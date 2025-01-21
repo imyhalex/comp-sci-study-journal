@@ -129,6 +129,16 @@ Pull requests are welcome. Enjoy!
 
 ### **COUNT**: returns the # of occurrences
 * `SELECT COUNT (DISTINCT` column_name`)`;
+> What is counted as a distinct value depends on the column’s collation. For example, with the default column collation of %SQLUPPER, values that differ in letter case are not counted as distinct values. To count every letter-case variant as a distinct value, use COUNT(DISTINCT(%EXACT(expression))). __NULL values are not included in COUNT DISTINCT counts.__
+
+___COUNT(*) returns the number of rows in the table or view. COUNT(*) counts all rows, including ones that contain duplicate column values or NULL values.___
+```sql
+SELECT COUNT(*) FROM Sample.Person;
+```
+___COUNT(expression) returns the number of values in expression, which is a table column name or an expression that evaluates to a column of data. COUNT(expression) does not count NULL values.___
+```sql
+SELECT COUNT(Name) AS TotalNames FROM Sample.Person;
+```
 
 ### **MIN() and MAX()**: returns the smallest/largest value of the selected column
 * `SELECT MIN (`column_names`) FROM` table_name `WHERE` condition;
