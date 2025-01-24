@@ -390,4 +390,42 @@ class Solution {
 <br/>
 
 
-### 105. Construct Binary Tree from Preorder and Inorder Traversal [[link](https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/description/?envType=study-plan-v2&envId=top-interview-150)]
+### 106. Construct Binary Tree from Inorder and Postorder Traversal[[link](https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+__How it works:__
+
+__Answer:__
+```java
+class Solution {
+    private HashMap<Integer, Integer> inOrderIndexMap;
+
+    private TreeNode buildTreeHelper(int[] inorder, int inStart, int inEnd, int[] postorder, int postStart, int postEnd) {
+        if (inStart > inEnd || postStart > postEnd)
+            return null;
+
+        // root always starts with the last element of postorder
+        int rootVal = postorder[postEnd];
+        TreeNode root = new TreeNode(rootVal);
+
+        int rootIndexInOrder = inOrderIndexMap.get(rootVal);
+        int leftTreeSize = rootIndexInOrder - inStart;
+
+        root.left = buildTreeHelper(inorder, inStart, rootIndexInOrder - 1, postorder, postStart, postStart + leftTreeSize - 1);
+        root.right = buildTreeHelper(inorder, rootIndexInOrder + 1, inEnd, postorder, postStart + leftTreeSize, postEnd - 1);
+
+        return root;
+    }
+
+    public TreeNode buildTree(int[] inorder, int[] postorder) {
+       if (inorder == null || postorder == null || inorder.length != postorder.length)
+            return null;
+
+        inOrderIndexMap = new HashMap<>();
+        for (int i = 0; i < inorder.length; i++) 
+            inOrderIndexMap.put(inorder[i], i);
+        
+        return buildTreeHelper(inorder, 0, inorder.length - 1, postorder, 0, postorder.length - 1);
+    }
+}
+```
+<br/>
