@@ -314,14 +314,80 @@ class Solution {
 
 ### 105. Construct Binary Tree from Preorder and Inorder Traversal [[link](https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/description/?envType=study-plan-v2&envId=top-interview-150)]
 
-__How it works__
+__How it works[[Video Explaination](https://www.youtube.com/watch?v=TREbF6S_5qo)]__
 
-__Answer:__
+__Answer in $O(n)$ time complexity:__
+Below is the **optimized** approach using a `HashMap` to achieve \(O(n)\) time complexity. The idea is:
+
+1. **Preprocessing**: Build a `HashMap` that maps each value in the `inorder` array to its index. This takes \(O(n)\) time.
+2. **Preorder**: The first element in the `preorder` slice is always the root.
+3. **Lookup**: Find the root’s index in `inorder` by directly querying the `HashMap` in \(O(1)\) time.
+4. **Recurse**:
+   - Compute the size of the left subtree.
+   - Recursively construct left subtree and right subtree by slicing the `preorder` array appropriately (and using the corresponding `inorder` boundaries).
+
+This avoids the \(O(n)\) scan of the `inorder` array at each recursive step, bringing the total complexity down to **\(O(n)\)**.
+
+__Time Complexity__
+
+1. **Building the HashMap**: \(O(n)\).  
+2. **Recursive Construction**:
+   - Each node is processed exactly once, and looking up the root’s index in the `inorder` array is \(O(1)\) due to the HashMap.  
+   - Hence, this step also takes \(O(n)\).  
+
+Overall **Time Complexity: \(O(n)\)**.
+
+__Space Complexity__
+
+- \(O(n)\) for the HashMap.  
+- \(O(h)\) for the recursion call stack, where \(h\) is the tree height (worst-case \(O(n)\) if the tree is skewed).  
+
+Thus total space complexity is **\(O(n)\)** in the worst case.
+
+
 ```java
+import java.util.HashMap;
 class Solution {
-    public TreeNode buildTree(int[] preorder, int[] inorder) {
+    // acts as a lookup table
+    HashMap<Integer, Integer> inOrderIndexMap;
+
+    private TreeNode buildTreeHelper(int[] preorder, int preStart, int preEnd, int[] inorder, int inStart, int inEnd) {
+        // if there are no element in the subtree
+        if (preStart > preEnd || inStart > inEnd)
+            return null;
         
+        // use preorder to locate the root
+        int rootVal = preorder[preStart];
+        TreeNode root = new TreeNode(rootVal);
+
+        // look up the root's index in the inorder array in o(1) time
+        int rootIndexInOrder = inOrderIndexMap.get(rootVal);
+
+        // number of nodes in th left subtree
+        int leftTreeSize = rootIndexInOrder - inStart;
+
+        // build left subtree
+        root.left = buildTreeHelper(preorder, preStart + 1, preStart + leftTreeSize, inorder, inStart, rootIndexInOrder - 1);
+
+        // build the right subtree
+        root.right = buildTreeHelper(preorder, preStart + leftTreeSize + 1, preEnd, inorder, rootIndexInOrder + 1, inEnd);
+
+        return root;
+    }
+
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        if (preorder == null || inorder == null || preorder.length != inorder.length)
+            return null;
+        
+        inOrderIndexMap = new HashMap<>();
+        for (int i = 0; i < inorder.length; i++) 
+            inOrderIndexMap.put(inorder[i], i);
+
+        return buildTreeHelper(preorder, 0, preorder.length - 1, inorder, 0, inorder.length - 1);
     }
 }
 ```
 <br/>
+
+
+### 105. Construct Binary Tree from Preorder and Inorder Traversal [[link](https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/description/?envType=study-plan-v2&envId=top-interview-150)]
