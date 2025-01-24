@@ -312,7 +312,7 @@ class Solution {
 ```
 <br/>
 
-### 101. Symmetric Tree [[link](https://leetcode.com/problems/symmetric-tree/description/?envType=study-plan-v2&envId=top-interview-150)]
+### 105. Construct Binary Tree from Preorder and Inorder Traversal [[link](https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/description/?envType=study-plan-v2&envId=top-interview-150)]
 
 __How it works__
 - Treat it as two trees shared one root
@@ -321,14 +321,8 @@ __How it works__
 __Answer:__
 ```java
 class Solution {
-    public boolean isSymmetric(TreeNode root) {
-        return isSymmetricHelper(root, root);
-    }
-
-    private boolean isSymmetricHelper(TreeNode node, TreeNode node1) {
-        if (node == null && node1 == null) return true;
-        if (node == null || node1 == null) return false;
-        return (node.val == node1.val) && isSymmetricHelper(node.right, node1.left) && isSymmetricHelper(node.left, node1.right);
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        
     }
 }
 ```
