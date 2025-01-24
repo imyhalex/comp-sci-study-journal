@@ -315,8 +315,6 @@ class Solution {
 ### 105. Construct Binary Tree from Preorder and Inorder Traversal [[link](https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/description/?envType=study-plan-v2&envId=top-interview-150)]
 
 __How it works__
-- Treat it as two trees shared one root
-- Compare each mirrored element respectivley
 
 __Answer:__
 ```java
