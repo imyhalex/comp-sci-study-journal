@@ -79,10 +79,10 @@ class BST {
         root = insertHelper(root, val);
     }
 
+    // the passed in node should remain the same as it origin points to
     private TreeNode insertHelper(TreeNode node, int val) { 
-        TreeNode newNode = new TreeNode(val);
         if (node == null) {
-            return newNode;
+            return new TreeNode(val);
         }
 
         if (val < node.val) {
@@ -96,6 +96,131 @@ class BST {
 }
 ```
 <br/>
+
+### Search
+
+__How it works:__
+- Compare the value to be searched with the value of the root
+- Repeat the above step till no more traversal is possible
+- If at any iteration, key is found, return True. Else False.
+
+__Non-recursive method:__
+```java
+class BST {
+    TreeNode root;
+
+    boolean search(int value) {
+        // start from the null
+        TreeNode current = root;
+
+        while (current != null) {
+            if (current.val == value)
+                return true;
+            else if (value < current.val)
+                current = current.left;
+            else
+                current = current.right;
+        }
+
+        return false;
+    }
+}
+```
+<br/>
+
+__Recursive Methods__
+```java
+class BST {
+    TreeNode root;
+
+    boolean rsearch(int value) {
+        return rsearchHelper(root, value);
+    }
+
+    private boolean rsearchHelper(TreeNode node, int value) {
+        if (node == null)
+            return false;
+        if (node.val == value)
+            return true;
+        if (value < node.val)
+            return rsearchHelper(node.left, value);
+        else
+            return rsearchHelper(node.right, value);
+    } 
+}
+```
+<br/>
+
+### Delete
+
+__How it works:__
+Below is a standard **recursive** implementation of the BST deletion algorithm in Java. It handles all the usual cases:
+
+1. **Node not found**: If the tree or subtree is `null`, just return `null`.
+2. **Node has no children (leaf)**: Simply remove it by returning `null`.
+3. **Node has one child**: Return the non-null child (left or right) to replace the node.
+4. **Node has two children**:
+   - Find the minimum value in the right subtree (or alternatively, the maximum value in the left subtree).
+   - Replace the current node’s value with that minimum value.
+   - Recursively delete that minimum value from the right subtree.
+
+```java
+class BST {
+    TreeNode root;
+    
+    void delete(int value) {
+        root = deleteNode(root, value);
+    }
+
+    // the passed in node should remain the same as it origin points to
+    private TreeNode deleteNode(TreeNode node, int value) {
+        if (node == null)
+            return null;
+        
+        if (value < node.val)
+            node.left = deleteNode(node.left, value);
+        else if (value > node.val)
+            node.right = deleteNode(node.right, value);
+        else {
+            // case 1. no left child
+            if (node.left == null)
+                return node.right;
+            // case 2: no right child
+            else if (node.right == null)
+                return node.left;
+            // case 3: two children
+            int minVal = findMin(node.right);
+            // replace the current node's alue with the minimum from right subtree
+            node.val = minVal;
+            // delete that minimum value from the right subtree
+            node.right = deleteNode(node.right, minVal);
+        }
+
+        return node;
+    }
+
+    private int findMin(TreeNode node) {
+        int min = node.val;
+        while (node.left != null) {
+            node = node.left;
+            min = node.val;   
+        }
+        return min;
+    }
+}
+```
+
+### How It Works
+
+1. **Search for the node**: We compare `val` with the current node’s value and traverse left or right accordingly.  
+2. **Delete Cases**:
+   - **No Child (Leaf)**: If the node has no children, return `null` to remove it.
+   - **One Child**: If the node has one child, return that child in place of the current node.
+   - **Two Children**:
+     1. Find the minimum value in the right subtree.  
+     2. Replace the current node’s `val` with that minimum value.  
+     3. Recursively delete that minimum value from the right subtree (to avoid duplicates).  
+3. **Return the node**: Because we may have changed the node (or replaced it with a child), we return the node back up the call stack so parent references are updated properly.
 
 ## Leetcode Questions
 
@@ -149,9 +274,6 @@ class Solution {
 
 ### 226. Invert Binary Tree [[link](https://leetcode.com/problems/invert-binary-tree/?envType=study-plan-v2&envId=top-interview-150)]
 
-__How it works:__
-
-
 __Answer:__
 ```java
 class Solution {
@@ -167,3 +289,4 @@ class Solution {
 }
 ```
 <br/>
+
