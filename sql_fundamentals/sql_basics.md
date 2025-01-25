@@ -203,3 +203,8 @@ SELECT COUNT(Name) AS TotalNames FROM Sample.Person;
    `column3` `datatype`, <br />
    `column4` `datatype`, <br />
    `);`
+  
+### Window Functions[[Link](https://www.geeksforgeeks.org/window-functions-in-sql/)]
+
+
+### Common Table Expression[[Link](https://www.geeksforgeeks.org/cte-in-sql/)]
