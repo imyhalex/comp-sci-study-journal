@@ -347,6 +347,7 @@ Thus total space complexity is **\(O(n)\)** in the worst case.
 
 ```java
 import java.util.HashMap;
+
 class Solution {
     // acts as a lookup table
     HashMap<Integer, Integer> inOrderIndexMap;
@@ -396,6 +397,8 @@ __How it works:__
 
 __Answer:__
 ```java
+import java.util.HashMap;
+
 class Solution {
     private HashMap<Integer, Integer> inOrderIndexMap;
 
@@ -425,6 +428,164 @@ class Solution {
             inOrderIndexMap.put(inorder[i], i);
         
         return buildTreeHelper(inorder, 0, inorder.length - 1, postorder, 0, postorder.length - 1);
+    }
+}
+```
+<br/>
+
+### 117. Populating Next Right Pointers in Each Node II[[Link](https://leetcode.com/problems/populating-next-right-pointers-in-each-node-ii/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+__Answer in BFS (Level-Order) Solution:__
+- Use a queue to store nodes level by level.
+- Pop nodes from the queue to process each level.
+- Link each node’s next pointer to the subsequent node in the queue (except for the last node in each level, whose next is set to null).
+- Push the child nodes (left and right) to the queue for the next level.
+
+```java
+import java.util.LinkedList;
+import java.util.Queue;
+
+class Node {
+    int val;
+    Node left;
+    Node right;
+    Node next;
+
+    Node() {}
+
+    Node (int val) { 
+        this.val = val;
+    }
+
+    Node(int val, Node left, Node right, Node next) { 
+        this.val = val;
+        this.left = left;
+        this.right = right;
+        this.next = next;
+    }
+}
+
+class Solution { 
+    public Node connect(Node root) {
+        if (root == null)
+            return null;
+
+        Queue<Node> queue = new LinkedList<>();
+        queue.add(root);
+
+        while (!queue.isEmpty()) {
+            int levelSize = queue.size();
+
+            // iterate over all nodes in the current level
+            for (int i = 0; i < levelSize; i++) {
+                Node current = queue.poll();
+
+                // link the current node's next to the next node in the queue
+                // except for the last node in this level
+                if (i < levelSize - 1)
+                    current.next = queue.peek();
+                else 
+                    current.next = null;
+                
+                // add children to the queue
+                if (current.left != null)
+                    queue.add(current.left);
+                if (current.right != null)
+                    queue.add(current.right);
+            }
+        }
+
+        return root;
+    }
+}
+```
+<br/>
+
+### 114. Flatten Binary Tree to Linked List[[Link](https://leetcode.com/problems/flatten-binary-tree-to-linked-list/?envType=study-plan-v2&envId=top-interview-150)]
+
+__Video Explaination[[Link](https://www.youtube.com/watch?v=rKnD7rLT0lI)]__
+```java
+class Solution {
+    // pre-order style: flattern the root tree and return the list tail
+    private TreeNode flatternTree(TreeNode node) {
+        if (node == null)
+            return null;
+        
+        if (node.left == null && node.right == null)
+            return node;
+        
+        TreeNode leftTail = flatternTree(node.left);
+        TreeNode rightTail = flatternTree(node.right);
+
+        if (leftTail != null) {
+            leftTail.right = node.right;
+            node.right = node.left;
+            node.left = null;
+        }
+
+        return rightTail == null ? leftTail : rightTail;
+    }
+
+    public void flatten(TreeNode root) {
+        flatternTree(root);
+    }
+}
+```
+<br/>
+
+### 112. Path Sum[[Link](https://leetcode.com/problems/path-sum/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+__Approach 1 - Recursion:__
+```java
+class Solution {
+    public boolean hasPathSum(TreeNode root, int targetSum) {
+        if (root == null) 
+            return false;
+
+        targetSum -= root.val;
+        if (root.left == null && root.right == null)
+            return targetSum == 0;
+        return hasPathSum(root.left, targetSum) || hasPathSum(root.right, targetSum);
+    }
+}
+```
+<br/>
+
+__Approach 2 - Iterative (using stack):__
+```java
+import java.util.Stack;
+
+class Solution {
+    Stack<TreeNode> node_stack = new Stack<>();
+    Stack<Integer> sum_stack = new Stack<>();
+
+    public boolean hasPathSum(TreeNode root, int targetSum) {
+        if (root == null)
+            return false;
+        node_stack.push(root);
+        sum_stack.push(targetSum);
+        
+        TreeNode node;
+        int current_sum;
+        while (!node_stack.isEmpty()) { 
+            node = node_stack.pop();
+            current_sum = sum_stack.pop();
+
+            if (node.right == null && node.left == null && current_sum == 0)
+                return true;
+            
+            if (node.right != null) { 
+                node_stack.add(node.right);
+                sum_stack.add(current_sum - node.right.val);
+            }
+
+            if (node.left != null) { 
+                node_stack.add(node.left);
+                sum_stack.add(current_sum - node.left.val);
+            }
+        }
+
+        return false;
     }
 }
 ```
