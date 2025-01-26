@@ -54,11 +54,18 @@ class MinHeap {
         arr[b] = temp;
     }
 
+    private void resize() {
+        int[] np = new int[capacity * 2];
+        for (int i = 0; i < currentHeapSize; i++)
+            np[i] = heap[i];
+        heap = np;
+        capacity *= 2;
+    }
+
     void insert(int key) { 
         if (currentHeapSize == capacity)
-            return;
+            resize();
         
-
     }
 }
 ```
