@@ -1,5 +1,5 @@
 # Binary Search Tree
-- Big O: log n
+- Big O for traversal: log n
 
 ## A typical structure in:
 
@@ -586,6 +586,169 @@ class Solution {
         }
 
         return false;
+    }
+}
+```
+<br/>
+
+### 129. Sum Root to Leaf Numbers[[Link](https://leetcode.com/problems/sum-root-to-leaf-numbers/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+__How it works:__
+- DFS in preorder
+
+__Answer:__
+```java
+class Solution {
+    int rootToLeaf = 0;
+
+    private void sumNumbersHelper(TreeNode node, int currentSum) { 
+        if (node != null) { 
+            currentSum = currentSum * 10 + node.val;
+            if (node.left == null && node.right == null) 
+                rootToLeaf += currentSum;
+            sumNumbersHelper(node.left, currentSum);
+            sumNumbersHelper(node.right, currentSum);
+        }
+    }
+
+    public int sumNumbers(TreeNode root) {
+        sumNumbersHelper(root, 0);
+        return rootToLeaf;
+    }
+}
+```
+<br/>
+
+### 124. Binary Tree Maximum Path Sum[[Link](https://leetcode.com/problems/binary-tree-maximum-path-sum/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+__How it works[[Video Link](https://www.youtube.com/watch?v=Hr5cWUld4vU)]:__ 
+- DFS in postorder
+- Main function body:
+    - Initialize a global variable max_sum to -Infinity.
+    - Call the function gain_from_subtree on the tree's root.
+    - Return the value of max_sum.
+- Body of the recursive function gain_from_subtree. It accepts root of the subtree as the input.
+    - If the root is null, return 0. This is the base case. If a node doesn't have a left or right child, then the path sum contributed by the respective subtree is 0.
+    - Call the function recursively on the left and right child of the root. Store the results in gain_from_left and gain_from_right, respectively.
+    - If either is negative, set it to 0. This is because we don't want to include a path sum contributed by a subtree if it is negative.
+    - Update the maximum path sum (max_sum) seen so far. To do so, compare max_sum with the sum of the following, and update it if it is smaller.
+    - Return the path sum gain contributed by the subtree. This is the maximum of the following two values.
+
+__Answer:__
+```java
+class Solution {
+    int maxSum;
+
+    private int maxPathSumHelper(TreeNode node) { 
+        if (node == null)
+            return 0;
+        
+        int gainFromLeft = Math.max(maxPathSumHelper(node.left), 0);
+        int gainFromRight = Math.max(maxPathSumHelper(node.right), 0);
+
+        maxSum = Math.max(maxSum, gainFromLeft + gainFromRight + node.val);
+        
+        return Math.max(gainFromLeft + node.val, gainFromRight + node.val);
+    }
+
+    public int maxPathSum(TreeNode root) {
+        maxSum = Integer.MIN_VALUE;
+        maxPathSumHelper(root);
+        return maxSum;
+    }
+}
+```
+<br/>
+
+
+### 173. Binary Search Tree Iterator[[Link](https://leetcode.com/problems/binary-search-tree-iterator/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+```java
+class BSTIterator {
+    ArrayList<Integer> list;
+    int index;
+
+    private void inorder(TreeNode node) { 
+        if (node != null) { 
+            inorder(node.left);
+            list.add(node.val);
+            inorder(node.right);
+        }
+    }
+    
+    public BSTIterator(TreeNode root) {
+        this.list = new ArrayList<>();
+        this.index = -1;
+        this.inorder(root);
+    }
+    
+    public int next() {
+        return list.get(++index);
+    }
+    
+    public boolean hasNext() {
+        return index + 1 < list.size();
+    }
+}
+```
+<br/>
+
+
+### 222. Count Complete Tree Nodes[[Link](https://leetcode.com/problems/count-complete-tree-nodes/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+__Explaination of Complete Tree:[[Link](https://www.geeksforgeeks.org/complete-binary-tree/)]__
+- find the height of root node by only traversing the leftmost branch of the tree because a complete tree is always filled value from left to right as I mentioned. We call this value is \(h\)
+
+- After that, we continue to find the heigth of right branch.
+
+- If right branch is h - 1, the left branch is the balance tree with height h - 1, then total nodes of left branch is 2^(h-1+1) - 1 = 2^h - 1. And the total nodes of tree from root node is (2^h + total nodes on right branch)
+If right branch is h - 2, then the last node is on left branch. So, total nodes of right branch is 2^(h-2+1) - 1 = 2^(h-1) - 1. And the total nodes of tree from root node is (2^(h-1) + total nodes on left branch)
+__Answer:__
+```java
+class Solution {
+
+    private int height(TreeNode node) { 
+        return node == null ? -1 : 1 + height(node.left);
+    }
+
+    public int countNodes(TreeNode root) {
+        int h = height(root);
+        return h < 0 ? 0 : height(root.right) == h - 1 ? 
+                        (1 << h) + countNodes(root.right) : (1 << h - 1) + countNodes(root.left);
+    }
+}
+```
+<br/>
+
+### 236. Lowest Common Ancestor of a Binary Tree[[Link](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+__Video Explaination[[Link](https://www.youtube.com/watch?v=gs2LMfuOR9k)]__
+```java
+class Solution {
+
+    private TreeNode dfs(TreeNode node, TreeNode p, TreeNode q) { 
+        // 1. Base case
+        if (node == null)
+            return null;
+        
+        // 2. If the current node is p or q, return it
+        if (node == p || node == q)
+            return node;
+        
+        // 3. Search in left and right subtrees
+        TreeNode leftNode = dfs(node.left, p, q);
+        TreeNode rightNode = dfs(node.right, p, q);
+
+         // 4. If both sides returned a node, current node is the LCA
+        if (leftNode != null && rightNode != null)
+            return node;
+
+        // 5. Otherwise, return the non-null side (could be null if neither side has p or q)
+        return leftNode != null ? leftNode : rightNode;
+    }
+
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        return dfs(root, p, q);
     }
 }
 ```
