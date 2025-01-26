@@ -722,7 +722,7 @@ class Solution {
 
 ### 236. Lowest Common Ancestor of a Binary Tree[[Link](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/description/?envType=study-plan-v2&envId=top-interview-150)]
 
-__Video Explaination[[Link](https://www.youtube.com/watch?v=gs2LMfuOR9k)]__
+__Video Explaination[[Link](https://www.youtube.com/watch?v=qZAAgeZFZh0)]__
 ```java
 class Solution {
 
@@ -743,7 +743,7 @@ class Solution {
         if (leftNode != null && rightNode != null)
             return node;
 
-        // 5. Otherwise, return the non-null side (could be null if neither side has p or q)
+        // 5. Otherwise, return the non-null side (could be null if neither side has p or q) - return left or right
         return leftNode != null ? leftNode : rightNode;
     }
 
