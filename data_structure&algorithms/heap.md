@@ -32,7 +32,7 @@ class MinHeap {
 
     MinHeap(int n) { 
         this.capacity = n;
-        this.heap = new int[capacity];
+        this.heap = new int[n];
         this.currentHeapSize = 0;
     }
 
@@ -66,6 +66,55 @@ class MinHeap {
         if (currentHeapSize == capacity)
             resize();
         
+        // first insert the new key at the end
+        int i = currentHeapSize;
+        heap[i] = key;
+        currentHeapSize++;
+
+        // fix the min heap properly if it is violated
+        while (i != 0 && heap[parent(i)] > heap[i]) { 
+            swap(heap, i, parent(i));
+            i = parent(i);
+        }
+    }
+
+    int getMin() {
+        return heap[0];
+    }
+
+    private void minHeapify(int key) { 
+        int l = left(key);
+        int r = right(key);
+        int smallest = key;
+
+        if (l < currentHeapSize && heap[l] < heap[smallest])
+            smallest = l;
+        
+        if (r < currentHeapSize && heap[r] < heap[smallest])
+            smallest = r;
+        
+        if (smallest != key) {
+            swap(heap, key, smallest);
+            minHeapify(smallest);
+        } 
+    }
+
+    int deleteMin() {
+        // if heap is empty, return something or throw an exception
+        if (currentHeapSize <= 0)
+            return Integer.MAX_VALUE;
+        
+        // if only one element, just remove it
+        if (currentHeapSize == 1) { 
+            currentHeapSize--;
+            return heap[0];
+        }
+
+        // store the minimum value (root), move last element to root and heapify
+        int root = heap[0];
+        heap[0] = heap[currentHeapSize - 1];
+        currentHeapSize--;
+        minHeapify(0);
     }
 }
 ```
