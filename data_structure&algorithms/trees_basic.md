@@ -643,6 +643,7 @@ class Solution {
         if (node == null)
             return 0;
         
+        // if find node is negative, return 0
         int gainFromLeft = Math.max(maxPathSumHelper(node.left), 0);
         int gainFromRight = Math.max(maxPathSumHelper(node.right), 0);
 
@@ -713,6 +714,7 @@ class Solution {
 
     public int countNodes(TreeNode root) {
         int h = height(root);
+        // if h < 0, then return 0 else if root.right height is h - 1, then count right tree else count only left tree
         return h < 0 ? 0 : height(root.right) == h - 1 ? 
                         (1 << h) + countNodes(root.right) : (1 << h - 1) + countNodes(root.left);
     }
@@ -753,3 +755,83 @@ class Solution {
 }
 ```
 <br/>
+
+### 199. Binary Tree Right Side View[[Link](https://leetcode.com/problems/binary-tree-right-side-view/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+__Answer:__
+```java
+class Solution {
+    List<Integer> arr = new ArrayList<>();
+    Queue<TreeNode> q = new LinkedList<>();
+
+    private List<Integer> bfs(TreeNode node) { 
+        q.add(node);
+        while(!q.isEmpty()) {
+            int size = q.size();
+
+            TreeNode rightSide;
+            for (int i = 0; i < size; i++) {
+                TreeNode current = q.poll();
+
+                if (i == size -1) { 
+                    rightSide = current;
+                    arr.add(rightSide.val);
+                }
+
+                if (current.left != null)
+                    q.add(current.left);
+                if (current.right != null)
+                    q.add(current.right);
+            }
+        }
+        return arr;
+    }
+
+    public List<Integer> rightSideView(TreeNode root) {
+        if (root == null)
+            return new ArrayList<>();
+        
+        return bfs(root);
+    }
+}
+```
+<br/>
+
+### 103. Binary Tree Zigzag Level Order Traversal[[Link](https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal/?envType=study-plan-v2&envId=top-interview-150)]
+
+__Answer:__
+```java
+class Solution {
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+        List<List<Integer>> res = new ArrayList<>();
+        Queue<TreeNode> q = new LinkedList<>();
+
+        if (root == null)
+            return res;
+
+        q.add(root);
+        boolean leftToRight = true;
+        while (!q.isEmpty()) { 
+            int size = q.size();
+
+            List<Integer> arr = new ArrayList<>();
+            for (int i = 0; i < size; i++) {
+                TreeNode current = q.poll();
+
+                if (leftToRight)
+                    arr.add(current.val);
+                else
+                    arr.add(0, current.val);
+
+                if (current.left != null)
+                    q.add(current.left);
+                if (current.right != null)
+                    q.add(current.right);
+            }
+            leftToRight = !leftToRight;
+            res.add(arr);
+        }
+        return res;
+    }
+}
+```
