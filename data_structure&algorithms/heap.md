@@ -118,3 +118,46 @@ class MinHeap {
     }
 }
 ```
+
+## Leetcode Questions
+
+### 215. Kth Largest Element in an Array[[Link](https://leetcode.com/problems/kth-largest-element-in-an-array/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+__Algorithm:__
+- Initialize a min-heap heap.
+- Iterate over the input. For each num:
+    - Push num onto the heap.
+    - If the size of heap exceeds k, pop from heap.
+- Return the top of the heap.
+
+__Answer:__
+```java
+import java.util.Queue;
+import java.util.PriorityQueue;
+
+class Solution {
+    public int findKthLargest(int[] nums, int k) {
+        Queue<Integer> heap = new PriorityQueue<>();
+        for (int num : nums) { 
+            heap.add(num);
+            if (heap.size() > k)
+                heap.remove();
+        }
+
+        return heap.peek();
+    }
+}
+```
+<br/>
+
+### Find K Paris with Smallest Sums[[link](https://leetcode.com/problems/find-k-pairs-with-smallest-sums/?envType=study-plan-v2&envId=top-interview-150)]
+
+__Answer:__
+```java
+class Solution {
+    public List<List<Integer>> kSmallestPairs(int[] nums1, int[] nums2, int k) {
+         
+    }
+}
+```
+<br/>
