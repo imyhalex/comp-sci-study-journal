@@ -152,11 +152,88 @@ class Solution {
 
 ### Find K Paris with Smallest Sums[[link](https://leetcode.com/problems/find-k-pairs-with-smallest-sums/?envType=study-plan-v2&envId=top-interview-150)]
 
+**Approach Explanation (Min-Heap / Priority Queue)**
+
+We want the **k** pairs \((u, v)\) where \(u\) comes from `nums1` and \(v\) comes from `nums2\), such that the sum \(u + v\) is among the smallest possible. Both arrays are sorted in **non-decreasing** order.
+
+A straightforward method is:
+1. **Use a min-heap (priority queue)** to always extract the pair with the smallest sum.
+2. Each heap entry will store a pair of indices \((i, j)\) representing the pair \((nums1[i], nums2[j])\) along with its sum.
+
+However, we must be careful to avoid inserting all \(n \times m\) possible pairs into the heap at once (which would be too large in many cases). Instead, we use a strategy somewhat like a "multi-way merge":
+
+1. **Initialize** the heap by offering one pair from each "row" or "column" to kickstart the process.  
+   - A common pattern is to start **only** with \((i = 0, j = 0)\). We know `nums1[0] + nums2[0]` is the absolute smallest sum.  
+   - Insert `(0, 0)` into the min-heap.  
+
+2. **Pop from the heap** (which gives us the current smallest sum) and add that pair to the result.  
+   - Let the popped index pair be \((i, j)\).
+
+3. **Then push the next potential candidates**:  
+   - If we took \((i, j)\), the "neighbors" in sorted order are \((i + 1, j)\) and \((i, j + 1)\) (because each array is sorted, these indices lead to the next largest sums).  
+   - But we must avoid duplicates, so maintain a visited set of index pairs to ensure we don't push the same pair twice.
+
+4. **Repeat** this process until you extract **k** pairs (or you run out of pairs).
+
+__Complexity:__
+- If \(k\) is much smaller than \(n \times m\), we avoid generating all pairs at once.  
+- Each pop and push from the heap takes \(O(\log(\text{sizeOfHeap}))\). In the worst case, we might push up to \(k\) times, so the time complexity is roughly \(O(k \log k)\) (though in practice, the heap can grow to at most `min(k, n * m)` in size but typically we consider \(k \le n \times m\)).
+
+
 __Answer:__
 ```java
+import java.util.*;
+
 class Solution {
     public List<List<Integer>> kSmallestPairs(int[] nums1, int[] nums2, int k) {
-         
+        List<List<Integer>> result = new ArrayList<>();
+        if (nums1 == null || nums2 == null || nums1.length == 0 || nums2.length == 0 || k == 0) {
+            return result;
+        }
+        
+        // Min-heap storing (sum, i, j)
+        // sum is not strictly necessary because we can compute from i, j, but it helps readability.
+        PriorityQueue<int[]> minHeap = new PriorityQueue<>(
+            (a, b) -> Integer.compare(a[0], b[0])
+        );
+        
+        // We'll store sum, i, j -> but i and j let us retrieve the actual values from nums1, nums2
+        // Offer the first pair: (nums1[0] + nums2[0], 0, 0)
+        minHeap.offer(new int[]{nums1[0] + nums2[0], 0, 0});
+
+        // Keep track of visited index pairs to avoid re-pushing the same pair
+        Set<String> visited = new HashSet<>();
+        visited.add("0,0");
+        
+        while (!minHeap.isEmpty() && result.size() < k) {
+            int[] top = minHeap.poll();
+            int sum = top[0];
+            int i   = top[1];
+            int j   = top[2];
+            
+            // Add the actual pair to result
+            result.add(Arrays.asList(nums1[i], nums2[j]));
+            
+            // Next candidate from the same row: (i, j+1)
+            if (j + 1 < nums2.length) {
+                String key = i + "," + (j+1);
+                if (!visited.contains(key)) {
+                    visited.add(key);
+                    minHeap.offer(new int[]{nums1[i] + nums2[j+1], i, j+1});
+                }
+            }
+            
+            // Next candidate from the same column: (i+1, j)
+            if (i + 1 < nums1.length) {
+                String key = (i+1) + "," + j;
+                if (!visited.contains(key)) {
+                    visited.add(key);
+                    minHeap.offer(new int[]{nums1[i+1] + nums2[j], i+1, j});
+                }
+            }
+        }
+        
+        return result;
     }
 }
 ```

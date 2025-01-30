@@ -835,3 +835,56 @@ class Solution {
     }
 }
 ```
+<br/>
+
+### 230. Kth Smallest Element in a BST[[Link](https://leetcode.com/problems/kth-smallest-element-in-a-bst/?envType=study-plan-v2&envId=top-interview-150)]
+
+__Answer:__
+```java
+class Solution {
+    private List<Integer> dfs(TreeNode node, List<Integer> list) { 
+        if (node != null) { 
+            dfs(node.left, list);
+            list.add(node.val);
+            dfs(node.right, list);
+        }
+        return list;
+    }
+
+    public int kthSmallest(TreeNode root, int k) {
+        List<Integer> arr = new ArrayList<>();
+        arr = dfs(root, arr);
+        return arr.get(k - 1);
+    }
+}
+```
+<br/>
+
+### 98. Validate Binary Search Tree[[Link](https://leetcode.com/problems/validate-binary-search-tree/?envType=study-plan-v2&envId=top-interview-150)]
+
+__Answer:__
+```java
+class Solution {
+    private List<Integer> dfs(TreeNode node, List<Integer> list) { 
+        if (node != null) { 
+            dfs(node.left, list);
+            list.add(node.val);
+            dfs(node.right, list);
+        }
+        return list;
+    }
+
+    public boolean isValidBST(TreeNode root) {
+        List<Integer> arr = new ArrayList<>();
+        arr = dfs(root, arr);
+
+        for (int i = 1; i < arr.size(); i++) { 
+            int prev = arr.get(i - 1);
+            int current = arr.get(i);
+            if (current < prev || current == prev)
+                return false;
+        }
+        return true;
+    }
+}
+```
