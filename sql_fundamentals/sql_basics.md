@@ -208,3 +208,259 @@ SELECT COUNT(Name) AS TotalNames FROM Sample.Person;
 
 
 ### Common Table Expression[[Link](https://www.geeksforgeeks.org/cte-in-sql/)]
+
+# Window Functions cheat sheet from ChatGPT:
+
+## 1. Introduction to Window Functions
+
+- **Window functions** allow you to perform calculations across rows that are somehow related to the current row, without collapsing the result set (unlike `GROUP BY`).
+- Typical usage:
+  ```sql
+  function_name([arguments]) OVER (
+      [PARTITION BY partition_expression, ...]
+      [ORDER BY sort_expression, ...]
+      [frame_clause]
+  )
+  ```
+- **Frame clause** (optional) defines which set of rows in a partition is used for the calculation. Common frame clauses:
+  - `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`
+  - `ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING`
+  - `RANGE BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING`
+  - etc.
+
+---
+
+## 2. Basic Syntax Components
+
+1. **PARTITION BY**: Groups rows (similar to GROUP BY), but without merging them into a single row.
+2. **ORDER BY**: Sorts rows within each partition. Often required for functions like `ROW_NUMBER()`, `LAG()`, etc.
+3. **Frame clause**:
+   - **ROWS** vs. **RANGE**:
+     - `ROWS`: Physical offsets of rows (e.g., the last 10 rows).
+     - `RANGE`: Logical offset based on values of the ordering column(s) (e.g., up to and including the current row’s value in a sorted sense).
+   - **UNBOUNDED PRECEDING**: Start from the first row in the partition.
+   - **UNBOUNDED FOLLOWING**: Go to the last row in the partition.
+   - **CURRENT ROW**: The row being evaluated.
+   - **N PRECEDING / N FOLLOWING**: A specific number of rows before or after the current row in the partition.
+
+---
+
+## 3. Common Window Functions
+
+1. **Aggregate Functions** (e.g., `SUM`, `AVG`, `COUNT`, `MIN`, `MAX`) used with an `OVER()` clause:
+   ```sql
+   SUM(column) OVER (PARTITION BY ... ORDER BY ... frame_clause)
+   ```
+2. **Ranking Functions**:
+   - `ROW_NUMBER() OVER (...)` – continuous, no ties.
+   - `RANK() OVER (...)` – gaps in ranking on ties.
+   - `DENSE_RANK() OVER (...)` – no gaps on ties.
+   - `NTILE(n) OVER (...)` – divides rows into `n` groups.
+3. **Value Functions**:
+   - `LAG(value, [offset], [default]) OVER (...)` – gets the value in a prior row.
+   - `LEAD(value, [offset], [default]) OVER (...)` – gets the value in a future row.
+   - `FIRST_VALUE(value) OVER (...)` – gets the first value from the frame.
+   - `LAST_VALUE(value) OVER (...)` – gets the last value from the frame.
+
+---
+
+## 4. Examples
+
+### 4.1 Running Total (Cumulative SUM)
+
+**Goal**: Calculate a running total of `sales_amount` per customer in chronological order.
+
+```sql
+SELECT
+    customer_id,
+    order_date,
+    sales_amount,
+    SUM(sales_amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY order_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS running_total
+FROM sales
+ORDER BY customer_id, order_date;
+```
+
+**Explanation**:
+- `PARTITION BY customer_id`: Each customer has their own running total.
+- `ORDER BY order_date`: Sorts rows by date for each customer.
+- `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`: For each row, sum all previous rows (including the current) in the partition.
+
+---
+
+### 4.2 Rolling 7-Day Moving Average (Time-based)
+
+**Goal**: For each date, compute the average of the `daily_value` for the 7 previous days (inclusive).
+
+```sql
+SELECT
+    date_col,
+    daily_value,
+    AVG(daily_value) OVER (
+        ORDER BY date_col
+        RANGE BETWEEN '7 days' PRECEDING AND CURRENT ROW
+    ) AS rolling_7day_avg
+FROM daily_metrics
+ORDER BY date_col;
+```
+
+**Explanation**:
+- `RANGE BETWEEN '7 days' PRECEDING AND CURRENT ROW`: Uses a range of dates (7 days before to current date). 
+- This requires an **ORDER BY** column that’s typed as date/time.  
+- Note: `RANGE` is based on value comparisons (date or timestamp), not row counts.
+
+---
+
+### 4.3 Rolling 3-Row Sum
+
+**Goal**: Sum the current row’s value and the two previous rows’ values (by order).
+
+```sql
+SELECT
+    id,
+    value,
+    SUM(value) OVER (
+        ORDER BY id
+        ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+    ) AS rolling_3row_sum
+FROM your_table
+ORDER BY id;
+```
+
+**Explanation**:
+- `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW`: For each row, look at that row plus the 2 preceding rows in the ordering.
+
+---
+
+### 4.4 Ranking Rows
+
+**Goal**: Assign a ranked order to rows within partitions. Example: rank employees by salary within each department.
+
+```sql
+SELECT
+    department_id,
+    employee_id,
+    salary,
+    RANK() OVER (
+        PARTITION BY department_id
+        ORDER BY salary DESC
+    ) AS salary_rank
+FROM employees
+ORDER BY department_id, salary DESC;
+```
+
+**Explanation**:
+- `PARTITION BY department_id`: Restart ranking for each department.
+- `ORDER BY salary DESC`: Higher salaries get rank 1, ties have the same rank, then skip rank number(s).
+
+---
+
+### 4.5 Finding Differences Between Rows with `LAG`
+
+**Goal**: Compare a row’s value to the previous row’s value to find a difference.
+
+```sql
+SELECT
+    id,
+    date_col,
+    value,
+    LAG(value, 1, 0) OVER (ORDER BY date_col) AS prev_value,
+    (value - LAG(value, 1, 0) OVER (ORDER BY date_col)) AS value_diff
+FROM daily_metrics
+ORDER BY date_col;
+```
+
+**Explanation**:
+- `LAG(value, 1, 0)`: Looks at the previous row’s `value`. If there is no previous row, use `0`.
+- `value_diff`: Subtracts the lagged value from the current value.
+
+---
+
+### 4.6 First and Last Values Within a Frame
+
+**Goal**: Identify the earliest and latest prices each day within a time-based frame (e.g., trading day).
+
+```sql
+SELECT
+    trade_date,
+    trade_time,
+    price,
+    FIRST_VALUE(price) OVER (
+        PARTITION BY trade_date
+        ORDER BY trade_time
+        RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS opening_price,
+    LAST_VALUE(price) OVER (
+        PARTITION BY trade_date
+        ORDER BY trade_time
+        RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS closing_price
+FROM trades
+ORDER BY trade_date, trade_time;
+```
+
+**Explanation**:
+- `FIRST_VALUE(price)` / `LAST_VALUE(price)`: Return the first/last row in the partition’s frame.
+- `RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING`: Expand the window to the entire partition (i.e., entire day).
+
+> **Tip**: By default, `FIRST_VALUE` and `LAST_VALUE` limit themselves to the **current** frame. You often need to set the frame to `UNBOUNDED` if you want the entire partition.
+
+---
+
+## 5. Notes on Performance & Usability
+
+1. **Index usage**: While `ORDER BY` in window functions does not necessarily use the same index as a top-level `ORDER BY`, having an index on the sort column can help the planner.
+2. **Memory considerations**: For large partitions, consider that the entire partition might be processed in memory.
+3. **Frame definition**: Carefully choose `ROWS` vs. `RANGE`. `ROWS` is more predictable if you want a fixed number of preceding/following rows. `RANGE` is useful for time-series or value-based boundaries.
+4. **Filtering**: If you need post-aggregation filtering on window calculations, you can’t use a simple `WHERE` clause on a window function directly (window functions are computed after `WHERE`). Instead, use a subquery or a **common table expression (CTE)**.
+
+---
+
+## 6. Quick Reference Summary
+
+**Window function general form**:
+```sql
+[function_name]([expression]) 
+OVER (
+  [PARTITION BY partition_column,...] 
+  [ORDER BY sort_column [ASC|DESC],...] 
+  [frame_clause]
+)
+```
+
+- **Frame Clauses**:
+  - `UNBOUNDED PRECEDING`
+  - `UNBOUNDED FOLLOWING`
+  - `N PRECEDING`
+  - `N FOLLOWING`
+  - `CURRENT ROW`
+
+- **Examples**:
+  - `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`
+  - `ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING`
+  - `RANGE BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING`
+  - `RANGE BETWEEN '7 days' PRECEDING AND CURRENT ROW` (for date/time data)
+
+---
+
+### Example Cheat-Sheet Snippet
+
+| **Task**                      | **Function**                 | **Window Clause Example**                                                         |
+|-------------------------------|------------------------------|------------------------------------------------------------------------------------|
+| Cumulative Sum                | `SUM(col)`                   | `OVER (PARTITION BY X ORDER BY Y ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)`|
+| Rolling Average (n rows)      | `AVG(col)`                   | `OVER (ORDER BY Y ROWS BETWEEN n PRECEDING AND CURRENT ROW)`                      |
+| Ranking                       | `RANK()` / `DENSE_RANK()`    | `OVER (PARTITION BY X ORDER BY Y DESC)`                                           |
+| Row Number                    | `ROW_NUMBER()`               | `OVER (ORDER BY Y)`                                                               |
+| Period-based Rolling Avg      | `AVG(col)`                   | `OVER (ORDER BY date_col RANGE BETWEEN 'n days' PRECEDING AND CURRENT ROW)`       |
+| Compare to Prior Row          | `LAG(col)`                   | `OVER (ORDER BY Y)`                                                               |
+| Compare to Next Row           | `LEAD(col)`                  | `OVER (ORDER BY Y)`                                                               |
+| First/Last in Partition       | `FIRST_VALUE(col)` / `LAST_VALUE(col)` | `OVER (PARTITION BY X ORDER BY Y RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)` |
+
+---
+
+**Use this cheat sheet** for quick lookups and as a template for writing window function queries in PostgreSQL. Experiment with different frame clauses to achieve the precise sliding window or cumulative calculations needed for your data analysis tasks.
+
+---
