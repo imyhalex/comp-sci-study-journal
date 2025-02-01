@@ -176,3 +176,47 @@ class Solution {
     }
 }
 ```
+<br/>
+
+### 122. Best Time to Buy and Sell Stock II[[Link](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+__Answer:__
+- Hint: Using Peak-Vally Effect
+    - Total Profit = SUM(height of peak - height of valley)
+```java
+class Solution {
+    public int maxProfit(int[] prices) {
+        int valley = prices[0];
+        int peak = prices[0];
+        int maxProfit = 0;
+
+        int i = 0;
+        while (i < prices.length - 1) {
+            while (i < prices.length - 1 && prices[i] >= prices[i + 1])
+                i++;
+            valley = prices[i];
+            while (i < prices.length - 1 && prices[i] <= prices[i + 1])
+                i++;
+            peak = prices[i];
+            maxProfit += peak - valley;
+        }
+        return maxProfit;
+    }
+}
+```
+<br/>
+
+### 274. H-Index[[Link](https://leetcode.com/problems/h-index/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+__Answer:__
+```java
+class Solution {
+    public int hIndex(int[] citations) {
+        Arrays.sort(citations);
+        int i = 0;
+        while (i < citations.length && citations[citations.length - 1 - i] > i)
+            i++;
+        return i;
+    }
+}
+```
