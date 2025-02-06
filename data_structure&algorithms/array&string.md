@@ -220,3 +220,99 @@ class Solution {
     }
 }
 ```
+
+### 380. Insert Delete GetRandom O(1)[[Link](https://leetcode.com/problems/insert-delete-getrandom-o1/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+__Walk-Through[[link](https://leetcode.com/problems/insert-delete-getrandom-o1/editorial/?envType=study-plan-v2&envId=top-interview-150)]__
+- The combination of insert, remove method between hashmap/set and arraylist for O(1) time complexity
+- For remove(), it will take liner time, to gain O(1) time complexity:
+    - Swap the element to delete to the last one
+    - pop the last element out
+
+
+__Answer:__
+```java
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
+
+class RandomizedSet {
+
+    HashMap<Integer, Integer> map;
+    List<Integer> list;
+    Random rand = new Random();
+
+    public RandomizedSet() {
+        map = new HashMap<>();
+        list = new ArrayList<>();
+    }
+    
+    public boolean insert(int val) {
+        if (map.containsKey(val))
+            return false;
+        
+        map.put(val, list.size());
+        list.add(list.size(), val);
+        return true;
+    }
+    
+    public boolean remove(int val) {
+        if (!map.containsKey(val))
+            return false;
+        
+        int lst = list.get(list.size() - 1);
+        int idx = list.indexOf(val);
+        list.set(list.size() - 1, val);
+        list.set(idx, lst);
+        map.put(lst, idx);
+
+        list.remove(list.size() - 1);
+        map.remove(val);
+        return true;
+    }
+    
+    public int getRandom() {
+        return list.get(rand.nextInt(list.size()));
+    }
+}
+```
+
+### 238. Product of Array Except Self[[Link](https://leetcode.com/problems/product-of-array-except-self/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+__Answer:__
+```java
+// [4,5,1,8,2] L and R arrays would finally be:
+// L: [1, 4, 20, 20, 160]
+// R: [80, 16, 16, 2, 1]
+// 
+import java.util.HashMap;
+
+class Solution {
+    public int[] productExceptSelf(int[] nums) {
+        if (nums == null)
+            return new int[];
+
+        int n = nums.length;
+        int[] L = new int[n];
+        int[] R = new int[n];
+        int[] res = new int[n];
+
+        L[0] = 1;
+        for (int i = 1; i < n; i++) {
+            // L[i - 1] already contains the product of elements to the left of 'i - 1'
+            // Simply multiplying it with nums[i - 1] would give the product of all
+            L[i] = nums[i - 1] * L[i - 1];
+        }
+
+        R[n - 1] = 1;
+        for (int i = n - 2; i >= 0; i--) { 
+            R[i] = nums[i + 1] * R[i + 1];
+        }
+
+        for (int i = 0; i < n; i++) { 
+            res[i] = L[i] * R[i];
+        }
+        return res;
+    }
+}
+```
