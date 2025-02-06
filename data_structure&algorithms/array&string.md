@@ -284,8 +284,6 @@ __Answer:__
 // [4,5,1,8,2] L and R arrays would finally be:
 // L: [1, 4, 20, 20, 160]
 // R: [80, 16, 16, 2, 1]
-// 
-import java.util.HashMap;
 
 class Solution {
     public int[] productExceptSelf(int[] nums) {
