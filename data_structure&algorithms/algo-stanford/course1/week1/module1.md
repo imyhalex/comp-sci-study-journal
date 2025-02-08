@@ -28,6 +28,54 @@ for k = 1 to n
 end
 ```
 
+```text
+function MERGE-SORT(A, low, high)
+    if low < high then:
+        mid = floor((low + high) / 2)
+        MERGE-SORT(A, low, mid)       // Recursively sort the left half
+        MERGE-SORT(A, mid + 1, high)    // Recursively sort the right half
+        MERGE(A, low, mid, high)        // Merge the two sorted halves
+
+function MERGE(A, low, mid, high)
+    n1 = mid - low + 1
+    n2 = high - mid
+    // Create temporary arrays L[1..n1] and R[1..n2]
+    L = new array of length n1
+    R = new array of length n2
+
+    // Copy data to temporary arrays
+    for i = 1 to n1 do:
+        L[i] = A[low + i - 1]
+    for j = 1 to n2 do:
+        R[j] = A[mid + j]
+
+    // Merge the temporary arrays back into A[low..high]
+    i = 1          // Initial index of first subarray
+    j = 1          // Initial index of second subarray
+    k = low      // Initial index of merged subarray
+
+    while i ≤ n1 and j ≤ n2 do:
+        if L[i] ≤ R[j] then:
+            A[k] = L[i]
+            i = i + 1
+        else:
+            A[k] = R[j]
+            j = j + 1
+        k = k + 1
+
+    // Copy any remaining elements of L, if there are any
+    while i ≤ n1 do:
+        A[k] = L[i]
+        i = i + 1
+        k = k + 1
+
+    // Copy any remaining elements of R, if there are any
+    while j ≤ n2 do:
+        A[k] = R[j]
+        j = j + 1
+        k = k + 1
+```
+
 ## Merge Sort Running Time
 
 __2 operations:__
@@ -186,4 +234,82 @@ Time Complexity:
     Average Case: O(n log n), When the array is randomly ordered.
     Worst Case: O(n log n), When the array is sorted in reverse order.
 Auxiliary Space: O(n), Additional space is required for the temporary array used during merging.
+```
+
+## Implementation of MergeSort in java
+```java
+class MergeSort {
+    private void merge(int[] arr, int l, int m, int r) {
+        // size of two subarrays to be merged
+        // l, m, r are length
+        int n1 = m - l + 1;
+        int n2 = r - m;
+
+        int[] L = new int[n1];
+        int[] R = new int[n2];
+
+        for (int i = 0; i < n1; i++)
+            L[i] = arr[l + i];
+        for (int j = 0; j < n2; j++)
+            R[i] = arr[m + j + 1];
+
+        // merge temp arrays
+        // initial indices for first and second subarrays
+        int i = 0, j = 0;
+        int k = l;
+
+        while (i < n1 && j < n2) {
+            if (L[i] < R[j]) { 
+                arr[k] = L[i];
+                i++;
+            }
+            else { 
+                arr[k] = R[j];
+                j++;
+            }
+            k++;
+        }
+
+        while (i < n1)
+            arr[k++] = L[i++];
+
+        while (i < n2)
+            arr[k++] = R[j++];
+    }
+
+    public void sort(int[] arr, int l, int r) {
+        if (l < r) { 
+            int m = l + (r - l) / 2;
+
+            sort(arr, l, m);
+
+            sort(arr, m + 1, r);
+
+            merge(arr, l, m , r);
+        }
+    }
+
+    // A utility function to print array of size n
+    static void printArray(int arr[])
+    {
+        int n = arr.length;
+        for (int i = 0; i < n; ++i)
+            System.out.print(arr[i] + " ");
+        System.out.println();
+    }
+
+    // Driver code
+    public static void main(String args[])
+    {
+        int arr[] = { 12, 11, 13, 5, 6, 7 };
+
+        System.out.println("Given array is");
+        printArray(arr);
+
+        sort(arr, 0, arr.length - 1);
+
+        System.out.println("\nSorted array is");
+        printArray(arr);
+    }
+}
 ```
