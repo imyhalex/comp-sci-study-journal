@@ -314,3 +314,77 @@ class Solution {
     }
 }
 ```
+
+### 134. Gas Station[[Link](https://leetcode.com/problems/gas-station/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+#### Key Observations
+
+1. **If the total amount of gas is less than the total cost, it is impossible to complete the circuit.** Formally, if 
+   \[
+   \sum_{i=0}^{n-1} gas[i] < \sum_{i=0}^{n-1} cost[i],
+   \]
+   then the answer must be `-1`.
+
+2. **Uniqueness**: If it is possible to make the full circuit, exactly one valid starting index exists.
+
+3. **Greedy Observation**: Suppose you start at station 0, and you run out of gas at station \(k\). This means the total amount of gas from stations `0` through `k` was not enough to get you from station \(k\) to station \(k+1\). In that situation, starting anywhere between `0` and `k` also cannot succeed (because you would have run out of gas even earlier). Therefore, the next possible starting point must be \(k+1\).
+
+4. **One-Pass Solution**: We can track our net gas in a single forward pass:
+   - A variable `currentTank` to check if our tank goes negative at any point.
+   - A variable `start` that records the current candidate starting station.
+   - A variable `totalTank` to check if overall we have enough gas to complete the circuit.
+
+---
+
+#### Step-by-Step Solution Outline
+
+1. **Initialize**:
+   - `start = 0`: We'll begin by assuming station 0 is the starting candidate.
+   - `currentTank = 0`: Tracks your current gas tank when starting from `start`.
+   - `totalTank = 0`: Tracks the net surplus or deficit over the entire route.
+
+2. **Iterate over each station `i`**:
+   - Compute the difference `diff = gas[i] - cost[i]`.  
+   - Update `totalTank += diff` (the global net).
+   - Update `currentTank += diff` (the local net starting from the current candidate).
+   - **If at any point `currentTank` becomes negative**:
+     - It means you cannot reach station `i+1` from the current `start`.  
+     - Therefore, set `start = i + 1`.  
+     - Reset `currentTank = 0` because you are starting fresh from the new station.
+
+3. **Check feasibility**:
+   - After the loop finishes, if `totalTank >= 0`, then `start` is the valid answer.
+   - Otherwise, return `-1`.
+
+---
+
+#### Time Complexity
+- The key insight is that you only do **one pass** over the arrays (O(n) time).  
+- You do not restart the journey from different stations repeatedly; you keep track of one potential start.  
+
+#### Space Complexity
+- O(1) extra space.
+
+```java
+class Solution {
+    public int canCompleteCircuit(int[] gas, int[] cost) {
+        int n = gas.length;
+
+        int totalTank = 0;
+        int currentTank = 0;
+        int start = 0;
+
+        for (int i = 0; i < n; i++) { 
+            int diff = gas[i] - cost[i];
+            totalTank += diff;
+            currentTank += diff;
+
+            if (currentTank < 0) {
+                start = i + 1;
+                currentTank = 0;
+            }
+        }
+        return (totalTank >= 0) ? start : -1;
+    }
+}
+```
