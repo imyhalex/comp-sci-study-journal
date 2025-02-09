@@ -388,3 +388,104 @@ class Solution {
     }
 }
 ```
+<br/>
+
+### 135. Candy[[Link](https://leetcode.com/problems/candy/description/?envType=study-plan-v2&envId=top-interview-150)]
+```text
+There are n children standing in a line. Each child is assigned a rating value given in the integer array ratings.
+
+You are giving candies to these children subjected to the following requirements:
+
+Each child must have at least one candy.
+Children with a higher rating get more candies than their neighbors.
+Return the minimum number of candies you need to have to distribute the candies to the children.
+
+ 
+
+Example 1:
+
+Input: ratings = [1,0,2]
+Output: 5
+Explanation: You can allocate to the first, second and third child with 2, 1, 2 candies respectively.
+Example 2:
+
+Input: ratings = [1,2,2]
+Output: 4
+Explanation: You can allocate to the first, second and third child with 1, 2, 1 candies respectively.
+The third child gets 1 candy because it satisfies the above two conditions.
+
+Note: the concept of neighbor does not care about the order, whenever the rating greater than the child next to him/she, that child should get one increment
+```
+__Answer:__
+```java
+class Solution {
+    public int candy(int[] ratings) {
+        int n = ratings.length;
+
+        int[] candies = new int[n];
+        Arrays.fill(candies, 1);
+        for (int i = 1; i < n; i++) {
+            if (ratings[i] > ratings[i - 1])
+                candies[i] = candies[i - 1] + 1; 
+        }
+
+        int sum = candies[n - 1];
+        for (int i = n - 2; i >= 0; i--) {
+            if (ratings[i] > ratings[i + 1])
+                candies[i] = Math.max(candies[i], candies[i + 1] + 1);
+            sum += candies[i];
+        }
+        return sum;
+    }
+}
+```
+<br/>
+
+### *42. Trapping Rain Water[[Link](https://leetcode.com/problems/trapping-rain-water/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+__Answer:__
+```java
+class Solution {
+    public int trap(int[] height) {
+        
+    }
+}
+```
+<br/>
+
+### 13. Roman to Integer[[Link](https://leetcode.com/problems/roman-to-integer/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+__Answer__
+```java
+class Solution {
+    static Map<Character, Integer> values = new HashMap<>();
+
+    static {
+        values.put('M', 1000);
+        values.put('D', 500);
+        values.put('C', 100);
+        values.put('L', 50);
+        values.put('X', 10);
+        values.put('V', 5);
+        values.put('I', 1);
+    }
+
+    public int romanToInt(String s) {
+        int res = 0;
+        int preVal =0;
+
+        for (int i = s.length() - 1; i >= 0; i--) {
+            int currentVal = values.get(s.charAt(i));
+
+            if (currentVal < preVal)
+                res -= currentVal;
+            else 
+                res += currentVal;
+            
+            preVal = currentVal;
+        }
+
+        return res;
+    }
+}
+```
