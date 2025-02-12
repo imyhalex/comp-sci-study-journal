@@ -1,6 +1,18 @@
 # Algo Comparison
 
 - __What is In-Place Algorithm?__[[Link](https://www.geeksforgeeks.org/in-place-algorithm/)]
+- __Stable and Unstable Algorithms__[[Link](https://www.geeksforgeeks.org/stable-and-unstable-sorting-algorithms/)]
+
+<br/>
+
+```text
+Q: Can we make any sorting algorithm stable? 
+
+Any given sorting algorithm which is not stable can be modified to be stable. There can be algorithm-specific 
+ways to make it stable, but in general, any comparison-based sorting algorithm which is not stable by nature 
+can be modified to be stable by changing the key comparison operation so that the comparison of two keys 
+considers position as a factor for objects with equal keys.
+```
 
 ## Selection Sort
 * In place
@@ -234,6 +246,7 @@ set first element as pivot
 
   swap(pivot, storeIndex-1)
 """
+
 function partition(arr, low, high):
     pivot = arr[high]
 
@@ -322,3 +335,111 @@ class QuickSort {
   * We do not care about the pivot element or comparison here, just split, which gets logn
   * Once all are single element, merge them back up two at a time (O(n) space)
 * [Visualization](https://visualgo.net/en/sorting)
+
+## Heap Sort
+* __Time Compexity:__ n log n
+* in-place algorithm
+* not stable
+* Rearrange array elements so that they form a Max Heap(continuously).
+* Repeat the following steps until the heap contains only one element:
+    * Swap the root element of the heap (which is the largest element in current heap) with the last element of the heap.
+    * Remove the last element of the heap (which is now in the correct position). We mainly reduce heap size and do not remove element from the actual array.
+    * Heapify the remaining elements of the heap.
+* [Details](https://www.geeksforgeeks.org/heap-sort/?ref=outind#detailed-working-of-heap-sort)
+* [Video Explaination](https://www.youtube.com/watch?v=2DmK_H7IdTo)
+
+### Pseudocode
+```text
+n -> heap size
+
+function heapify(arr, i, n):
+    largest = i
+
+    left = 2 * i + 1
+    right = 2 * i + 2
+
+    if left < n and arr[left] > arr[largest]
+    then
+        largest = left
+    end if
+
+    if right < n and arr[right] > arr[largest]
+    then
+        largest = right
+    end if
+
+    if largest != i
+    then
+        swap(arr[i], arr[largest])
+        heapify(arr, largest, n)
+    end if
+end
+
+function buildMaxHeap(arr, n):
+    for i from floor(n/2) - 1 down to 0
+    do:
+        heapify(arr, i, n)
+    end for
+end
+
+function heapSort(arr):
+    n = length(arr)
+
+    buildMaxHeap(arr, n)
+
+    for i from n-1 down to 1
+    do:
+        swap(arr[0], arr[i])
+        heapify(arr, 0, i)
+    end for
+end
+```
+
+### Code Implementation
+
+```java
+class HeapSort { 
+
+    HeapSort() {}
+
+    private void swap(int[] arr, int i, int j) {
+        int temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
+
+    private void heapify(int[] arr, int i, int n) { 
+        int largest = i;
+
+        int l = 2 * i + 1;
+        int r = 2 * i + 2;
+
+        if (l < n && arr[l] > arr[largeset])
+            largest = l;
+        
+        if (r < n && arr[r] > arr[largest])
+            largest = r;
+
+        if (largest != i) { 
+            swap(arr, i, largest);
+            heapify(arr, largest, n);
+        }
+    }
+
+    private void builMaxHeap(int[] arr, n) { 
+        for (int i = n / 2 - 1; i >= 0; i--)
+            heapify(arr, i, n);
+    }
+
+    void heapSort(int[] arr) { 
+        int n = arr.length;
+
+        buildMaxHeap(arr, n);
+
+        for (int i = n - 1; i > 0; i--) {
+            swap(arr, 0, i);
+            heapify(arr, 0, i);
+        }
+    }
+}
+```
