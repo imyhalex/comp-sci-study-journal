@@ -509,3 +509,136 @@ class Solution {
     }
 }
 ```
+
+
+### 14. Longest Common Prefix[[Link](https://leetcode.com/problems/longest-common-prefix/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+__Divide-abd-Conquer Method__
+```java
+class Solution {
+
+    private String commonPrefix(String left, String right) { 
+        int min = Math.min(left.length(), right.length());
+
+        for (int i = 0; i < min; i++) 
+            if (left.charAt(i) != right.charAt(i))
+                return left.substring(0, i);
+        
+        return left.substring(0, min);
+    }
+
+    private String longestCommonPrefix(String[] strs, int l, int r) { 
+        if (l == r)
+            return strs[l];
+        else { 
+            int m = (l + r) / 2;
+
+            String lcpLeft = longestCommonPrefix(strs, l, m);
+            String lcpRight = longestCommonPrefix(strs, m + 1, r);
+
+            return commonPrefix(lcpLeft, lcpRight);
+        }
+    }
+
+    public String longestCommonPrefix(String[] strs) {
+        if (strs.length == 0 || strs == null)
+            return "";
+        
+        return longestCommonPrefix(strs, 0, strs.length - 1);
+    }
+}
+```
+
+__Vertical Scanning__
+
+```java
+class Solution {
+    public String longestCommonPrefix(String[] strs) {
+        if (strs == null || strs.length == 0) 
+            return "";
+
+        for (int i = 0; i < strs[0].length(); i++) { 
+            char c = strs[0].charAt(i);
+            for (int j = 1; j < strs.length; j++) { 
+                if (i == strs[j].length() || strs[j].charAt(i) != c)
+                    return strs[0].substring(0, i);
+            } 
+        }
+
+        return strs[0];
+    }
+}
+```
+
+### 151. Reverse Words in a String
+
+__Answer__
+```java
+class Solution {
+    // [,\\.\\s] splits the string by commas (,), spaces (\\s), and periods (\\.)
+    public String reverseWords(String s) {
+        s = s.trim();
+
+        String[] words = s.split("\\s+");
+        int l = 0, r = words.length - 1;
+        while(l < r) { 
+            String temp = words[l];
+            words[l] = words[r];
+            words[r] = temp;
+            l++;
+            r--;
+        }
+
+        return String.join(" ", words);
+    }
+}
+```
+
+### *6. Zigzag Conversion[[Link](https://leetcode.com/problems/zigzag-conversion/?envType=study-plan-v2&envId=top-interview-150)]
+
+```java
+class Solution {
+    public String convert(String s, int numRows) {
+        // Special cases
+        if (numRows == 1 || s.length() <= numRows) {
+            return s;
+        }
+
+        // Create a StringBuilder for each row
+        List<StringBuilder> rows = new ArrayList<>();
+        for (int i = 0; i < numRows; i++) {
+            rows.add(new StringBuilder());
+        }
+
+        int curRow = 0;
+        // direction = +1 means "moving down"; -1 means "moving up"
+        int direction = +1;
+
+        // Distribute characters across rows in a zigzag pattern
+        for (char c : s.toCharArray()) {
+            rows.get(curRow).append(c);
+
+            // If we hit the top or bottom, reverse direction
+            // reverse the direction in only two condition
+            if (curRow == 0) {
+                direction = +1;
+            } 
+            else if (curRow == numRows - 1) {
+                direction = -1;
+            }
+
+            // Move to the next row
+            // either curRow += 1 or curRow -= 1
+            curRow += direction;
+        }
+
+        // Combine rows
+        StringBuilder result = new StringBuilder();
+        for (StringBuilder row : rows) {
+            result.append(row);
+        }
+
+        return result.toString();
+    }
+}
+```
