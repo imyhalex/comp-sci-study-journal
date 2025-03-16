@@ -51,7 +51,7 @@ class GreedyEg {
         Arrays.sort(coins);
         int res = 0;
 
-        for (int i = n - 1; i >= 0; i++) { 
+        for (int i = n - 1; i >= 0; i--) { 
             if (amount >= coins[i]) {
                 // find the maximum number of ith coin we can use 
                 int cnt = amount / coins[i];
@@ -93,3 +93,169 @@ __Difference between Greedy and Dynamic Programming__
 1. Greedy algorithm works when the problem has `Greedy Choice Property` and `Optimal Substructure`. Dynamic Programming also works when a problem has optimal substructure but it also requires `Overlapping Subproblems`.
 
 2. In greedy algorithm each local decision leads to an optimal solution for the `entire problem` whereas in dynamic programming solution to the main problem `depends on the overlapping subproblems`.
+
+
+## Popular Greedy Alogrithms
+
+- [Fractional Knapsack](#fractional-knapsack)
+- Dijkstra's Algorithm
+- Kruskal's Algorithm
+- Huffman Coding
+- Prim's Algorithm
+
+
+### Fractional Knapsack[[Link](https://www.geeksforgeeks.org/fractional-knapsack-problem/)]
+
+Given the weights and profits of N items, in the form of {profit, weight} put these items in a knapsack of capacity W to get the maximum total profit in the knapsack. In Fractional Knapsack, we can break items for maximizing the total value of the knapsack.
+
+```text
+Input: arr[] = {{60, 10}, {100, 20}, {120, 30}}, W = 50
+Output: 240 
+Explanation: By taking items of weight 10 and 20 kg and 2/3 fraction of 30 kg. 
+Hence total price will be 60+100+(2/3)(120) = 240
+
+
+Input:  arr[] = {{500, 30}}, W = 10
+Output: 166.667
+```
+
+__Illustration:__
+Check the below illustration for a better understanding:
+
+
+Consider the example: __arr[] = {{100, 20}, {60, 10}, {120, 30}}, W = 50.__
+
+
+Sorting: Initially sort the array based on the profit/weight ratio. The sorted array will be __{{60, 10}, {100, 20}, {120, 30}}.__
+
+
+___Iteration:___
+
+
+- For i = 0, weight = 10 which is less than W. So add this element in the knapsack. profit = 60 and remaining W = 50 – 10 = 40.
+- For i = 1, weight = 20 which is less than W. So add this element too. profit = 60 + 100 = 160 and remaining W = 40 – 20 = 20.
+- For i = 2, weight = 30 is greater than W. So add 20/30 fraction = 2/3 fraction of the element. Therefore profit = 2/3 * 120 + 160 = 80 + 160 = 240 and remaining W becomes 0.
+
+So the final profit becomes 240 for W = 50.
+
+
+Follow the given steps to solve the problem using the above approach:
+
+- Calculate the ratio (profit/weight) for each item.
+- Sort all the items in decreasing order of the ratio.
+- Initialize __res = 0__, __curr_cap = given_cap__.
+- Do the following for every item i in the sorted order:
+    - If the weight of the current item is less than or equal to the remaining capacity then add the value of that item into the result
+    - Else add the current item as much as we can and break out of the loop.
+Return __res__.
+
+__Implementation of the above approach(Python):__
+```python
+class Item:
+    def __init__(self, val, wt):
+        self.profit = val
+        self.weight = wt
+
+def fractional_knapsack(W, arr):
+    arr.sort(key=lambda x: (x.profit/x.weight), reverse=True)
+
+    # result
+    res = 0.0
+
+    for item in arr:
+        # if adding item won't overflow, add it completely
+        if item.weight <= W:
+            res += item.profit
+            W -= item.weight
+
+        # if can't add current item, add fractional part of it
+        else:
+            fraction = W / item.weight
+            res += item.profit * fraction
+            break
+    
+    return res
+
+if __name__ == "__main__":
+    W = 50
+    arr = [Item(60, 10), Item(100, 20), Item(120, 30)]
+    max_val = fractional_knapsack(W, arr)
+    print(max_val)
+
+```
+- Time Complexity: O(N logN)
+- Auxiliary Space: O(N)
+
+__Implementation of the above approach(Java):__
+```java
+import java.lang.*;
+import java.util.Arrays;
+import java.util.Comparator;
+
+class FractionalKnapScak 
+{
+
+    static class ItemValue 
+    { 
+        int profit, weight;
+
+        ItemValue(int val, int wt) { 
+            this.weight = wt;
+            this.profit = val;
+        }
+    }
+
+    private static double getMaxValue(ItemValue[] arr, int capacity) 
+    { 
+        // sort items by profit/weight ratio:
+        Arrays.sort(arr, Comparator<ItemValue>() {
+            @Override
+            public int compare(ItemValue item1, ItemValue item2) { 
+                double cp1 = new Double((double)item1.profit / (double)item1.weight);
+                double cp2 = new Double((double)item2.profit / (double)item2.weight);
+
+                if (cp1 < cp2)
+                    return 1;
+                else
+                    reutrn -1;
+            }
+        });
+
+        double res = 0.0;
+
+        for (ItemValue i : arr) { 
+            int curWt = (int) i.weight;
+            int curVal = (int) i.profit;
+
+            if (capacity - curWt >= 0) {
+                capacity -= curWt;
+                res += curVal;
+            }
+            else { 
+                double fraction = ((double)capacity / (double)curWt)
+                res += (curVal * fraction);
+                capacity = (int)(capcaity - (curWt * fraction));
+                break;
+            }
+        }
+        return res; 
+    }
+
+    static void main(String[] args) 
+    {
+        ItemValue[] arr = { new ItemValue(60, 10),
+                            new ItemValue(100, 20),
+                            new ItemValue(120, 30) };
+ 
+        int capacity = 50;
+ 
+        double maxValue = getMaxValue(arr, capacity);
+ 
+        // Function call
+        System.out.println(maxValue);
+    }
+}
+```
+
+
+### Dijkstra’s Algorithm[[Link](https://www.geeksforgeeks.org/introduction-to-dijkstras-shortest-path-algorithm/)]
