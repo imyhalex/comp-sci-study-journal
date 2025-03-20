@@ -278,10 +278,35 @@ class Solution:
 ```
 
 ## 399. Evaluate Division[[Link](https://leetcode.com/problems/evaluate-division/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- Vide Explaination[[Link](https://www.youtube.com/watch?v=Uei1fwDoyKk)]
+
 ```python
 class Solution:
     def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
-        pass
+        adj = collections.defaultdict(list) # Map a -> list of [b, a/b]
+        for i, eq in enumerate(equations):
+            a, b = eq
+            adj[a].append([b, values[i]])
+            adj[b].append([a, 1 / values[i]])
+        
+        def bfs(src, target):
+            if src not in adj or target not in adj:
+                return -1
+            q, visit = deque(), set()
+            q.append([src, 1])
+            visit.add(src)
+            while q:
+                n, w = q.popleft()
+                if n == target:
+                    return w
+                for nei, weight in adj[n]:
+                    if nei not in visit:
+                        q.append([nei, w * weight])
+                        visit.add(nei)
+            return - 1
+
+        return [bfs(q[0], q[1]) for q in queries]
 ```
 
 ## 207. Course Schedule[[Link](https://leetcode.com/problems/course-schedule/description/?envType=study-plan-v2&envId=top-interview-150)]
@@ -363,3 +388,40 @@ class Solution:
         return output
 ```
 - Time Complexity: O(E + V) / O(N + P)
+
+## 909. Snakes and Ladders[[Link](https://leetcode.com/problems/snakes-and-ladders/?envType=study-plan-v2&envId=top-interview-150)]
+
+- Vide Explaination[[Link](https://www.youtube.com/watch?v=6lH4nO3JfLk)]
+```python
+# BFS in graph
+class Solution:
+    def snakesAndLadders(self, board: List[List[int]]) -> int:
+        length = len(board)
+        board.reverse()
+
+        def int_to_pos(square): # -> get position
+            r = (square - 1) // length
+            c = (square - 1) % length
+            if r % 2:
+                c = length - 1 - c
+            return r, c
+
+        q = deque() # [square, moves] moves -> number of moves to get this square from start
+        q.append([1, 0])
+        visit = set()
+
+        while q:
+            square, moves = q.popleft()
+            for i in range(1, 7):
+                next_square = square + i
+                r, c = int_to_pos(next_square)
+
+                if board[r][c] != -1:
+                    next_square = board[r][c]
+                if next_square == length * length: # reached last square
+                    return moves + 1 # -> moves is the number of moves to get "this" square
+                if next_square not in visit:
+                    visit.add(next_square)
+                    q.append([next_square, moves + 1])
+        return -1
+```
