@@ -259,3 +259,103 @@ class FractionalKnapScak
 
 
 ### Dijkstra’s Algorithm[[Link](https://www.geeksforgeeks.org/introduction-to-dijkstras-shortest-path-algorithm/)]
+
+- A popular algorithm for solving many single-source shortest path problems having non-negative edge weight in the graphs.
+- It is to find the shortest distance between two vertices on a graph
+
+__Pseudo code__:
+```text
+function Dijkstra(Graph, source):
+   // Initialize distances to all nodes as infinity, and to the source node as 0.
+
+    distances = map(all nodes -> infinity)
+
+    distances = 0
+
+   // Initialize an empty set of visited nodes and a priority queue to keep track of the nodes to visit.
+   visited = empty set
+   queue = new PriorityQueue()
+   queue.enqueue(source, 0)
+
+   // Loop until all nodes have been visited.
+   while queue is not empty:
+       // Dequeue the node with the smallest distance from the priority queue.
+       current = queue.dequeue()
+
+
+       // If the node has already been visited, skip it.
+       if current in visited:
+           continue
+
+
+       // Mark the node as visited.
+       visited.add(current)
+
+
+       // Check all neighboring nodes to see if their distances need to be updated.
+       for neighbor in Graph.neighbors(current):
+           // Calculate the tentative distance to the neighbor through the current node.
+           tentative_distance = distances[current] + Graph.distance(current, neighbor)
+
+
+           // If the tentative distance is smaller than the current distance to the neighbor, update the distance.
+           if tentative_distance < distances[neighbor]:
+               distances[neighbor] = tentative_distance
+
+
+               // Enqueue the neighbor with its new distance to be considered for visitation in the future.
+               queue.enqueue(neighbor, distances[neighbor])
+
+
+   // Return the calculated distances from the source to all other nodes in the graph.
+   return distances
+```
+
+### Code Implementation
+```python
+import heapq
+
+def dijkstra(V, adj, S):
+    # initialize distance array with infinity and source distance as 0
+    dist = [float('inf')] * V
+    dist[S] = 0
+
+    # min-heap to process node
+    pq = [(0, S)] # (distance, node)
+
+    while pq:
+        current_distance, node = heapq.heappop(pq)
+        
+        # if processed before with a smaller distance, skip
+        if current_distance > dist[node]:
+            continue
+
+        # explore neighbors
+        for neighbor, weight in adj[node]:
+            new_distance = current_distance + weight
+
+            # Update if a shorter path is found
+            if new_distance < dist[neighbor]:
+                dist[neighbor] = new_distance
+                heapq.heappush(pq, (new_distance, neighbor))
+
+    return dist  # Shortest distances from source to all nodes
+
+def main():
+    V = 6  # Number of vertices
+    edges = [(0, 3, 9), (0, 5, 4), (1, 4, 4), (2, 5, 10), (4, 5, 3)]
+    
+    # Create adjacency list
+    adj = [[] for _ in range(V)]
+    for u, v, w in edges:
+        adj[u].append((v, w))
+        adj[v].append((u, w))  # Since it's an undirected graph
+
+    S = 1  # Source node
+
+    result = dijkstra(V, adj, S)
+    print(result)
+
+if __name__ == "__main__":
+    main()
+```
