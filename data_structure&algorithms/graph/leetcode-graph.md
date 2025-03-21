@@ -425,3 +425,68 @@ class Solution:
                     q.append([next_square, moves + 1])
         return -1
 ```
+
+## 433. Minimum Genetic Mutation[[Link](https://leetcode.com/problems/minimum-genetic-mutation/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- Video Expalination[[Link](https://www.youtube.com/watch?v=9lkn3rHCSLg)]
+```python
+class Solution:
+    def minMutation(self, startGene: str, endGene: str, bank: List[str]) -> int:
+        q = deque()
+        q.append([startGene, 0])
+        visited = set()
+        visited.add(startGene)
+
+        while q:
+            curr_gene, weight = q.popleft()
+            if curr_gene == endGene:
+                return weight
+            
+            for c in 'ACGT':
+                for i in range(len(curr_gene)):
+                    neighbor = curr_gene[:i] + c + curr_gene[i + 1:]
+                    if neighbor not in visited and neighbor in bank:
+                        q.append([neighbor, weight + 1])
+                        visited.add(neighbor)
+
+        return -1
+```
+
+## 127. Word Ladder[[Link](https://leetcode.com/problems/word-ladder/?envType=study-plan-v2&envId=top-interview-150)]
+
+- Vide Explaination[[Link](https://www.youtube.com/watch?v=h9iTnkgv05E)]
+
+```python
+class Solution:
+    def ladderLength(self, beginWord: str, endWord: str, wordList: List[str]) -> int:
+        # construct adjacency list from word list
+        if endWord not in wordList:
+            return 0
+        
+        nei = collections.defaultdict(list)
+        wordList.append(beginWord)
+        for word in wordList:
+            for j in range(len(word)):
+                pattern = word[:j] + "*" + word[j + 1:]
+                nei[pattern].append(word)
+        
+        visited = set()
+        visited.add(beginWord)
+        q = deque()
+        q.append(beginWord)
+        res = 1
+        while q:
+            for i in range(len(q)):
+                word = q.popleft()
+                if word == endWord:
+                    return res
+                for j in range(len(word)):
+                    pattern = word[:j] + "*" + word[j + 1:]
+                    for neiWord in nei[pattern]:
+                        if neiWord not in visited:
+                            visited.add(neiWord)
+                            q.append(neiWord)
+
+            res += 1
+        return 0
+```
