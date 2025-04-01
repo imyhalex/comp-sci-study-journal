@@ -350,7 +350,7 @@ class Solution:
 
 ## 210. Course Schedule II[[Link](https://leetcode.com/problems/course-schedule-ii/?envType=study-plan-v2&envId=top-interview-150)]
 
-- video explaination[[Link](https://leetcode.com/problems/course-schedule-ii/?envType=study-plan-v2&envId=top-interview-150)]
+- video explaination[[Link](https://www.youtube.com/watch?v=Akt3glAwyfY&t=578s)]
 
 ```python
 class Solution:
