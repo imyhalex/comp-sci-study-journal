@@ -47,7 +47,7 @@ class Solution:
         self.get_subsets(idx + 1, nums, sub, curr)
 ```
 
-## Combination
+## Combination[[Link](https://neetcode.io/courses/advanced-algorithms/12)]
 - Time Complexity: O(k * 2^n)
 
 ### 1. Trivial Approach
@@ -92,6 +92,51 @@ def get_combs(i, curr, combs, n, k):
         curr.pop()
 ```
 
+## Permutations[[Link](https://neetcode.io/courses/advanced-algorithms/13)]
+- Time Complexity: O(n * n!)
+
+### Recursive
+```python
+def permutations(nums):
+    return permutations_helper(0, nums)
+
+def permutations_helper(i, nums):
+    if i == len(nums):
+        return [[]]
+    
+    res = []
+    perms = permutations_helper(i + 1, nums)
+    for p in perms:
+        for j in range(len(p) + 1):
+            p_copy = p.copy()
+            p_copy.insert(j, nums[i])
+            res.append(p_copy)
+    
+    return res
+```
+
+```text
+The recursive solution is essentially the same as the iterative one in terms of time complexity. While both are bounded below by O(n·n!) due to the size 
+of the output, the practical work including list copying makes the complexity closer to O(n²·n!) in the worst-case scenario. So yes, they have 
+essentially the same time complexity characteristics.
+```
+### Iterative
+- Time Complexity: O(n^2 * n!)
+
+```python
+def permutation(nums):
+    perms = [[]]
+
+    for n in nums:
+        next_perms = []
+        for p in perms:
+            for i in range(len(p) + 1):
+                p_copy = p.copy()
+                p_copy.insert(i, n)
+                next_perms.append(p_copy)
+        perms = next_perms
+    return perms
+```
 
 ## Some LC Problems
 ### 77. Combinations[[Link](https://leetcode.com/problems/combinations/description/)]
@@ -135,7 +180,6 @@ class Solution:
         curr.pop()
 
         self.get_combs_sum(i + 1, curr, combs, nums, target, total)
-        
 
 ```
 
@@ -162,4 +206,58 @@ class Solution:
         
         for letter in table[digits[i]]:
             self.get_letter_combs(i + 1, curr + letter, combs, digits, table)
+```
+
+### 46. Permutations[[Link](https://leetcode.com/problems/permutations/description/?envType=study-plan-v2&envId=top-interview-150)]
+```python
+class Solution:
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        return self.perms_helper(0, nums)
+    
+    def perms_helper(self, i, nums):
+        if i == len(nums):
+            return [[]]
+        
+        res = []
+        perms = self.perms_helper(i + 1, nums)
+        for p in perms:
+            for j in range(len(p) + 1):
+                p_copy = p.copy()
+                p_copy.insert(j, nums[i])
+                res.append(p_copy)
+        return res
+```
+
+### *47. Permutations II[[Link](https://leetcode.com/problems/permutations-ii/description/)]
+- vids explaination[[Link](https://neetcode.io/solutions/permutations-ii)]
+```python
+# Time: O(n * n!)
+class Solution:
+    def permuteUnique(self, nums: List[int]) -> List[List[int]]:
+        nums.sort()
+        res = []
+        visited = [False] * len(nums)
+        self.perms_helper(nums, visited, [], res)
+        return res
+    
+    def perms_helper(self, nums, visited, path, res):
+        if len(path) == len(nums):
+            res.append(path.copy())
+            return
+        
+        for i in range(len(nums)):
+            # Skip elements that have already been used in the current permutation.
+            if visited[i]:
+                continue
+            # If the current element is the same as the previous element, and the previous
+            # element hasn't been used in this recursion branch, skip to avoid duplicates.
+            if i > 0 and nums[i] == nums[i - 1] and not visited[i - 1]:
+                continue
+            # Mark the current element as used and add it to the path.
+            visited[i] = True
+            path.append(nums[i])
+            self.perms_helper(nums, visited, path, res)
+            # Remove the current element from the path and mark it as unused before the next iteration.
+            path.pop()
+            visited[i] = False
 ```
