@@ -97,6 +97,134 @@ def dp(rows, cols):
     return prev_row[0]
 ```
 
+## 0/1 Knapsack[[Link](https://neetcode.io/courses/advanced-algorithms/18)]
+
+- Idea:
+    - given a bag/knapsack with a fixed capacity, along with some items' weights and profits we reap by choosing to put that item in the bag.
+    - want to maximize the profit while also ensuring that our backpack doesn't run out of space. 
+- The reason this algorithm is called 0/1 is because at each point, we can either choose to include an item or not include it - a binary decision.
+
+```text
+Q: Given a list of N items, and a backpack with a limited capacity, return the maximum total profit that can be contained in the backpack. The i-th 
+item's profit is profit[i] and its weight is weight[i]. Assume you can only add each item to the bag at most once.
+```
+
+### Brute Force Approach
+```python
+# Brute force Solution
+# Time: O(2^n), Space: O(n)
+# Where n is the number of items.
+
+def dfs(profit, weight, capacity):
+    return dfsHelper(0, profit, weight, capacity)
+
+def dfsHelper(i, profit, weight, capacity):
+    if i == len(profit):
+        return 0
+
+    # Skip item i
+    maxProfit = dfsHelper(i + 1, profit, weight, capacity)
+
+    # Include item i
+    newCap = capacity - weight[i]
+    if newCap >= 0:
+        p = profit[i] + dfsHelper(i + 1, profit, weight, newCap)
+        # Compute the max
+        maxProfit = max(maxProfit, p)
+
+    return maxProfit
+```
+
+### Top-Down Approach(Memoization)
+```python
+# Memoization Solution
+# Time: O(n * m), Space: O(n * m)
+# Where n is the number of items & m is the capacity.
+
+def memoization(profit, weight, capacity):
+    # A 2d array, with N rows and M + 1 columns, init with -1's
+    n, m = len(profit), capacity
+    cache = [[-1] * (m + 1) for _ in range(len(n))]
+    return memo_helper(0, profit, weight, capacity, cache)
+
+def memo_helper(i, profit, weight, capacity, cache):
+    if i == len(profit):
+        return 0
+    
+    if cache[i][capacity] != -1:
+        return cache[i][capacity]
+    
+    # skip item i
+    cache[i][capacity] = memo_helper(i + 1, profit, weight, capacity, cache)
+
+    # include item i
+    new_cap = capacity - weight[i]
+    if new_cap > 0:
+        p = profit[i] + memo_helper(i + 1, profit, weight, new_cap, cache)
+        # compute the max
+        cache[i][capacity] = max(cache[i][capacity], p)
+    
+    return cache[i][capacity]
+```
+
+### Bottom-UP Approach
+```python
+# Dynamic Programming Solution
+# Time: O(n * m), Space: O(n * m)
+# Where n is the number of items & m is the capacity.
+
+def dp(profit, weight, capacity):
+    n, m = len(profit), capacity
+    dp = [[0] * (m + 1) for _ in range(n)]
+
+    # fill th first column and row to reduce edge cases
+    for i in range(n):
+        dp[i][0] = 0
+    
+    for c in range(m + 1):
+        if weight[0] <= c:
+            dp[0][c] = profit[0]
+        
+    for i in range(1, n):
+        for c in range(1, m + 1):
+            # either skip
+            skip = dp[i - 1][c]
+            # or include
+            include = 0
+            if c - weight[i] >= 0:
+                include = profit[i] + dp[i - 1][c - weight[i]]
+            dp[i][c] = max(skip, include)
+    return dp[n - 1][m]
+```
+
+### Bottom-Up Approach(Optimized)
+```python
+# Memory optimized Dynamic Programming Solution
+# Time: O(n * m), Space: O(m)
+
+def dp_optimized(profit, weight, capacity):
+    n, m = len(profit), capacity
+    dp = [0] * (m + 1)
+
+    # fill the first row to reduce edge cases
+    for c in range(m + 1):
+        if weight[0] <= c:
+            dp[c] = profit[0]
+    
+    for i in range(1, n):
+        curr = [0] * (m + 1)
+        for c in range(1, m + 1):
+            # skip
+            skip = dp[c]
+            # or include
+            include = 0
+            if c - weight[i] >= 0:
+                include = profit[i] + dp[c - weight[i]]
+            curr[c] = max(skip, include)
+        dp = curr
+    return dp[m]
+```
+
 ## Some LC Problems
 
 ### 70. Climbing Stairs[[Link](https://leetcode.com/problems/climbing-stairs/description/)]
@@ -280,4 +408,120 @@ Hence an entire blocked row or column automatically collapses the corresponding 
 class Solution:
     def longestCommonSubsequence(self, text1: str, text2: str) -> int:
 
+```
+
+### Partition Equal Subset Sum[[Link](https://neetcode.io/problems/partition-equal-subset-sum)]
+
+- Video Explaination[[Link](https://www.youtube.com/watch?v=IsvocB5BJhw)]
+
+__Brute-Force__
+```python
+class Solution:
+    def canPartition(self, nums: List[int]) -> bool:
+        if sum(nums) % 2 != 0:
+            return False
+
+        def dfs(i, target):
+            if i >= len(nums):
+                return target == 0
+            if target < 0:
+                return False
+            
+            return dfs(i + 1, target) or dfs(i + 1, target - nums[i])
+        
+        return dfs(0, sum(nums) // 2)
+```
+
+__Dynamic Programming__
+```python
+# Time complexity: O(n∗target); Space complexity: O(n∗target)
+class Solution:
+    def canPartition(self, nums: List[int]) -> bool:
+        if sum(nums) % 2 != 0:
+            return False
+
+        n, target = len(nums), sum(nums) // 2
+        dp = [[False] * (target + 1) for _ in range(n + 1)] # n + 1 for handle first item edge cases
+
+        for i in range(n + 1):
+            dp[i][0] = True
+
+        for i in range(1, n + 1):
+            for t in range(1, target + 1):
+                if nums[i - 1] <= t:
+                    dp[i][t] = (dp[i - 1][t] or dp[i - 1][t - nums[i - 1]])
+                else:
+                    dp[i][t] = dp[i - 1][t]
+        return dp[n][target]
+```
+```python
+# video-ish result
+
+# Time complexity: O(n∗target); Space complexity: O(n∗target)
+class Solution:
+    def canPartition(self, nums: List[int]) -> bool:
+        if sum(nums) % 2 != 0:
+            return False
+        
+        n, target = len(nums), sum(nums) // 2
+        dp = [[False] * (target + 1) for _ in range(n)]
+
+        for i in range(n):
+            dp[i][0] = True
+        
+        for t in range(target + 1):
+            if nums[0] == t:
+                dp[0][t] = True
+        
+        for i in range(1, n):
+            for t in range(1, target + 1):
+                not_take = dp[i - 1][t]
+                take = False
+                if t - nums[i] >= 0:
+                    take= dp[i - 1][t - nums[i]]
+                dp[i][t] = take or not_take
+        return dp[n - 1][target]
+```
+```python
+# optimized version
+
+# Time complexity: O(n∗target); Space complexity: O(target)
+class Solution:
+    def canPartition(self, nums: list[int]) -> bool:
+        if sum(nums) % 2 != 0:
+            return False
+        
+        target = sum(nums) // 2
+        dp = [False] * (target + 1)
+
+        dp[0] = True
+        for num in nums:
+            for t in range(target, num - 1, - 1):
+                dp[t] = dp[t] or dp[t - num]
+        
+        return dp[target]
+```
+
+### 494. Target Sum[[Link](https://leetcode.com/problems/target-sum/description/)]
+```python
+# Time complexity O(2^n)
+# Space complextiy O(n)
+
+class Solution:
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+
+        def dfs(i, total):
+            if i == len(nums):
+                return total == target
+            
+            return (dfs(i + 1, total + nums[i]) + dfs(i + 1, total - nums[i]))
+        
+        return dfs(0, 0)
+```
+
+__Bottom-UP__
+```python
+class Solution:
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        
 ```
