@@ -260,4 +260,68 @@ class Solution:
             # Remove the current element from the path and mark it as unused before the next iteration.
             path.pop()
             visited[i] = False
+
+# Less parameters to pass if in nested function
+class Solution:
+    def permuteUnique(self, nums: List[int]) -> List[List[int]]:
+        nums.sort()
+        res = []
+        visited = [False] * len(nums)
+
+        def dfs(path):
+            if len(path) == len(nums):
+                res.append(path.copy())
+                return
+
+            for i in range(len(nums)):
+                if visited[i]:
+                    continue
+                if i > 0 and nums[i] == nums[i - 1] and not visited[i - 1]:
+                    continue
+
+                visited[i] = True
+                path.append(nums[i])
+                dfs(path)
+                path.pop()
+                visited[i] = False
+
+        dfs([])
+        return res
+```
+
+### 79. Word Search[[Link](https://leetcode.com/problems/word-search/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://www.youtube.com/watch?v=pfiQ_PS1g8E&t=18s)]
+
+```python
+# time complexity: O(n * m * dfs-> 4^len(word)) -> O(n * m * 4^n)
+class Solution:
+    def exist(self, board: List[List[str]], word: str) -> bool:
+        rows, cols = len(board), len(board[0])
+        path = set() 
+
+        def dfs(r, c, i):
+            if i == len(word):
+                return True
+            
+            if (r < 0 or c < 0 or r >= rows or c >= cols
+                or word[i] != board[r][c] or (r, c) in path):
+                return False
+
+            
+            path.add((r, c))
+            res = (
+                dfs(r + 1, c, i + 1) or
+                dfs(r - 1, c, i + 1) or
+                dfs(r, c + 1, i + 1) or
+                dfs(r, c - 1, i + 1)
+            )
+            path.remove((r, c))
+            return res
+        
+        for r in range(rows):
+            for c in range(cols):
+                if dfs(r, c, 0):
+                    return True
+        return False
 ```
