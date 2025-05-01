@@ -294,6 +294,25 @@ class Solution:
         return dp[1]
 ```
 
+### 322. *Coin Change[[Link](https://leetcode.com/problems/coin-change/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/solutions/coin-change)]
+- unbounded knapsack(save for learning the topic later)
+```python
+# Time Complexity: O(amount * len(coin)); Space Complexity: O(amount)
+class Solution:
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        dp = [amount + 1] * (amount + 1) # 'amount + 1' in [] is just to set default value
+        dp[0] = 0 # base case
+
+        for a in range(1, amount + 1):
+            for c in coins:
+                if a - c >= 0:
+                    dp[a] = min(dp[a], 1 + dp[a - c])
+
+        return dp[amount] if dp[amount] != amount + 1 else -1
+```
+
 ### 139. Word Break[[Link](https://leetcode.com/problems/word-break/description/?envType=study-plan-v2&envId=top-interview-150)]
 <!-- ```python
 # BFS
@@ -319,8 +338,27 @@ class Solution:
         return False
 ``` -->
 
-- Video Explaination[[Link](https://www.youtube.com/watch?v=Sx9NNgInc3A)]
+```python
+# solution in recursion
+# Time complexity: O(t∗m^n); Space: O(n)
+class Solution:
+    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
 
+        def dfs(i):
+            if i == len(s):
+                return True
+            
+            for w in wordDict:
+                if ((i + len(w)) <= len(s) and s[i : i + len(w)] == w):
+                    if dfs(i + len(w)):
+                        return True
+            return False
+        
+        return dfs(0)
+```
+
+- Video Explaination[[Link](https://neetcode.io/problems/word-break)]
+- hint: set the position of string out of bound as True as a starting point; and traverse in reverse order
 ```python
 # Bottom Up Approach
 # -Time Complexity: O(n⋅m⋅k); Space: O(n)
