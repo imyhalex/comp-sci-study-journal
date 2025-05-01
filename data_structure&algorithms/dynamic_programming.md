@@ -31,7 +31,7 @@ def fib(n, cache):
 ```
 
 ### Bottom Up Approach(Tabulation)
-- Time Complexity get optimized to: O(n)
+- Time Complexity get optimized to: O(n), and only use the array with size of 2, we can bring space complexity down to O(1)
 ```python
 def fib(n):
     if n < 2:
@@ -45,6 +45,20 @@ def fib(n):
         dp[0] = tmp
         i += 1
     return dp[1]
+
+# or
+class Solution:
+    def fib(self, n: int) -> int:
+        if n < 2:
+            return n
+        
+        dp = [0, 1]
+        for i in range(2, n + 1):
+            tmp = dp[1]
+            dp[1] = dp[0] + dp[1]
+            dp[0] = tmp
+        
+        return dp[1]
 ```
 ## 2-Dimension DP[[Link](https://neetcode.io/courses/dsa-for-beginners/33)]
 
@@ -228,7 +242,20 @@ def dp_optimized(profit, weight, capacity):
 ## Some LC Problems
 
 ### 70. Climbing Stairs[[Link](https://leetcode.com/problems/climbing-stairs/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/climbing-stairs)]
+- decision tree idea
 ```python
+# recursion method:
+class Solution:
+    def climbStairs(self, n: int) -> int:
+        def dfs(i):
+            if i >= n:
+                return i == n
+            return dfs(i + 1) + dfs(i + 2)
+        return dfs(0)  
+
+# bottm-up dp: 
 class Solution:
     def climbStairs(self, n: int) -> int:
         if n < 2:
@@ -246,6 +273,9 @@ class Solution:
 ```
 
 ### 198. House Robber[[Link](https://leetcode.com/problems/house-robber/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/house-robber)]
+
 ```python
 class Solution:
     def rob(self, nums: List[int]) -> int:
@@ -255,9 +285,9 @@ class Solution:
         if len(nums) == 1:
             return nums[0]
     
-        dp = [0, 0]
+        dp = [0, 0] # dp[0] -> rob1, dp[1] -> rob2
         for n in nums:
-            tmp = max(dp[1], dp[0] + n)
+            tmp = max(dp[0] + n, dp[1])
             dp[0] = dp[1] # override
             dp[1] = tmp # make sure dp[1] have most up-to-date num
 
