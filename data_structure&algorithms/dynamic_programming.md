@@ -476,21 +476,41 @@ Hence an entire blocked row or column automatically collapses the corresponding 
 
 ### 1143. Longest Common Subsequence[[Link](https://leetcode.com/problems/longest-common-subsequence/description/)]
 
-![Video](https://www.youtube.com/watch?v=Ua0GhsJSlWM)
 - video explaination[[Link](https://neetcode.io/solutions/longest-common-subsequence)]
+- hint: if find common character, add on dp array in diagonal, it not, find the maximun num either from the right or below
 ```python
 # recursion solution
+# Time Complexity: O(2 ^ (m + n)); Space Complexity: O(m + n)
 class Solution:
     def longestCommonSubsequence(self, text1: str, text2: str) -> int:
         
         def dfs(i, j):
             if i == len(text1) or j == len(text2):
+                return 0
+            
+            if text1[i] == text2[j]:
+                return 1 + dfs(i + 1, j + 1)
+            
+            return max(dfs(i + 1, j), dfs(i, j + 1))
+
+        return dfs(0, 0)
 
 
 # DP in Bottom-Up 
+# Time Complexity: O(n * m); Space Complexity: O(n * m)
 class Solution:
     def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        dp = [[0 for j in range(len(text2) + 1)] for i in range(len(text1) + 1)]
+
+        rows, cols = len(text1), len(text2)
+        for i in range(rows - 1, -1, -1):
+            for j in range(cols - 1, -1, -1):
+                if text1[i] == text2[j]:
+                    dp[i][j] = 1 + dp[i + 1][j + 1]
+                else:
+                    dp[i][j] = max(dp[i + 1][j], dp[i][j + 1])
         
+        return dp[0][0] 
 ```
 
 ### Partition Equal Subset Sum[[Link](https://neetcode.io/problems/partition-equal-subset-sum)]
