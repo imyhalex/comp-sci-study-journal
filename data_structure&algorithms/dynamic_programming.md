@@ -400,16 +400,19 @@ class Solution:
     def uniquePathsWithObstacles(self, obstacleGrid: List[List[int]]) -> int:
         rows, cols = len(obstacleGrid), len(obstacleGrid[0])
 
-        if obstacleGrid[rows - 1][cols - 1] == 1 or obstacleGrid[0][0]:
+        # edge cases: if the destionation has obstacle or starting point conatins obstacle
+        if obstacleGrid[rows - 1][cols - 1] or obstacleGrid[0][0]:
             return 0
             
         prev = [0] * cols
         for r in range(rows - 1, -1, -1):
             curr = [0] * cols
+            # this part handle the last element for curr dp array
             if obstacleGrid[r][cols - 1] != 1:
                 curr[cols - 1] = prev[cols - 1] if r < rows - 1 else 1
             
             for c in range(cols - 2, -1, -1):
+                # this part handle the obstacle in the middle of the row in grid
                 if obstacleGrid[r][c] != 1:
                     curr[c] = curr[c + 1] + prev[c]
             prev = curr
@@ -471,11 +474,23 @@ So that single ternary assignment guarantees the two essential base‑cases for 
 Hence an entire blocked row or column automatically collapses the corresponding DP values to zero, making the solution robust for every grid layout.
 
 
-### Longest Common Subsequence[[Link](https://neetcode.io/problems/longest-common-subsequence)]
+### 1143. Longest Common Subsequence[[Link](https://leetcode.com/problems/longest-common-subsequence/description/)]
+
+![Video](https://www.youtube.com/watch?v=Ua0GhsJSlWM)
+- video explaination[[Link](https://neetcode.io/solutions/longest-common-subsequence)]
 ```python
+# recursion solution
 class Solution:
     def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        
+        def dfs(i, j):
+            if i == len(text1) or j == len(text2):
 
+
+# DP in Bottom-Up 
+class Solution:
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        
 ```
 
 ### Partition Equal Subset Sum[[Link](https://neetcode.io/problems/partition-equal-subset-sum)]
