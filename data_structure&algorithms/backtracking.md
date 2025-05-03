@@ -181,6 +181,27 @@ class Solution:
 
         self.get_combs_sum(i + 1, curr, combs, nums, target, total)
 
+# in nested function style:
+class Solution:
+    def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
+        combs, curr = [], []
+
+        def dfs(i, total):
+            if total == target:
+                combs.append(curr.copy())
+                return
+            
+            if i >= len(candidates) or total > target:
+                return
+            
+            curr.append(candidates[i])
+            dfs(i, candidates[i] + total)
+            curr.pop()
+
+            dfs(i + 1, total)
+
+        dfs(0, 0)
+        return combs
 ```
 
 ### 17. Letter Combinations of a Phone Number[[Link](https://leetcode.com/problems/letter-combinations-of-a-phone-number/description/?envType=study-plan-v2&envId=top-interview-150)]
