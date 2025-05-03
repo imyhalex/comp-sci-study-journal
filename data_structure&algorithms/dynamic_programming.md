@@ -630,7 +630,7 @@ class Solution:
         return dp[target]
 ```
 
-### 494. Target Sum[[Link](https://leetcode.com/problems/target-sum/description/)]
+### *494. Target Sum[[Link](https://leetcode.com/problems/target-sum/description/)]
 
 - video explaination[[Link](https://neetcode.io/problems/target-sum)]
 - hint: the 2d array should from -target to +target
@@ -672,7 +672,36 @@ class Solution:
 ```
 __Bottom-UP__
 ```python
+# Time Complexity: O(n * m)
+# Space Complexity: O(n * m)
 class Solution:
     def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        dp = [defaultdict(int) for _ in range(len(nums) + 1)]
+
+        dp[0][0] = 1 # (0 element, 0 sum) -> 1 way
+                     # 1 way to zero with first 0 elements
         
+        for i in range(len(nums)):
+            for curr_sum, count in dp[i].items():
+                dp[i + 1][curr_sum + nums[i]] += count
+                dp[i + 1][curr_sum - nums[i]] += count
+
+        return dp[len(nums)][target]
+
+# or optimized in
+# Time Complexity: O(n * m)
+# Space Complexity: O(m)
+class Solution:
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        dp = defaultdict(int)
+        dp[0] = 1
+
+        for num in nums:
+            next_dp = defaultdict(int)
+            for total, count in dp.items():
+                next_dp[total + num] += count
+                next_dp[total - num] += count
+            dp = next_dp
+            
+        return dp[target]
 ```
