@@ -593,6 +593,31 @@ class Solution:
     def canPartition(self, nums: list[int]) -> bool:
         if sum(nums) % 2 != 0:
             return False
+
+        n, target = len(nums), sum(nums) // 2
+        dp = [False] * (target + 1)
+
+        for t in range(target + 1):
+            if nums[0] == t:
+                dp[t] = True
+        
+        for i in range(1, n):
+            curr = [False] * (target + 1)
+            for t in range(1, target + 1):
+                not_take = dp[t]
+                take = False
+                if t - nums[i] >= 0:
+                    take = dp[t - nums[i]]
+                curr[t] = take or not_take
+            dp = curr
+        return dp[target]
+
+# or
+# Time complexity: O(n∗target); Space complexity: O(target)
+class Solution:
+    def canPartition(self, nums: list[int]) -> bool:
+        if sum(nums) % 2 != 0:
+            return False
         
         target = sum(nums) // 2
         dp = [False] * (target + 1)
@@ -606,6 +631,9 @@ class Solution:
 ```
 
 ### 494. Target Sum[[Link](https://leetcode.com/problems/target-sum/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/target-sum)]
+- hint: the 2d array should from -target to +target
 ```python
 # Time complexity O(2^n)
 # Space complextiy O(n)
@@ -621,7 +649,27 @@ class Solution:
         
         return dfs(0, 0)
 ```
+__Memoization__
+```python
+# Time Complexity: O(n * m)
+# Space Complexity: O(n * m)
+class Solution:
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        dp = {} # (index, curr_sum) -> num of ways 
 
+        def dfs(i, curr_sum):
+            if (i, curr_sum) in dp:
+                return dp[(i, curr_sum)]
+            
+            if i == len(nums):
+                return curr_sum == target # True or False -> 1 or 0
+            
+            dp[(i, curr_sum)] = (
+                dfs(i + 1, curr_sum + nums[i]) + dfs(i + 1, curr_sum - nums[i])
+            )
+            return dp[(i, curr_sum)]
+        return dfs(0, 0)
+```
 __Bottom-UP__
 ```python
 class Solution:
