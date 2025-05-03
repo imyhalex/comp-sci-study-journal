@@ -312,7 +312,7 @@ class Solution:
         return res
 ```
 
-### 79. Word Search[[Link](https://leetcode.com/problems/word-search/description/?envType=study-plan-v2&envId=top-interview-150)]
+### *79. Word Search[[Link](https://leetcode.com/problems/word-search/description/?envType=study-plan-v2&envId=top-interview-150)]
 
 - video explaination[[Link](https://www.youtube.com/watch?v=pfiQ_PS1g8E&t=18s)]
 - hint: recursion on all four directions
