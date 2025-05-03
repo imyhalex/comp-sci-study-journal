@@ -161,6 +161,8 @@ class Solution:
 ```
 
 ### Combination Sum[[Link](https://neetcode.io/problems/combination-target-sum)]
+
+- hint: need a variable `total` to be passed in dfs(i, total) and initialized be 0
 ```python
 class Solution:
     def combinationSum(self, nums: List[int], target: int) -> List[List[int]]:
