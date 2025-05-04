@@ -349,3 +349,30 @@ class Solution:
                     return True
         return False
 ```
+
+### 22. Generate Parentheses[[Link](https://leetcode.com/problems/generate-parentheses/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/generate-parentheses)]
+- hint: divide the dfs into recusively do open parentheses and close parentheses
+
+```python
+class Solution:
+    def generateParenthesis(self, n: int) -> List[str]:
+        combs, curr = [], []
+
+        def dfs(opn_n, cls_n):
+            if opn_n == cls_n == n:
+                combs.append("".join(curr))
+                return
+            
+            if opn_n < n:
+                curr.append('(')
+                dfs(opn_n + 1, cls_n)
+                curr.pop()
+            if cls_n < opn_n:
+                curr.append(')')
+                dfs(opn_n, cls_n + 1)
+                curr.pop()
+        dfs(0, 0)
+        return combs 
+```
