@@ -51,5 +51,37 @@
     data stored elsewhere in RAM or on disk. An example of reading from disk, would be opening a file in your file system 
     and reading it line-by-line.
     ```
+    - All computations are done within the CPU, occurs in a matter of milliseconds
+        - Fetchs instructions from the RAM
+        - Decodes those instructions
+        - Executes the decoded instructions
+        - ___All these instructions are represented as bytes___
+    - CPU consits of a __cache__
+- __Cache:__
+    - CPU contains this memory component
+    - Most CPUs have an L1, L2, and L3 cache (L1: smallest & fastest; L3: largest & slowest)
+        - they are physical components
+        - much faster than RAM
+        - stores data on the order of KBs or tens of KBs
+    - When read operation is requested, the cache is checked before the RAM and the disk
+        - if data requested in the cache, and it is unchaged since the last time it was accessed
+            - it will fetched crom the cache, not the RAM
+    - Read/Write from cache is lot faster than RAM and disk, usually happened in nanoseconds
+    - It is up to OS to decide what gets stored in the cache
+    - Caching is an important concepte applied in many areas beyond computer architecture
+        - Web Browsers: use cache to keep track frequently accessed web pages to load them faster
+            - data might include HTML, CSS, JavaScript, and images
+            - in this case, browswer is using the disk as cache, because making internet request is a lot slower than reading from disk
+                - __Why?__
+                    - Disk access is much faster than downloading data over the internet.
+                    - So instead of fetching the same resources again from a remote server (which takes more time and bandwidth), the browser first checks if the content is already cached on the local disk.
+                    - If the cache is still valid (not outdated), it loads the content from disk, making the page appear much faster.
+- __[Moore's Law](https://en.wikipedia.org/wiki/Moore%27s_law):__
+    - What is it:
+    ```text
+    Moore's Law is an observation, which suggests that the number of transistors in a CPU double every two years. Looking at the visual below, it looks 
+    like a linear graph, but looking at the scale on the y-axis explains that it is exponential. So while the number of transistors doubles, the cost of 
+    computers tends to halve. In the recent years however, the number of transistors, and thus the speed of the computers, has begun to plateau.
+    ```  
 
-# Application Architecture
+# Application Architecture[[Link](https://neetcode.io/courses/system-design-for-beginners/1)]
