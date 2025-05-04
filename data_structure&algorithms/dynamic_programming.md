@@ -766,3 +766,66 @@ class Solution:
         
         return dp[(m, n)]
 ```
+
+### 1049. Last Stone Weight II[[Link](https://leetcode.com/problems/last-stone-weight-ii/description/)]
+- video explaination[[Link](https://neetcode.io/solutions/last-stone-weight-ii)]
+
+```python
+# memoization
+# Time Complexity: O(n * m); Space Complexity: O(n * m)
+class Solution:
+    def lastStoneWeightII(self, stones: List[int]) -> int:
+        dp = defaultdict(int) 
+
+        stone_sum = sum(stones)
+        target = ceil(stone_sum) # or (stoneSum + 1) // 2
+
+        def dfs(i, total):
+            if total >= target or i == len(stones):
+                return abs(total - (stone_sum - total))
+            if (i, total) in dp:
+                return dp[(i, total)]
+            
+            dp[(i, total)] = min(dfs(i + 1, total), dfs(i + 1, total + stones[i]))
+            return dp[(i, total)]
+        
+        return dfs(0, 0)
+
+# bottom-up dp optimized
+# Time: O(n * m); Space: O(m)
+# more neet way
+class Solution:
+    def lastStoneWeightII(self, stones: List[int]) -> int:
+        stoneSum = sum(stones)
+        target = stoneSum // 2
+        dp = [0] * (target + 1)
+
+        for stone in stones:
+            for t in range(target, stone - 1, -1):
+                dp[t] = max(dp[t], dp[t - stone] + stone)
+
+        return stoneSum - 2 * dp[target]
+
+# or
+class Solution:
+    def lastStoneWeightII(self, stones: List[int]) -> int:
+        total = sum(stones)
+        target = total // 2 
+
+        dp = [False] * (target + 1)
+        dp[0] = True
+
+        for s in stones:
+            # traverse backward to avoid 
+            for j in range(target, s - 1, -1):
+                if dp[j - s]:
+                    dp[j] = True # if j - stone is reachable, j is also reachable
+        
+        # find the largest j <= target where dp[j] is True
+        for j in range(target, -1, -1):
+            if dp[j]:
+                return total - 2 * j
+        
+        return 0
+
+```
