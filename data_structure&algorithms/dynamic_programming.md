@@ -711,7 +711,58 @@ class Solution:
 - video explaination[[Link](https://neetcode.io/solutions/ones-and-zeroes)]
 
 ```python
+# memoization
+# Time Complexity: O(n * m * N); Space Complexity: O(n * m *N)
 class Solution:
     def findMaxForm(self, strs: List[str], m: int, n: int) -> int:
+        # memoization
+        dp = {}
+
+        def dfs(i, m, n):
+            if i == len(strs):
+                return 0
+            
+            if (i, m, n) in dp:
+                return dp[(i, m, n)]
+
+            m_cnt, n_cnt = strs[i].count("0"), strs[i].count("1")
+            # include the string at index i or not include the string at index i
+            dp[(i, m, n)] = dfs(i + 1, m, n)
+            if m_cnt <= m and n_cnt <= n:
+                dp[(i, m, n)] = max(dp[(i, m, n)], 1 + dfs(i + 1, m - m_cnt, n - n_cnt))
+            return dp[(i, m, n)]
         
+        return dfs(0, m, n)
+
+
+# bottom-up dp
+# Time Complexity: O(n * m * N); Space Complexity: O(n * m * N)
+class Solution:
+    def findMaxForm(self, strs: List[str], m: int, n: int) -> int:
+        dp = defaultdict(int) 
+
+        for i in range(len(strs)):
+            s = strs[i]
+            m_cnt, n_cnt = s.count("0"), s.count("1")
+            for m in range(0, m + 1):
+                for n in range(0, n + 1):
+                    if m_cnt <= m and n_cnt <= n:
+                        dp[(i, m, n)] = max(1 + dp[(i - 1, m - m_cnt, n - n_cnt)], dp[(i - 1, m, n)])
+                    else:
+                        dp[(i, m, n)] = dp[(i - 1, m, n)]
+        return dp[(len(strs) - 1, m, n)]
+
+# bottom-up optimized
+# Time Complexity: O(n * m * N); Space Complexity: O(n * m + N)
+class Solution:
+    def findMaxForm(self, strs: List[str], m: int, n: int) -> int:
+        dp = defaultdict(int) 
+
+        for s in strs:
+            m_cnt, n_cnt = s.count("0"), s.count("1")
+            for m_i in range(m, m_cnt - 1, -1):
+                for n_j in range(n, n_cnt - 1, -1):
+                    dp[(m_i, n_j)] = max(1 + dp[(m_i - m_cnt, n_j - n_cnt)], dp[(m_i, n_j)])
+        
+        return dp[(m, n)]
 ```
