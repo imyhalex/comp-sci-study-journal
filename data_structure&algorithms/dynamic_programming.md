@@ -705,3 +705,13 @@ class Solution:
             
         return dp[target]
 ```
+
+### 474. Ones and Zeroes[[Link](https://leetcode.com/problems/ones-and-zeroes/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/ones-and-zeroes)]
+
+```python
+class Solution:
+    def findMaxForm(self, strs: List[str], m: int, n: int) -> int:
+        
+```
