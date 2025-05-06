@@ -239,3 +239,164 @@ def dp_optimized(profit, weight, capacity):
     return dp[m]
 ```
 ## Unbounded Knapsack[[Link](https://neetcode.io/courses/advanced-algorithms/19)]
+
+- Unlike 0/1 knapscak, which only allowed to include each item at most once, the unbounded knapsack has no limit on how many times we can include an item
+
+```text
+Q: Given a list of N items, and a backpack with a limited capacity, return the maximum total profit that can be contained in the backpack. 
+The i-th item's profit is profit[i] and its weight is weight[i]. Assume you can have an unlimited number of each item available.
+```
+
+### Brute Force Approach
+```python
+# Brute force Solution
+# Time: O(2^c), Space: O(c)
+# Where c is the capacity.
+
+def dfs(profit, weight, capacity):
+    return dfsHelper(0, profit, weight, capacity)
+
+def dfsHelper(i, profit, weight, capacity):
+    if i == len(profit):
+        return 0
+    
+    # skip i
+    maxProfit = dfsHelper(i + 1, profit, weight, capacity)
+
+    # include i
+    newCap = capacity - weight[i]
+    if newCap >= 0:
+        p = profit[i] + dfsHelper(i, profit, weight, newCap)
+        # compute the max
+        maxProfit = max(maxProfit, p)
+    
+    return maxProfit
+
+
+# compare to 0/1 knapsack
+# def dfs(profit, weight, capacity):
+#     return dfsHelper(0, profit, weight, capacity)
+
+# def dfsHelper(i, profit, weight, capacity):
+#     if i == len(profit):
+#         return 0
+
+#     # Skip item i
+#     maxProfit = dfsHelper(i + 1, profit, weight, capacity)
+
+#     # Include item i
+#     newCap = capacity - weight[i]
+#     if newCap >= 0:
+#         p = profit[i] + dfsHelper(i + 1, profit, weight, newCap)
+#         # Compute the max
+#         maxProfit = max(maxProfit, p)
+
+#     return maxProfit
+```
+
+### Top Down
+```python
+# Memoization Solution
+# Time: O(n * m), Space: O(n * m)
+# Where n is the number of items & m is the capacity.
+def memoization(profit, weight, capacity):
+    # A 2d array, with N rows and M + 1 columns, init with -1's
+    # This is our problem space - two-dimensional grid
+    N, M = len(profit), capacity
+    cache = [[-1] * (M + 1) for _ in range(N)]
+    return memoHelper(0, profit, weight, capacity, cache)
+
+def memoHelper(i, profit, weight, capacity, cache):
+    if i == len(profit):
+        return 0
+    if cache[i][capacity] != -1:
+        return cache[i][capacity]
+
+    # Skip item i
+    cache[i][capacity] = memoHelper(i + 1, profit, weight, capacity, cache)
+    
+    # Include item i
+    newCap = capacity - weight[i]
+    if newCap >= 0:
+        p = profit[i] + memoHelper(i, profit, weight, newCap, cache)
+        # Compute the max
+        cache[i][capacity] = max(cache[i][capacity], p)
+
+    return cache[i][capacity]
+```
+
+### Bottom Up
+```python
+# Dynamic Programming Solution
+# Time: O(n * m), Space: O(n * m)
+# Where n is the number of items & m is the capacity.
+def dp(profit, weight, capacity):
+    n, m = len(profit), capacity
+    dp = [[0] * (m + 1) for _ in range(n)]
+
+    # fill th first column and row to reduce edge cases
+    for i in range(n):
+        dp[i][0] = 0
+    
+    for c in range(m + 1):
+        if weight[0] <= c:
+            dp[0][c] = profit[0]
+        
+    for i in range(1, n):
+        for c in range(1, m + 1):
+            # either skip
+            skip = dp[i - 1][c]
+            # or include
+            include = 0
+            if c - weight[i] >= 0:
+                include = profit[i] + dp[i][c - weight[i]]
+            dp[i][c] = max(skip, include)
+    return dp[n - 1][m]
+```
+
+### Bottom Up (Optimized)
+```python
+# Memory optimized Dynamic Programming Solution
+# Time: O(n * m), Space: O(m)
+def optimizedDp(profit, weight, capacity):
+    n, m = len(profit), capacity
+    dp = [0] * (m + 1)
+
+    for c in range(m + 1):
+        if weight[0] <= c:
+            dp[c] = profit[0]
+
+    for i in range(1, n):
+        curr = [0] * (m + 1)
+        for c in range(1, m + 1):
+            skip = dp[c]
+            include = 0
+            if c - weight[i] >= 0:
+                include = profit[i] + curr[c - weight[i]]
+            curr[c] = max(include, skip)
+        dp = curr
+    return dp[m]
+
+# compare to 0/1 knapsack
+# def dp_optimized(profit, weight, capacity):
+#     n, m = len(profit), capacity
+#     dp = [0] * (m + 1)
+
+#     # fill the first row to reduce edge cases
+#     for c in range(m + 1):
+#         if weight[0] <= c:
+#             dp[c] = profit[0]
+    
+#     for i in range(1, n):
+#         curr = [0] * (m + 1)
+#         for c in range(1, m + 1):
+#             # skip
+#             skip = dp[c]
+#             # or include
+#             include = 0
+#             if c - weight[i] >= 0:
+#                 include = profit[i] + dp[c - weight[i]]
+#             curr[c] = max(skip, include)
+#         dp = curr
+#     return dp[m]
+```
