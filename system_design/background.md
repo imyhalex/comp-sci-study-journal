@@ -85,3 +85,57 @@
     ```  
 
 # Application Architecture[[Link](https://neetcode.io/courses/system-design-for-beginners/1)]
+![application architecture high-level](../imgs/sharpen=1.avif)
+- __A developer's perspective__
+    - Developer write code that is deployed to a server
+    - Server
+        - A computer that handle requests from another computer
+        - This server also requires persistent storage to store the application data
+        - A server may have built-in storage, but has limitaion in size
+        - Server may talk to an external storage system(database, cloud etc)
+            - Storage may not be part of the same server, and is instead connected through a network
+- __A user's pserspective__
+    - Somone makes a request from the server(ususally through web broswer)
+    - If a user wants to use front-end feature, server will respond with the necessary JS/HTML/CSS code, compiled to display what the user requested
+    - When a lots of user making request
+        - Need to scale our server
+- __Scaling Server__
+    - Vertical Scaling: upgrading components within the same PC
+        - Add more RAM
+        - Upgrad CPU with more cores and higher clocking speed
+        - Limitation: every computer has a limitaion in terms of upgrading
+        - Sufficient and easier to implement for simple application
+    - Horizontal Scaling: upgrading by combining multiple PC
+        - Can have multiple server running the code
+        - Distribute the user requests among these servers
+        - Ensure:
+            - Speed of each server remains intact
+            - If one server goes down, we can direct traffic to other servers
+        - Requires much more engineering effort
+    - Large system prefer horizontal scaling
+    - Multi-server determines which requests go to which server by using `load balancer`
+        - A load balancer will evenly distribute the incoming requests across a group of servers
+    - Important: servers don't exist in isolation,
+        - It is higly likely that servers are interacting with external servers through APIs
+        - For instance: neetcode.io website interact with other services like Stripe through an API
+- __Logging and Metrics__
+    - Give the dev a log of all the activity that happend
+    - Can be written to the same server, but for better reliability they are commonly written to another external server
+    - Gives dev insight into how request went
+        - if error occur
+        - what happend before a server crashed
+        - but logs don't provide complete picture
+    - If RAM has become the bottleneck of our server or CPU resources are restricting the request being handled efficienctly
+        - require `metric` service
+            - collect data from different resources within our server environment such as:
+                - CPU usage
+                - network traffic...(etc)
+            - allow dev to gain insight into server's behavior and identify potential bottleneck
+- __Alert__
+    - Explain:
+    ```text
+    As developers, we wouldn't want to keep checking metrics to see if any unexpected behavior exhibits itself. 
+    This would be like checking your phone every 5 minutes for a notification. It is more ideal to receive a push notification. 
+    We can program alerts so that whenever a certain metric fails to meet the target, the developers receive a push notification.
+    For example, if 100% of the user requests receive successful responses, we could set an alert to be notified if this metric dips under 95%.
+    ```
