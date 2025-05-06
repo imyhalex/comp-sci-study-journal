@@ -1,4 +1,4 @@
-# Computer Architecture[[Link](https://neetcode.io/courses/system-design-for-beginners/1)]
+# Computer Architecture[[Link](https://neetcode.io/courses/system-design-for-beginners/0)]
 
 - __Disk:__
     - Store all data for computer
@@ -139,3 +139,87 @@
     We can program alerts so that whenever a certain metric fails to meet the target, the developers receive a push notification.
     For example, if 100% of the user requests receive successful responses, we could set an alert to be notified if this metric dips under 95%.
     ```
+
+# Design Requirements[[Link](https://neetcode.io/courses/system-design-for-beginners/2)]
+
+- __Thinking in System Design__
+    - `Moving Data`
+        ```text
+        As we discussed earlier in the chapter on computer architecture, data is moved between the disk, RAM, and CPU. However, when designing large 
+        systems, our focus shifts to moving data between different clients and servers, which may be geographically dispersed across the world. This is 
+        significantly more challenging compared to local data movement.
+        ``` 
+    - `Storing Data`
+        - Q: how do we store data? Database? Blob Store? File Sytem? Distributed System?
+            ```text
+            This might remind you of picking between different data structures to find the optimal solution. For example, choosing an array over a BST to 
+            store data doesn't mean that an array is better than a BST in all scenarios, but rather it depends on the use case. By the same token, we have 
+            to choose how we want to store data and which way will be the most efficient, given the scenario.
+            ```
+    - `Transforming Data`
+        ```text
+        Lastly, we want to transform data. It wouldn't be very fun if all we were doing was moving and storing data. If we were given a bunch of server 
+        logs, one way to transform this data would be to output the % of successful requests vs % of failed requests. This is sometimes handled by a 
+        monitoring service. Perhaps, we are given some medical records, and we want to filter the patients by age. These are just two basic examples, 
+        and there are countless ways to transform data. Regardless of how complex or how simple the process, the fundamental question is: what is the 
+        most efficient way to transform the given data?
+        ```
+    - Note:
+        - Picked bad algo or changing bad code won't be challenging
+        - But bad design in the application architecture can be very costly
+            - choose wrong DB will have more severe consequences
+                - need to migrate data
+                - rewrite portions of the application
+- __What is a good design?__
+    - Q: what constitues a good design? evaluate:
+        - a number of factors
+        - performance measures
+        - certain metrics
+        - ___in essence:___ need to do compare and contrast and identify trad-offs by evaluating these factors
+    - `Availability`
+        - Heart of an effective system
+        - Refers to the percentage of time in system is available, as in, up and running for a given period of time
+            - Formula: availability = uptime / uptime + downtime
+                - downtime can be planned or unplanned
+                    - planned: software update, verification, back-up etc.
+                    - unplanned: hardware/software failure, natural disaster
+                    - takeaway: hard to predict unplanned downtime but chances of occuring can be minimized
+                - Example:
+                    ```text
+                    Using the equation above, let's say that we had an uptime of 23 hours out of 24 hours. This would result in a total availability of 
+                    96%. From a system design and a business perspective, this is rather poor, because we are losing money and users for 1 hour a day.
+                    ```
+                    - Ideally: 100% availability, but it is not possible due to unplanned downtime
+                        - companies will aim for at least 99% availability, but:
+                            - still poor in performance
+                            - calculate: (1 - 99%) * 365 days = 3.65 days shut down
+                                - will loose lots of money for company like amazon
+                            - if reduce downtime by factor of 10
+                                - take uptime to 99.9% and downtime to 0.1%, which is a big jump
+                    - A good target for companies to have 99.999%, which is 5 min downtime in 365 days
+                        - hard to achive but it is important for mission critical system
+        - Measure of availability is used to define `SLO`(service level objective) and `SLA`(service level aggrement)
+            - SLA: An aggrement a company makes with their clients or users to provide a certain metric of uptime, responsiveness, and responsibilities.
+            - SLO: Refers to an objective your team must hit to meet the SLA requirements.
+            - For example: AWS's monthly SLA is 99.99% and if not met, they refund a percentage of service credit.
+            - And SLO is an aggrement within an SLA
+- __Reliability, Fault Tolerance, and Redundancy__
+    - `Reliability`:
+        - Referes to the system's ability to perform its intended fuctions without failure or errors over a specific period of time.
+        - When discussing reliability of a system, we are talking about the probability that the server won't fail
+            - if thousands of users are making requests, or if there are DDoS(Distributed Denial-of-Service) attacks, how easily our server go down
+                - this brings to fault tolerance
+    - `Fault Tolerance`:
+        - If one of our system has a fault, it fails, and we have another server, it means our server is somewhat fault tolerant
+        - Refers to how well the system can detect and heal itself from a probelm, some actions like
+            - disable a function
+            - revert to a different mode
+            - switch to a different server...(etc.)
+        - To let system be fault tolerance, we can have a redundant server (Redundancy)
+    - `Redundancy`:
+        - Refers to something that is unessential in English
+        - Is provided by backup server which essentially "shadow" the contents of a server
+            - we don't need this server, but it only comes into play if primary server fails
+            - only have this redundancy, we are able to have Fault Tolerance
+            - second server a simply backup, what if we had two servers that were both active? This would be called `active-active redundancy`
+    

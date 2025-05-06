@@ -400,3 +400,5 @@ def optimizedDp(profit, weight, capacity):
 #         dp = curr
 #     return dp[m]
 ```
+
+## Longest Common Sequence[[Link](https://neetcode.io/courses/advanced-algorithms/20)]
