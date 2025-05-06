@@ -53,25 +53,6 @@ class Solution:
         return dp[1]
 ```
 
-### 322. *Coin Change[[Link](https://leetcode.com/problems/coin-change/description/?envType=study-plan-v2&envId=top-interview-150)]
-
-- video explaination[[Link](https://neetcode.io/solutions/coin-change)]
-- unbounded knapsack(save for learning the topic later)
-```python
-# Time Complexity: O(amount * len(coin)); Space Complexity: O(amount)
-class Solution:
-    def coinChange(self, coins: List[int], amount: int) -> int:
-        dp = [amount + 1] * (amount + 1) # 'amount + 1' in [] is just to set default value
-        dp[0] = 0 # base case
-
-        for a in range(1, amount + 1):
-            for c in coins:
-                if a - c >= 0:
-                    dp[a] = min(dp[a], 1 + dp[a - c])
-
-        return dp[amount] if dp[amount] != amount + 1 else -1
-```
-
 ### 139. Word Break[[Link](https://leetcode.com/problems/word-break/description/?envType=study-plan-v2&envId=top-interview-150)]
 <!-- ```python
 # BFS
@@ -607,6 +588,24 @@ class Solution:
 
 ```
 
+### 322. *Coin Change[[Link](https://leetcode.com/problems/coin-change/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/solutions/coin-change)]
+- unbounded knapsack(save for learning the topic later)
+```python
+# Time Complexity: O(amount * len(coin)); Space Complexity: O(amount)
+class Solution:
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        dp = [amount + 1] * (amount + 1) # 'amount + 1' in [] is just to set default value
+        dp[0] = 0 # base case
+
+        for a in range(1, amount + 1):
+            for c in coins:
+                if a - c >= 0:
+                    dp[a] = min(dp[a], 1 + dp[a - c])
+
+        return dp[amount] if dp[amount] != amount + 1 else -1
+```
 
 ### 983. Minimum Cost For Tickets[[Link](https://leetcode.com/problems/minimum-cost-for-tickets/description/)]
 
@@ -658,4 +657,29 @@ class Solution:
                     j += 1
                 dp[i] = min(dp[i], cost + dp[j])
         return dp[0]
+```
+
+### 518. Coin Change II[[Link](https://leetcode.com/problems/coin-change-ii/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/coin-change-ii)]
+
+```python
+class Solution:
+    def change(self, amount: int, coins: List[int]) -> int:
+        n, m = len(coins), amount
+        dp = [0] * (m + 1)
+        # base case: set only one way to sum up to zero: choose not coin at all is also count as one way
+        dp[0] = 1
+
+        for i in range(n):
+            curr = [0] * (m + 1)
+            curr[0] = 1
+            for c in range(1, m + 1):
+                not_include = dp[c]
+                include = 0
+                if c - coins[i] >= 0:
+                    include = curr[c - coins[i]]
+                curr[c] = not_include + include
+            dp = curr
+        return dp[m]
 ```
