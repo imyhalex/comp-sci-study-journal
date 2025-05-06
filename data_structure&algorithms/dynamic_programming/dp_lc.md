@@ -606,3 +606,56 @@ class Solution:
         return 0
 
 ```
+
+
+### 983. Minimum Cost For Tickets[[Link](https://leetcode.com/problems/minimum-cost-for-tickets/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/minimum-cost-for-tickets)]
+
+__Top Down__
+```python
+class Solution:
+    def mincostTickets(self, days: List[int], costs: List[int]) -> int:
+        """
+        c = {
+            1: cost[0],
+            7: cost[1],
+            30: cost[2]
+        }
+        """
+        dp = {} 
+
+        def dfs(i):
+            if i == len(days):
+                return 0
+            
+            if i in dp:
+                return dp[i]
+
+            dp[i] = float("inf")
+            j = i
+            for cost, duration in zip(costs, [1, 7, 30]):
+                while j < len(days) and days[j] < days[i] + duration:
+                    j += 1
+                dp[i] = min(dp[i], cost + dfs(j))
+            
+            return dp[i]
+        
+        return dfs(0)
+```
+
+__Bottom Up__
+```python
+class Solution:
+    def mincostTickets(self, days: List[int], costs: List[int]) -> int:
+        dp = [0] * (len(days) + 1)
+
+        for i in range(len(days) - 1, -1, -1):
+            j = i
+            dp[i] = float('inf')
+            for cost, duration in zip(costs, [1, 7, 30]):
+                while j < len(days) and days[j] < days[i] + duration:
+                    j += 1
+                dp[i] = min(dp[i], cost + dp[j])
+        return dp[0]
+```
