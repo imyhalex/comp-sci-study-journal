@@ -238,7 +238,7 @@
     - Refers to the delay between the client making the request and the server responding to that request
     - Diff between Throughput and Latency:
         - Throughput refers to how many requests can be sent oer a network per second
-        - Calculation:
+        - Calculation: <br/>
          ![viz latency](../imgs/sharpen=1%20(1).avif)
         - Latency refers to the amount of time it takes for each individual request to be completed
         - Latency is not exclusive to network
