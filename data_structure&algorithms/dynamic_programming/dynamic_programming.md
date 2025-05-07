@@ -402,3 +402,5 @@ def optimizedDp(profit, weight, capacity):
 ```
 
 ## Longest Common Sequence[[Link](https://neetcode.io/courses/advanced-algorithms/20)]
+
+- Q: Given two stirng s1 and s2, find the length of the longest common subsequence between two strings
