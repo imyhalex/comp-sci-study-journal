@@ -222,4 +222,26 @@
             - we don't need this server, but it only comes into play if primary server fails
             - only have this redundancy, we are able to have Fault Tolerance
             - second server a simply backup, what if we had two servers that were both active? This would be called `active-active redundancy`
+        - Note: in most cases, by redundancy we mean active-active redundancy
+- __Throughput__
+    - Refers to the amount of data or operations we can handle over some period of time
+    - Throuput of a client making request to a server would be measured through the `number of requests/second`
+    - If want to improve throughput, perform:
+        - vertical scaling
+        - horizontal scaling
+    - Another measure of throughput is `queries/second`, which measure the number of requests made by user to a server or DB
+        - this make more sense when discussing design in terms of users
+    - Also has measure of `bytes/second`, refering the maximum amount of data that can be sent over a network at any given time
+        - more sense when having a data pipeline where are required to process given data in a different format
+        - the data isn't related to a single user
+- __Latency__
+    - Refers to the delay between the client making the request and the server responding to that request
+    - Diff between Throughput and Latency:
+        - Throughput refers to how many requests can be sent oer a network per second
+        - Calculation:
+         ![viz latency](../imgs/sharpen=1%20(1).avif)
+        - Latency refers to the amount of time it takes for each individual request to be completed
+        - Latency is not exclusive to network
+            - even exists within a computer's internal components such as RAM and each cache making requests from the CPU
+
     
