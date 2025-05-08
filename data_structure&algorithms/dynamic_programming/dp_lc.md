@@ -682,3 +682,120 @@ class Solution:
             dp = curr
         return dp[m]
 ```
+
+### 115. Distinct Subsequences[[Link](https://leetcode.com/problems/distinct-subsequences/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/count-subsequences)]
+
+__Top Down__
+```python
+# Time: O(m * n); Space: O(m * n)
+class Solution:
+    def numDistinct(self, s: str, t: str) -> int:
+        cache = [[-1] * len(t) for _ in range(len(s))]
+
+        def dfs(i1, i2):
+            if i2 == len(t):
+                return 1
+            
+            if i1 == len(s):
+                return 0
+
+            if cache[i1][i2] != -1:
+                return cache[i1][i2]
+            
+            if s[i1] == t[i2]:
+                cache[i1][i2] = dfs(i1 + 1, i2 + 1) + dfs(i1 + 1, i2)
+            else:
+                cache[i1][i2] = dfs(i1 + 1, i2)
+            
+            return cache[i1][i2]
+        
+        return dfs(0, 0)
+```
+
+__Bottom Up Optimized__
+```python
+# Time: O(m * n); Space: O(m)
+class Solution:
+    def numDistinct(self, s: str, t: str) -> int:
+        m, n = len(s), len(t)
+        dp = [0] * (n + 1)
+        dp[n] = 1 # base case: one way to match empty t
+
+        for i in range(m - 1, -1, -1):
+            curr = dp[:] # copy whole dp state to curr, or use dp.copy()
+            for j in range(n - 1, -1, -1):
+                if s[i] == t[j]:
+                    curr[j] = dp[j] + dp[j + 1]
+                else:
+                    curr[j] = dp[j]
+            dp = curr
+        
+        return dp[0]
+```
+
+### 72. Edit Distance[[Link](https://leetcode.com/problems/edit-distance/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/edit-distance)]
+
+__Top Down__
+```python
+"""
+Base Cases:
+If i == len(word1): we have to insert all remaining word2[j:] → cost = len(word2) - j
+
+If j == len(word2): we have to delete all remaining word1[i:] → cost = len(word1) - i
+"""
+
+class Solution:
+    def minDistance(self, word1: str, word2: str) -> int:
+        m, n = len(word1), len(word2)
+        cache = [[-1] * n for _ in range(m)]
+
+        def dfs(i, j):
+            if i == m:
+                return n - j
+            
+            if j == n:
+                return m - i
+            
+            if cache[i][j] != -1:
+                return cache[i][j] 
+            
+            # when character are equal, no operation, move pointer
+            if word1[i] == word2[j]:
+                cache[i][j] = dfs(i + 1, j + 1)
+            # when diff, do operationm move pointer accordingly, and find min move
+            else:
+                insert = 1 + dfs(i, j + 1)
+                delete = 1 + dfs(i + 1, j)
+                replace = 1 + dfs(i + 1, j + 1)
+                cache[i][j] = min(insert, delete, replace)
+            return cache[i][j]
+            
+        return dfs(0, 0)
+```
+
+__Bottom Up Optimzied__
+```python
+class Solution:
+    def minDistance(self, word1: str, word2: str) -> int:
+        m, n = len(word1), len(word2)
+        dp = [0] * (n + 1)
+
+        for j in range(n + 1):
+            dp[j] = n - j
+
+        for i in range(m - 1, -1, -1):
+            curr = [0] * (n + 1)
+            curr[n] = m - i
+            for j in range(n - 1, -1, -1):
+                if word1[i] == word2[j]:
+                    curr[j] = dp[j + 1]
+                else:
+                    curr[j] = 1 + min(dp[j + 1], curr[j + 1], dp[j])
+            dp = curr[:]
+        
+        return dp[0]
+```
