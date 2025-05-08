@@ -800,7 +800,7 @@ class Solution:
         return dp[0]
 ```
 
-### 97. Interleaving String[[Link](https://leetcode.com/problems/interleaving-string/description/?envType=study-plan-v2&envId=top-interview-150)]
+### *97. Interleaving String[[Link](https://leetcode.com/problems/interleaving-string/description/?envType=study-plan-v2&envId=top-interview-150)]
 
 - video explaination[[Link](https://neetcode.io/problems/interleaving-string)]
 
@@ -853,4 +853,63 @@ class Solution:
                     dp[i][j] = True
         
         return dp[i][j]
+```
+
+### 1092. Shortest Common Supersequence[[Link](https://leetcode.com/problems/shortest-common-supersequence/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/shortest-common-supersequence)]
+- have to be solved in bottom up solution
+
+```python
+class Solution:
+    def shortestCommonSupersequence(self, str1: str, str2: str) -> str:
+        cache = {}
+
+        def dfs(i, j):
+            if i == len(str1):
+                return str2[j:]
+            
+            if j == len(str2):
+                return str1[i:]
+            
+            if (i, j) in cache:
+                return cache[(i, j)]
+            
+            if str1[i] == str2[j]:
+                cache[(i, j)] = str1[i] + dfs(i + 1, j + 1)
+            else:
+                # Branch
+                res1 = str1[i] + dfs(i + 1, j)
+                res2 = str2[j] + dfs(i, j + 1)
+                cache[(i, j)] = res1 if len(res1) < len(res2) else res2
+                
+            return cache[(i, j)]
+        
+        return dfs(0, 0)
+```
+
+```python
+class Solution:
+    def shortestCommonSupersequence(self, str1: str, str2: str) -> str:
+        m, n = len(str1), len(str2)
+        dp = [""] * (n + 1)
+
+
+        for j in range(n + 1):
+            dp[j] = str2[j:]
+        
+        for i in range(m - 1, -1, -1):
+            curr = [""] * (n + 1)
+            curr[n] = str1[i:]
+            for j in range(n - 1, -1, -1):
+                if str1[i] == str2[j]:
+                    curr[j] = str1[i] + dp[j + 1]
+                else:
+                    res1 = str1[i] + dp[j]
+                    res2 = str2[j] + curr[j + 1]
+                    curr[j] = res1 if len(res1) < len(res2) else res2
+            
+            dp = curr
+        
+        return dp[0]
 ```
