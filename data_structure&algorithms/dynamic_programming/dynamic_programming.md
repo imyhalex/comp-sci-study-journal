@@ -437,10 +437,10 @@ def memoHelper(s1, s2, i1, i2, cache):
     if cache[i1][i2] != -1:
         return cache[i1][i2]
     
-    if s1[i1] == s2.[i2]:
+    if s1[i1] == s2[i2]:
         cache[i1][i2] 1 + dfsHelper(s1, s2, i1 + 1, i2 + 1)
     else:
-       cache[i1][i2] = max(dfsHelper(s1, s2, i1 + 1, i2), dfsHelper(s1, s2, i1, i2 + 1))
+        cache[i1][i2] = max(dfsHelper(s1, s2, i1 + 1, i2), dfsHelper(s1, s2, i1, i2 + 1))
     
     return cache[i1][i2]
 ```
