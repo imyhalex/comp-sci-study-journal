@@ -404,3 +404,76 @@ def optimizedDp(profit, weight, capacity):
 ## Longest Common Sequence[[Link](https://neetcode.io/courses/advanced-algorithms/20)]
 
 - Q: Given two stirng s1 and s2, find the length of the longest common subsequence between two strings
+
+### Brute Force
+```python
+# Time: O(2^(n + m)), Space: O(n + m)
+def dfs(s1, s2):
+    return dfsHelper(s1, s2, 0, 0)
+
+def dfsHelper(s1, s2. i1, i2):
+    if i1 == len(s1) or i2 == len(s2):
+        return 0
+
+    if s1[i1] == s2.[i2]:
+        return 1 + dfsHelper(s1, s2, i1 + 1, i2 + 1)
+    else:
+        return max(dfsHelper(s1, s2, i1 + 1, i2), dfsHelper(s1, s2, i1, i2 + 1))
+```
+
+
+### Top Down
+```python
+# Time: O(n * m), Space: O(n + m)
+def memoization(s1, s2):
+    n, m = len(s1), len(s2)
+    cache = [[-1] * m  for _ in range(n)]
+    return memoHelper(s1, s2, 0, 0, cache)
+
+def memoHelper(s1, s2, i1, i2, cache):
+    if i1 == len(s1) or i2 == len(s2):
+        return 0
+    
+    if cache[i1][i2] != -1:
+        return cache[i1][i2]
+    
+    if s1[i1] == s2.[i2]:
+        cache[i1][i2] 1 + dfsHelper(s1, s2, i1 + 1, i2 + 1)
+    else:
+       cache[i1][i2] = max(dfsHelper(s1, s2, i1 + 1, i2), dfsHelper(s1, s2, i1, i2 + 1))
+    
+    return cache[i1][i2]
+```
+
+### Bottom Up
+```python
+# Time: O(n * m), Space: O(n + m)
+def dp(s1, s2):
+    n, m = len(s1), len(s2)
+    dp = [[0] * (m+1) for _ in range(n+1)]
+
+    for i in range(n):
+        for j in range(m):
+            if s1[i] == s2[j]:
+                dp[i+1][j+1] = 1 + dp[i][j]
+            else:
+                dp[i+1][j+1] = max(dp[i][j+1], dp[i+1][j])
+    return dp[n][m]
+```
+
+### Bottom Up (Optimized)
+```python
+def dp(s1, s2):
+    n, m = len(s1), len(s2)
+    dp = [0] * (m + 1)
+
+    for i in range(n):
+        curr = [0] * (m + 1)
+        for j in range(m):
+            if s1[i] == s2[j]:
+                curr[j + 1] = 1 + dp[j]
+            else:
+                curr[j + 1] = max(dp[j + 1], curr[j])
+        dp = curr
+    return dp[m]
+```
