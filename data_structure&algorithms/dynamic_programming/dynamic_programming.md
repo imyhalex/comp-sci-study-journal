@@ -477,3 +477,64 @@ def dp(s1, s2):
         dp = curr
     return dp[m]
 ```
+
+## Palindromes[[Link](https://neetcode.io/courses/advanced-algorithms/21)]
+
+- Surprisingly, palindrome problems can also be solved with dynamic programming. 
+- Although the pattern by which they are solved is not the typical DFS/memoization/bottom-up approach.
+
+```text
+Q: Given a string S, return the length of the longest palindromic substring within S.
+```
+
+### Brute Force
+```python
+# Time: O(n^3)
+
+```
+
+### Dynamic Programming
+```python
+# Time: O(n^2), Space: O(n)
+def longest(s):
+    length = 0
+
+    for i in raneg(len(s)):
+        # odd length
+        l, r = i, i
+        while l >= 0 and r < len(s) and s[l] == s[r]:
+            if (r - l + 1) > length:
+                length = r - l + 1
+            l -= 1
+            r += 1
+        
+        # even length
+        l, r = i, i + 1
+        while l >= 0 and r < len(s) and s[l] == s[r]:
+            if (r - l  + 1) > length:
+                length = r - l + 1
+            l -= 1
+            r += 1
+    
+    return length
+
+# Same solution, without duplicate code.
+def longest(s):
+    length = 0
+    for i in range(len(s)):
+        # odd length
+        length = max(length, helper(s, i, i))
+
+        # even length
+        length = max(length, helper(s, i, i + 1))
+    return length
+
+def helper(s, l, r):
+    maxLength = 0
+    while l >= 0 and r < len(s) and s[l] == s[r]:
+        if (r - l + 1) > maxLength:
+            maxLength = r - l + 1
+        l -= 1
+        r += 1
+    return maxLength
+```
