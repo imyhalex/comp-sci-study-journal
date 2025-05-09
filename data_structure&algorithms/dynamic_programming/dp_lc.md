@@ -665,22 +665,21 @@ class Solution:
 ```python
 class Solution:
     def change(self, amount: int, coins: List[int]) -> int:
-        n, m = len(coins), amount
-        dp = [0] * (m + 1)
+        m, n = len(coins), amount
+        dp = [0] * (n + 1)
         # base case: set only one way to sum up to zero: choose not coin at all is also count as one way
         dp[0] = 1
-
-        for i in range(n):
-            curr = [0] * (m + 1)
+        for i in range(m):
+            curr = [0] * (n + 1)
             curr[0] = 1
-            for c in range(1, m + 1):
-                not_include = dp[c]
-                include = 0
-                if c - coins[i] >= 0:
-                    include = curr[c - coins[i]]
-                curr[c] = not_include + include
+            for j in range(1, n + 1):
+                not_pick = dp[j]
+                pick = curr[j - coins[i]] if j - coins[i] >= 0 else 0
+                curr[j] = pick + not_pick
+
             dp = curr
-        return dp[m]
+        return dp[n]
+        
 ```
 
 ### 115. Distinct Subsequences[[Link](https://leetcode.com/problems/distinct-subsequences/description/)]
