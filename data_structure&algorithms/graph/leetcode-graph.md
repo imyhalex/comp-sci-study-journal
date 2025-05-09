@@ -170,13 +170,13 @@ class Solution:
                 # view current r, c as [0, 0]
                 neighbors = [[1, 0], [-1, 0], [0, 1], [0, -1]] # this is bascially directions
                 for dr, dc in neighbors:
-                    if (r + dr >= 0 and c + dc >= 0 and 
-                        r + dr < rows and c + dc < cols and
-                        grid[r + dr][c + dc] == 1
-                    ):
-                        grid[r + dr][c + dc] = 2
-                        q.append((r + dr, c + dc))
-                        fresh -= 1
+                    if (r + dr < 0 or c + dc < 0 or 
+                        r + dr == rows or c + dc == cols or
+                        grid[r + dr][c + dc] != 1):
+                        continue
+                    grid[r + dr][c + dc] = 2
+                    q.append((r + dr, c + dc))
+                    fresh -= 1
             time += 1
         
         return -1 if fresh != 0 else time
