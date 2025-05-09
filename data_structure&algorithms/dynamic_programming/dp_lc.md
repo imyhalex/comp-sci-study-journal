@@ -939,3 +939,52 @@ class Solution:
             res = p2 if len(p2) > len(res) else res
         return res
 ```
+
+### 647. Palindromic Substrings[[Link](https://leetcode.com/problems/palindromic-substrings/description/)]
+
+```python
+class Solution:
+    def countSubstrings(self, s: str) -> int:
+        
+        def helper(s, l, r):
+            count = 0 
+            while l >= 0 and r < len(s) and s[l] == s[r]:
+                count += 1
+                l -= 1
+                r += 1
+            return count
+        
+        res = 0
+        for i in range(len(s)):
+            res += helper(s, i, i)
+            res += helper(s, i, i + 1)
+        
+        return res
+```
+
+### 516. Longest Palindromic Subsequence[[Link](https://leetcode.com/problems/longest-palindromic-subsequence/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/longest-palindromic-subsequence)]
+- trick: pass s into lcs algo in s and revered s
+
+```python
+class Solution:
+    def longestPalindromeSubseq(self, s: str) -> int:
+
+        def LCS(s1, s2):
+            m, n = len(s1), len(s2)
+            dp = [0] * (n + 1)
+
+            for i in range(m - 1, -1, -1):
+                curr = [0] * (n + 1)
+                for j in range(n - 1, -1, -1):
+                    if s1[i] == s2[j]:
+                        curr[j] = 1 + dp[j + 1]
+                    else:
+                        curr[j] = max(dp[j], curr[j + 1])
+                dp = curr
+            
+            return dp[0]
+        
+        return LCS(s, s[::-1])
+```
