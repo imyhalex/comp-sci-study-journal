@@ -99,7 +99,6 @@ __Difference Between Auxiliary Space and Space Complexity__
 - Searching in Graph: search an entity in the graph
 - Traversal of Graph: traversing all nodes in the graph
 
-
 ### Adding & Removing Edges Implementation (Adjacency Matrix)
 ```python
 class Graph:
@@ -243,12 +242,27 @@ g.display()
 
 ## Pros & Cons of Graph
 - __Pros:__
-    - Graph Data Structure used to represent a wide range of relationships as we do not have any restrictions like previous data structures (Tree cannot have loops and have to be hierarchical. Arrays, Linked List, etc are linear)
+    - Graph Data Structure used to represent a wide range of relationships as we do not have any restrictions like previous data structures (Tree cannot 
+    have loops and have to be hierarchical. Arrays, Linked List, etc are linear)
     - They can be used to model and solve a wide range of problems, including pathfinding, data clustering, network analysis, and machine learning.
-    - Any real world problem where we certain set of items and relations between them can be easily modeled as a graph and a lot of standard graph algorithms like BFS, DFS, Spanning Tree, Shortest Path, Topological Sorting and Strongly Connected
+    - Any real world problem where we certain set of items and relations between them can be easily modeled as a graph and a lot of standard graph 
+    algorithms like BFS, DFS, Spanning Tree, Shortest Path, Topological Sorting and Strongly Connected
     - Graph Data Structure can be used to represent complex data structures in a simple and intuitive way, making them easier to understand and analyze.
 - __Cons:__
-    - Graph Data Structure can be complex and difficult to understand, especially for people who are not familiar with graph theory or related algorithms.
+    - Graph Data Structure can be complex and difficult to understand, especially for people who are not familiar with graph theory or related 
+    algorithms.
     - Creating and manipulating graphs can be computationally expensive, especially for very large or complex graphs.
     - Graph algorithms can be difficult to design and implement correctly, and can be prone to bugs and errors.
-    - Graph Data Structure can be difficult to visualize and analyze, especially for very large or complex graphs, which can make it challenging to extract meaningful insights from the data.
+    - Graph Data Structure can be difficult to visualize and analyze, especially for very large or complex graphs, which can make it challenging to 
+    extract meaningful insights from the data.
+
+------
+## Intro to Graphs[[Link](https://neetcode.io/courses/dsa-for-beginners/28)]
+- Adjacency Matrix:
+    - The dimension of the rows and cols are vertexs
+        - the matrix has to be square
+        - 0 mean there is no edge between v1 and v2
+        - 1 mean there is an edge between v1 and v2
+- Adjacency List (hash map)
+    - key: vertex
+    - value (list): neighbors
