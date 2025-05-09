@@ -266,3 +266,9 @@ g.display()
 - Adjacency List (hash map)
     - key: vertex
     - value (list): neighbors
+
+## Matrix DFS[[Linnk](https://neetcode.io/courses/dsa-for-beginners/29)]
+
+```text
+
+```
