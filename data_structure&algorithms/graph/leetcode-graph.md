@@ -1,60 +1,12 @@
 # Graph in LC
 
 ## 200. Number of Islands[[Link](https://leetcode.com/problems/number-of-islands/description/?envType=study-plan-v2&envId=top-interview-150)]
-
-```text
-Given an m x n 2D binary grid grid which represents a map of '1's (land) and '0's (water), return the number of islands.
-
-An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are 
-all surrounded by water.
- 
-Example 1:
-Input: grid = [
-  ["1","1","1","1","0"],
-  ["1","1","0","1","0"],
-  ["1","1","0","0","0"],
-  ["0","0","0","0","0"]
-]
-Output: 1
-
-Example 2:
-Input: grid = [
-  ["1","1","0","0","0"],
-  ["1","1","0","0","0"],
-  ["0","0","1","0","0"],
-  ["0","0","0","1","1"]
-]
-
-Explianition:
-1  1  0  0  0
-1  1  0  0  0
-0  0  1  0  0
-0  0  0  1  1
-
-Now, let's identify the islands:
-
-Island #1 (Top-left corner):
-    The "1"s at positions (0,0), (0,1), (1,0), (1,1) are all connected.
-    These form one island.  
-    Island #2 (Middle of the grid):
-
-The "1" at (2,2) is isolated, meaning it has no adjacent "1" neighbors.
-    This forms a second island.
-    Island #3 (Bottom-right corner):
-
-The "1"s at (3,3), (3,4) are connected.
-    These form a third island.
-
-Output: 3
-```
-
 - __Concepts:__
     - An __island__ is a connected component of "1" cells, meaning a group of "1"s that are connected through their neighbors (up, down, left, or right). 
     - A "1" that is completely isolated (i.e., has only "0" neighbors) is still an island.
 
+- video explaination[[Link](https://neetcode.io/problems/count-number-of-islands)]
 
-
-__Answer__
 ```python
 # in DFS
 from typing import List
@@ -88,44 +40,146 @@ class Solution:
                     dfs(r, c)
 
         return islands
-```
-- Explaination[[Link](https://www.youtube.com/watch?v=HpinqiqiXUQ)]
-```python
-# BFS
-from typing import List
-from collections import deque
 
+# or
 class Solution:
     def numIslands(self, grid: List[List[str]]) -> int:
         if not grid:
             return 0
         
-        islands = 0
-        visited = set()
         rows, cols = len(grid), len(grid[0])
+        visited = set() 
 
-        def bfs(r, c):
-            q = deque()
+        def dfs(r, c):
+            if (r < 0 or c < 0 or r == rows or c == cols or
+                (r, c) in visited or grid[r][c] == '0'):
+                return
+            
             visited.add((r, c))
-            q.append((r, c))
+            dfs(r + 1, c) 
+            dfs(r - 1, c)  
+            dfs(r, c + 1)  
+            dfs(r, c - 1)
 
-            while q:
-                row, col = q.popleft()
-                directions = [[1, 0], [-1, 0], [0, 1], [0, -1]]
-
-                for dr, dc in directions:
-                    r, c = row + dr, col + dc
-                    if 0 <= r < rows and 0 <= c < cols and grid[r][c] == '1' and (r, c) not in visited:
-                        q.append((r, c))
-                        visited.add((r, c))
-
+        count = 0
         for r in range(rows):
             for c in range(cols):
                 if grid[r][c] == '1' and (r, c) not in visited:
-                    islands += 1
-                    bfs(r, c)
+                    dfs(r, c)
+                    count += 1
+        return count
+```
+
+## 695. Max Area of Island[[Link](https://leetcode.com/problems/max-area-of-island/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/max-area-of-island)]
+
+```python
+class Solution:
+    def maxAreaOfIsland(self, grid: List[List[int]]) -> int:
+        rows, cols = len(grid), len(grid[0])
+        visited = set()  
+
+        def dfs(r, c):
+            if (r < 0 or c < 0 or r == rows or c == cols or
+                (r, c) in visited or grid[r][c] == 0):
+                return 0 # this cover all base case, also include if all grid zero, return 0
+            
+            visited.add((r, c))
+            count = 1 # so we can set count = 1 with no problem
+            count += dfs(r + 1, c)
+            count += dfs(r - 1, c)
+            count += dfs(r, c + 1)
+            count += dfs(r, c - 1)
+            return count
+
+        max_count = 0
+        for r in range(rows):
+            for c in range(cols):
+                if grid[r][c] == 1 and (r, c) not in visited:
+                    count = dfs(r, c)
+                    max_count = max(max_count, count)
         
-        return islands
+        return max_count
+```
+
+## 1091. Shortest Path in Binary Matrix[[Link](https://leetcode.com/problems/shortest-path-in-binary-matrix/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/shortest-path-in-binary-matrix)]
+
+```python
+class Solution:
+    def shortestPathBinaryMatrix(self, grid: List[List[int]]) -> int:
+        rows, cols = len(grid), len(grid[0])
+        if grid[0][0] != 0 or grid[rows - 1][cols - 1] != 0:
+            return -1
+
+        visited = set()
+        q = deque()
+
+        q.append((0, 0))
+        visited.add((0, 0))
+
+        length = 1 # start a (0, 0) counts as step 1
+        while q:
+            for i in range(len(q)): # take a snapshot of the length of the q
+                r, c = q.popleft()
+                if r == rows - 1 and c == cols - 1:
+                    return length
+                
+                # view current r, c as [0, 0]
+                neighbors = [
+                    [1, 0], [-1, 0], [0, 1], [0, -1]
+                    , [1, 1], [-1, 1], [1, -1], [-1, -1]
+                ] # this is bascially directions
+                for dr, dc in neighbors:
+                    if (r + dr < 0 or c + dc < 0 or 
+                        r + dr == rows or c + dc == cols or
+                        (r + dr, c + dc) in visited or grid[r + dr][c + dc] == 1):
+                        continue
+                    q.append((r + dr, c + dc))
+                    visited.add((r + dr, c + dc))
+            length += 1
+        
+        return -1
+```
+
+## 994. Rotting Oranges[[Link](https://leetcode.com/problems/rotting-oranges/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/rotting-fruit)]
+
+```python
+class Solution:
+    def orangesRotting(self, grid: List[List[int]]) -> int:
+        rows, cols = len(grid), len(grid[0])
+        q = deque()
+        fresh = 0
+
+        for r in range(rows):
+            for c in range(cols):
+                if grid[r][c] == 1:
+                    fresh += 1
+                if grid[r][c] == 2:
+                    q.append((r, c))
+
+        time = 0
+        while q and fresh > 0:
+            for i in range(len(q)): # take a snapshot of the length of the q
+                r, c = q.popleft()
+                
+                # view current r, c as [0, 0]
+                neighbors = [[1, 0], [-1, 0], [0, 1], [0, -1]] # this is bascially directions
+                for dr, dc in neighbors:
+                    if (r + dr >= 0 and c + dc >= 0 and 
+                        r + dr < rows and c + dc < cols and
+                        grid[r + dr][c + dc] == 1
+                    ):
+                        grid[r + dr][c + dc] = 2
+                        q.append((r + dr, c + dc))
+                        fresh -= 1
+            time += 1
+        
+        return -1 if fresh != 0 else time
 ```
 
 ## 130. Surrounded Regions[[Link](https://leetcode.com/problems/surrounded-regions/description/?envType=study-plan-v2&envId=top-interview-150)]

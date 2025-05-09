@@ -258,6 +258,10 @@ g.display()
 
 ------
 ## Intro to Graphs[[Link](https://neetcode.io/courses/dsa-for-beginners/28)]
+- Matrix (grid)
+    - values:
+        - 1 : blocked
+        - 0 : free
 - Adjacency Matrix:
     - The dimension of the rows and cols are vertexs
         - the matrix has to be square
@@ -270,5 +274,79 @@ g.display()
 ## Matrix DFS[[Linnk](https://neetcode.io/courses/dsa-for-beginners/29)]
 
 ```text
+Q: Count the unique paths from the top left to the bottom right. A single path may only move along 0's and can't visit the same cell more than once.
+```
 
+__Implementation of DFS in Matrix__
+```python
+# Matrix (2D Grid)
+grid = [[0, 0, 0, 0],
+        [1, 1, 0, 0],
+        [0, 0, 0, 1],
+        [0, 1, 0, 0]]
+
+visited = set()
+
+# Count paths (backtracking)
+def dfs(grid, r, c, visited):
+    rows, cols = len(grid), len(grid[0])
+    if (min(r, c) < 0 or r == rows or c == cols 
+        or (r, c) in visited or grid[r][c] == 1):
+        return 0
+    
+    if r == rows - 1 and c == cols - 1:
+        return 1
+    
+    visited.add((r, c))
+
+    count = 0
+    count += dfs(grid, r + 1, c, visited)
+    count += dfs(grid, r - 1, c, visited)
+    count += dfs(grid, r, c + 1, visited)
+    count += dfs(grid, r, c - 1, visited)
+
+    visited.remove((r, c))
+    return count
+print(dfs(grid, 0, 0, visited))
+```
+
+## Matrix BFS[[Link](https://neetcode.io/courses/dsa-for-beginners/30)]
+
+```text
+Q: Find the length of the shortest path from top left of the grid to the bottom right.
+```
+
+```python
+from collections import deque
+
+# Time: O(n * m)
+def bfs(grid):
+    rows, cols = len(grid), len(grid[0])
+    visited = set()
+    q = deque()
+
+    q.append((0, 0))
+    visited.add((0, 0))
+
+    length = 0
+    while q:
+        for i in range(len(q)): # take a snapshot of the length of the q
+            r, c = q.popleft()
+            if r == rows - 1 and c == cols - 1:
+                return length
+            
+            # view current r, c as [0, 0]
+            neighbors = [[1, 0], [-1, 0], [0, 1], [0, -1]] # this is bascially directions
+            for dr, dc in neighbors:
+                if (r + dr < 0 or c + dc < 0 or 
+                    r + dr == rows or c + dc == cols or
+                    (r + dr, c + dc) in visited or grid[r + dr][c + dc] == 1):
+                    continue
+                q.append((r + dr, c + dc))
+                visited.add((r + dr, c + dc))
+        length += 1
+    
+    return -1 # unreachable (optional)
+    
+print(bfs(grid))
 ```
