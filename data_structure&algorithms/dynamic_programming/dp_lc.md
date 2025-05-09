@@ -913,3 +913,29 @@ class Solution:
         
         return dp[0]
 ```
+
+### 5. Longest Palindromic Substring[[Link](https://leetcode.com/problems/longest-palindromic-substring/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+```python
+class Solution:
+    def longestPalindrome(self, s: str) -> str:
+        def helper(s, l, r):
+            max_length = 0
+            max_str = ""
+            while l >= 0 and r < len(s) and s[l] == s[r]:
+                if (r - l + 1) > max_length:
+                    max_length = r - l + 1
+                    max_str = s[l : r + 1]
+                l -= 1
+                r += 1
+            return max_str
+        
+        res = ""
+        for i in range(len(s)):
+            p1 = helper(s, i, i)
+            p2 = helper(s, i, i + 1)
+
+            res = p1 if len(p1) > len(res) else res
+            res = p2 if len(p2) > len(res) else res
+        return res
+```
