@@ -135,3 +135,5 @@
     - For HTTPS, default port is 443 (eg. https://www.google.com implicitly use port 443 (for encrypted communication via `TLS/SSL`))
     - `127.0.0.1` is the reserved loopback IP address, commonly known as: localhost
         - when application running on local computer it looks like `localhost:port no.` or `127.0.0.1:port no.`
+
+# TCP and UDP[[Link](https://neetcode.io/courses/system-design-for-beginners/4)]
