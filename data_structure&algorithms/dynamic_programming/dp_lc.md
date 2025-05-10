@@ -467,28 +467,30 @@ class Solution:
 ### 474. Ones and Zeroes[[Link](https://leetcode.com/problems/ones-and-zeroes/description/)]
 
 - video explaination[[Link](https://neetcode.io/solutions/ones-and-zeroes)]
+- view this as pure backtracking problem
 
 ```python
 # memoization
 # Time Complexity: O(n * m * N); Space Complexity: O(n * m *N)
 class Solution:
     def findMaxForm(self, strs: List[str], m: int, n: int) -> int:
-        # memoization
-        dp = {}
+        cache = {}
 
         def dfs(i, m, n):
             if i == len(strs):
                 return 0
             
-            if (i, m, n) in dp:
-                return dp[(i, m, n)]
-
-            m_cnt, n_cnt = strs[i].count("0"), strs[i].count("1")
+            if (i, m, n ) in cache:
+                return cache[(i, m, n)]
+            
+            zero_cnt, one_cnt = strs[i].count("0"), strs[i].count("1")
             # include the string at index i or not include the string at index i
-            dp[(i, m, n)] = dfs(i + 1, m, n)
-            if m_cnt <= m and n_cnt <= n:
-                dp[(i, m, n)] = max(dp[(i, m, n)], 1 + dfs(i + 1, m - m_cnt, n - n_cnt))
-            return dp[(i, m, n)]
+            # opt1: don't include the current string
+            cache[(i, m, n)] = dfs(i + 1, m, n) 
+            # opt2: include the current string
+            if zero_cnt <= m and one_cnt <= n:
+                cache[(i, m, n)] = max(cache[(i, m, n)], 1 + dfs(i + 1, m - zero_cnt, n - one_cnt))
+            return cache[(i, m, n)]
         
         return dfs(0, m, n)
 
