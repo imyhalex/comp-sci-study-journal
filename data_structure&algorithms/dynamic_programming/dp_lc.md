@@ -804,7 +804,9 @@ class Solution:
 ### *97. Interleaving String[[Link](https://leetcode.com/problems/interleaving-string/description/?envType=study-plan-v2&envId=top-interview-150)]
 
 - video explaination[[Link](https://neetcode.io/problems/interleaving-string)]
-
+- hint: think can character from s1 and s2 in current state form the s3 from the tail
+    - s3 pointer k = i + j for s1 and s2. if s1[i] == s3[k] when i = 0, j = 0, k = i + j = 1 + 0 = 1 that also help s3 pointer move to next character
+    - 2d array only display the s1 for row and s2 for colum in dp
 __Top Down__
 ```python
 class Solution:
@@ -855,6 +857,89 @@ class Solution:
         
         return dp[i][j]
 ```
+
+__Bottom Up Optimized__
+```python
+# k = i + j, where k is the pointer of s3
+class Solution:
+    def isInterleave(self, s1: str, s2: str, s3: str) -> bool:
+        if len(s1) + len(s2) != len(s3):
+            return False
+        
+        if len(s2) < len(s1):
+            s1, s2 = s2, s1
+
+        dp = [False] * (len(s2) + 1)
+        dp[len(s2)] = True
+
+        for i in range(len(s1), -1, -1):
+            curr = [False] * (len(s2) + 1)
+            curr[len(s2)] = True
+            for j in range(len(s2), -1, -1):
+                if i < len(s1) and s1[i] == s3[i + j] and dp[j]:
+                    curr[j] = True
+                if j < len(s2) and s2[j] == s3[i + j] and curr[j + 1]:
+                    curr[j] = True
+            dp = curr
+        
+        return dp[0]
+```
+
+Great question — and you're noticing something subtle but important.
+
+You added this line:
+
+```python
+if len(s2) < len(s1):
+    s1, s2 = s2, s1
+```
+
+And it made your code **start working correctly**. Why?
+
+
+
+__✅ Why this swap fixes your code:__
+
+Your DP array is:
+
+```python
+dp = [False] * (len(s2) + 1)
+```
+
+You're only allocating space for the **shorter of the two strings** if `s1` happens to be shorter. But in your current loop structure, you're always iterating over **`s1` in the outer loop** and **`s2` in the inner loop**:
+
+```python
+for i in range(len(s1), -1, -1):   # outer
+    curr = [False] * (len(s2) + 1)
+    ...
+    for j in range(len(s2), -1, -1):   # inner
+```
+
+If `s1` is **longer**, and you're treating it like the outer loop, then `dp` and `curr` need to have size `len(s2) + 1`. That's **safe** — you're only allocating based on the **inner loop string** (`s2`).
+
+But if `s1` is **shorter**, and you accidentally put the **longer string** in the inner loop (`s2`), you'll overflow `curr[j + 1]` when `j == len(s2) - 1`, because `curr[j + 1]` would go past `curr[len(s2)]`.
+
+
+__🧠 In short:__
+
+You're using only **O(len(s2))** space, so `s2` must be the **shorter string**.
+
+By adding:
+
+```python
+if len(s2) < len(s1):
+    s1, s2 = s2, s1
+```
+
+You're ensuring:
+
+* The **shorter string (`s1`)** is always in the **outer loop**
+* The **longer string (`s2`)** is always in the **inner loop**
+* And since you allocate DP space based on `len(s2)`, you stay within bounds
+
+- ✅ Best practice:
+    - If you're space-optimizing using only 1D DP, it's a good idea to **always iterate over the shorter dimension in the inner loop**, and allocate space accordingly.
+
 
 ### 1092. Shortest Common Supersequence[[Link](https://leetcode.com/problems/shortest-common-supersequence/description/)]
 

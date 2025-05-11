@@ -382,6 +382,8 @@ Q: Count the number of paths that lead from a source to destination.
 __DFS__
 ```python
 # Count paths (backtracking)
+visit = set()
+
 def dfs(node, target, adjList, visit):
     if node in visit:
         return 0
@@ -405,13 +407,13 @@ __BFS__
 def bfs(node, target, adjList):
     visit = set()
     visit.add(node)
-    queue = deque()
-    queue.append(node)
+    q = deque()
+    q.append(node)
 
     length = 0
-    while queue:
-        for i in range(len(queue)):
-            curr = queue.popleft()
+    while q:
+        for i in range(len(q)):
+            curr = q.popleft()
             if curr == target:
                 return length
 
