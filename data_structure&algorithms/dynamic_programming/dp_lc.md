@@ -663,6 +663,10 @@ class Solution:
 ### 518. Coin Change II[[Link](https://leetcode.com/problems/coin-change-ii/description/)]
 
 - video explaination[[Link](https://neetcode.io/problems/coin-change-ii)]
+- unbounded knapsack problem
+    - the biggest different between 0/1 and unbounded knapsack is 0/1's second opt goes for top left unbounded goes left
+        - 0/1: `pick = dp[i - 1][j - coins[i]]` or `pick = dp[j - coins[i]]` for example
+        - unbounded: `pick = dp[i][j - coins[i]]` or `pick = curr[j - coins[i]]`
 
 ```python
 class Solution:
@@ -687,7 +691,7 @@ class Solution:
 ### 115. Distinct Subsequences[[Link](https://leetcode.com/problems/distinct-subsequences/description/)]
 
 - video explaination[[Link](https://neetcode.io/problems/count-subsequences)]
-
+- if s[i] == t[j], then dfs(i + 1, j + 1) and also need (i + 1, j) to check what if the next character is also equal to the character in t
 __Top Down__
 ```python
 # Time: O(m * n); Space: O(m * n)
@@ -945,7 +949,9 @@ You're ensuring:
 
 - video explaination[[Link](https://neetcode.io/solutions/shortest-common-supersequence)]
 - have to be solved in bottom up solution
-
+- two opts if str1[i] != str2[j]: cur c + result set of str of cur c
+    - look down, str1, that is: str1[i] + dp[j]
+    - look right, str2, that is: str2[j] + curr[j + 1]
 ```python
 class Solution:
     def shortestCommonSupersequence(self, str1: str, str2: str) -> str:

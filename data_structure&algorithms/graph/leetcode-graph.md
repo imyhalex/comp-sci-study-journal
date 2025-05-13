@@ -147,6 +147,8 @@ class Solution:
 ## 994. Rotting Oranges[[Link](https://leetcode.com/problems/rotting-oranges/description/)]
 
 - video explaination[[Link](https://neetcode.io/problems/rotting-fruit)]
+- dont need set `visited` becasue modify the grid in-place
+- `while q and fresh > 0`:
 
 ```python
 class Solution:
