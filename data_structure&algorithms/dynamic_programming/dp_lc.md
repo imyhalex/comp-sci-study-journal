@@ -724,12 +724,13 @@ __Bottom Up Optimized__
 # Time: O(m * n); Space: O(m)
 class Solution:
     def numDistinct(self, s: str, t: str) -> int:
-        m, n = len(s), len(t)
+        m, n = len(s), len(t) 
         dp = [0] * (n + 1)
-        dp[n] = 1 # base case: one way to match empty t
+        dp[n] = 1
 
         for i in range(m - 1, -1, -1):
-            curr = dp[:] # copy whole dp state to curr, or use dp.copy()
+            curr = [0] * (n + 1)
+            curr[n] = 1
             for j in range(n - 1, -1, -1):
                 if s[i] == t[j]:
                     curr[j] = dp[j] + dp[j + 1]
