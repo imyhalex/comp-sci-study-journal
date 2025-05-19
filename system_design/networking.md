@@ -137,3 +137,109 @@
         - when application running on local computer it looks like `localhost:port no.` or `127.0.0.1:port no.`
 
 # TCP and UDP[[Link](https://neetcode.io/courses/system-design-for-beginners/4)]
+
+- __The use cases for TCP__
+    - TCP (Transmission Control Protocol)
+        - Use case: 
+            - Email sending (under SMTP protocol)
+            - User make HTTPs requests in a system
+        - Pros: Reliable
+        - Cons: 
+            - Brings more overhead
+            - Tend to be slower due to its rigorous approch to ensure delivery (latency)
+        - Ensures lost packaets are reliably delivered, by:
+            - setting up two-way connection (commonly referred to as a 3-wat connection)
+        - Requires both the client and server establish a reliable connection before any data exchange take place
+        - Bidirectional comminication can begin after the connection is established
+        - If data pacakect is sent without receiving an acknowledgement
+            - assumes it wasn't received and triggers retransmission
+    - UDP (User Datagram Protocal)
+        - Less reliable
+        - Faster data transmission
+        - Does not attempt to resend lost packets or reorder them
+        - Use cases (opt for UDP), scenarios like:
+            - Online gaming
+            - Video streaming
+                - Because: it is often preferable to skip a dropped frame rather than resend it
+                - ensures smoother gameplay or uniterrupted streaming
+            - Overall: UDP is selected over TCP in situtation where speed and efficiency take precendence over reliability and error correction
+
+# DNS[[Link](https://neetcode.io/courses/system-design-for-beginners/5)]
+- __DNS (Domain Name System)__
+    - Operates as a decentralized hierarchical naming system that converts easily readable webasite name into IP address
+        - When we input a domain name such as google.com into our web browser, the Domain Name System (DNS) translates it into an IP address (like 142.251.211.238).
+    - Overall coordination, security, and operation of domain names within DNS is managed by ICANN (Internet Corporation for Assigned Names and Numbers)
+
+- __ICANN and Domain Name Registrars__
+    - ICANN:
+        - Like shopping center's management company
+        - Ensures the efficient running of the internet's infrastructure
+    - Domain Regestrars
+        - Resemble the individual store lease providers
+        - Are certified by ICANN to offer domain name registration services
+        - Assit us in searching for available domain name and oversee the registration procedure
+    - ICANN doesn't own domain name directly
+    - Domain name are sold by approved domain registrars, such as:
+        - GoDaddy
+        - Google Domains
+        - HostGator
+            - These registrars maintain the registration records and ensure that the domain is registered in our name
+- __DNS Records__
+    - Serve to store information related to a domain or subdomain
+        - The A(Address) record, associates a domain with IPv4 address
+            ```text
+            Let's consider a scenario where you send a request to neetcode.io, which is linked to the IP address 192.158.1.39. The DNS 
+            record for neetcode.io would house this IP address. Upon receiving your request, the DNS server would reference this 
+            record to route your request to the server hosting the neetcode.io website. This server then sends a response back to 
+            your computer.
+            ```
+    - To enhance future access speed, if a server has a static IP address
+        - computer can store this IP address in its cache or memory
+        - enables computer to retrive the IP address quickly instead of making another DNS query to the DNS server
+    - DNS records and DNS server play a crucial role in ensuring that your requests reach the correct server by mapping domain name to thier corresponding IP address
+- __Anatomy of a URL (Uniform Resource Locator)__
+![anatomy of url](../imgs/anatomy-url.avif)
+    - `Protocol (Scheme)`
+        - Commonly start with either HTTP or HTTPS
+        - Is also commonly referred to as the scheme
+        - HTTPS has become more dominant protocol for URLs on the World Wide Web
+        - Several other protocols that URLs can begin with:
+            - FTP (File Trasfer Protocols):
+                - denoted by `ftp://`
+                - utilized to access files and directories on remote servers
+                - servers as a means for transferring files between systems
+            - SSH (Secure Shell):
+                - denoted by `ssh://`
+                - extensively employed for establishing secure remote connections to servers or computers
+            - Examples:
+                - `ftp://ftp.example.com/pub/file.txt`
+                    ```text
+                    In this example, "ftp://" indicates the use of the FTP protocol. "ftp.example.com" represents the FTP 
+                    server's domain name or IP address. "pub" is the directory on the FTP server where the file "file.txt" 
+                    is located. So, this FTP URL would be used to access and download the file named "file.txt" from the "pub" 
+                    directory on the FTP server at "ftp.example.com".
+                    ```
+                - `ssh://username@example.com:22`
+                    ```text
+                    In this example, "ssh://" indicates the use of the SSH protocol. "username" represents the username you would 
+                    use to authenticate yourself on the remote server. "example.com" is the domain name or IP address of the 
+                    SSH server you want to connect to. ":22" specifies the port number (in this case, port 22) on which the SSH 
+                    server is running
+                    ```
+    - `Domain`: e.g.: domains.google.com
+        - Subdomain
+            - In our example, the subdomain "domains" establishes a distinct section within the website, differentiating its content from the root domain. 
+        - Primary Domain
+            - The primary domain of google.com signifies the core identity of the website.
+            - When we acquire a domain through a registrar, we gain ownership of this primary domain. 
+        - Top Level Domain (TLD)
+            - ".com" portion corresponds to the top-level domain
+            - For instance, ".com" signifies commercial websites, while ".io" is commonly utilized by tech companies. 
+            - Offers a way to categorize and classify websites based on their intended purpose on industry
+        - Path
+            - A path within a domain is denoted by using forward slashes, /. 
+            - Signifies a specific location or route within the website
+            - Enables more precise linking and navigation within a website's structure
+        - Ports
+            - HTTP/HTTPS protocol already default to certain port number (HTTP: 80; HTTPS: 443), call implcitly
+            - For non-standard port must be specified in the URL
