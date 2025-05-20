@@ -51,3 +51,25 @@ class Solution:
             if diff in hash_map and hash_map[diff] != i:
                 return [i, hash_map[diff]]
 ```
+
+## *146. LRU Cache[[Link](https://leetcode.com/problems/lru-cache/description/?envType=study-plan-v2&envId=top-interview-150)]
+- video explaination[[Link](https://neetcode.io/problems/lru-cache)]
+```python
+class LRUCache:
+
+    def __init__(self, capacity: int):
+        if capacity > 0:
+            pass
+
+    def get(self, key: int) -> int:
+        
+
+    def put(self, key: int, value: int) -> None:
+        
+
+
+# Your LRUCache object will be instantiated and called as such:
+# obj = LRUCache(capacity)
+# param_1 = obj.get(key)
+# obj.put(key,value)
+```
