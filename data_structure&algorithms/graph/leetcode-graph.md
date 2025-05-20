@@ -270,30 +270,25 @@ class Node:
         self.val = val
         self.neighbors = neighbors if neighbors is not None else []
 """
-
 from typing import Optional
 class Solution:
     def cloneGraph(self, node: Optional['Node']) -> Optional['Node']:
         if not node:
             return None
-        
-        # a dictionary to map a original nodes to colned node
-        visited = {}
+        old_to_new = {}
 
-        def dfs(start):
-            if start in visited:
-                return visited[start]
+        def dfs(node):
+            if node in old_to_new:
+                return old_to_new[node]
             
-            # clone -> new start node for clone graph
-            clone = Node(start.val)
-            visited[start] = clone
-
+            # clone -> new node for clone graph
+            clone = Node(node.val)
+            old_to_new[node] = clone
             # recursively clone the neigbhor
-            for neighbor in start.neighbors:
+            for neighbor in node.neighbors:
                 clone.neighbors.append(dfs(neighbor))
-
             return clone
-
+        
         return dfs(node)
 ```
 
@@ -332,39 +327,39 @@ class Solution:
 ## 207. Course Schedule[[Link](https://leetcode.com/problems/course-schedule/description/?envType=study-plan-v2&envId=top-interview-150)]
 
 - Video Explaination[[Link](https://www.youtube.com/watch?v=EgI5nU9etnU)]
-
+- hint: construct the adjacency list and evalutate if meet requirements(detect cycle or not)
 ```python
-from typing import List
 class Solution:
     def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
-        # construct adjacency list
-        preq_map = {i:[] for i in range(numCourses)}
+        pre_map_adjlist = {i:[] for i in range(numCourses)}
+        # feed adj List
         for crs, pre in prerequisites:
-            preq_map[crs].append(pre)
+            pre_map_adjlist[crs].append(pre)
 
-        # visit set -> detect cycle
-        visited = set()
-
+        # visited set
+        visited = set() 
         def dfs(crs):
             if crs in visited:
                 return False
-            if preq_map[crs] == []:
+            
+            if pre_map_adjlist[crs] == []:
                 return True
             
             visited.add(crs)
-            for pre in preq_map[crs]:
+            # looking through the neighbor
+            for pre in pre_map_adjlist[crs]:
                 if not dfs(pre):
                     return False
-            
             visited.remove(crs)
-            preq_map[crs] = []
+            pre_map_adjlist[crs] = [] # add this line to reduce time executed
             return True
-
         # need to manually loop to cover the disconnected graph cases
         for crs in range(numCourses):
             if not dfs(crs):
                 return False
+        
         return True
+            
 ```
 - Time Complexity: O(N + P)
 

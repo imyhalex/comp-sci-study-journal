@@ -1,4 +1,4 @@
-# Hashing
+# Hashing[[Link](https://neetcode.io/courses/dsa-for-beginners/26)]
 
 - Mapping data to a specific index in a hash table (an arry of items) using a __hash function__ that enables fast retrieval of information based on its key
 - All three operation (search, insert, and delete) in \(O(n)\)
@@ -164,4 +164,13 @@ public class HashMapExample {
   - **Insert** (e.g., `put` in a HashMap, `add` in a HashSet)  
   - **Delete** (e.g., `remove` in a HashMap or HashSet)  
 - **Worst-case** time complexity can degrade to \(\mathcal{O}(n)\) if many keys end up in the same bucket or if you have a pathological hash function. However, **good hash functions** and **resizing** strategies typically prevent this scenario from being common.
+
+## Compare to TreeMap
+- TreeMap offers time complexity of O(log n) in:
+   - Search 
+   - Insert
+   - Delete
+
+## Downside of HashMap
+- The downside of hash maps is that they are not ordered, so it not possible to traverse the keys of a hashmap in any particular order.
 
