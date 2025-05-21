@@ -100,3 +100,98 @@
     - Together, TLS and SSL ensure that web data remains inaccessible and unalterable by unauthorized parties.
     - HTTPS is essentially the combination of HTTP with TLS.
     - While SSL is often used interchangeably with TLS, it's worth noting that SSL is technically an outdated term, superseded by TLS.
+
+# WebSockets[[Link](https://neetcode.io/courses/system-design-for-beginners/7)]
+- There are multiple application protocol:
+    - Those build on top of the TCP:
+        - HTTP
+        - WebSocket
+        - FTP
+        - SMTP
+        - SSH
+    - Those build on top of the UDP
+        - WebRTC (for web streaming)
+
+- The problem
+    - Consider: building a chat application
+        - What if using HTTP?
+            - works best when dealing stateless data
+                - follows a request-response protocol
+            - but: unidirectional and lack real-time communication capabilities
+            - client must continually make requests to the server, resulting in significant overhead
+                - fetchs messages from server every minute is far from ideal
+            - it presents limitaion when it comes to real-time applications
+        - What if using WebSocket
+            - is a distinct protocol that facilitates two-way commnunication between client and server
+                - enabling back-and-forth data transmission
+            - this capability highly valuable in scenarios that demand real-time updates, such as:
+                - chat application
+                - live streaming apps
+                - real-time gaming apps
+- __Establishing a WebSocket Connection__
+    - WebSocket can be seen as an "upgrade" from HTTP in sense that it starts with a standard HTTP request and then transitions to a WebSocket connection if both the client and server support the protocol
+    - Major web browswers that have built-in support of WebSocket:
+        - Google Chrome
+        - Firefox
+        - Edge
+    - Popular server-side web application frameworks also offer support for WebSocket, such as:
+        - Node.js
+        - Django
+        - ASP.NET
+    - Overview for establishing a WebSocket connection
+        1. Client Sends a WebSocket Handshake Request:
+            - The client will establish a WS connected by initiating a WS handshake
+            - This is an HTTP Upgrade request with a few special headers
+        2. Server Response (Handshake Response):
+            - Return status code 101 if server supports the WS protocol and is willing to accept the connection 
+                - 101 indicates the server understands the upgrade header field request and indicates which protocol it is switching to
+        3. Data Transfer:
+            - The client and server send data between each other in real time after the handshake
+            - This is more efficient than constantly opening and closing new HTTP connections
+            - WS is truly bidirectional, and this way the client will not have to keep checking the browser
+    - By default:
+        - WS connections use port 80, similar to HTTP
+        - WebSocket Secure (WSS) connections use port 443, similar to HTTPS
+    - Important:
+        - While devices and browsers may support WebSocket, the network they're connected to must also allow WebSocket connections
+        - Some restrictive firewalls might block WebSocket connections but because it so ubiquitous and compatible with existing web infrastructure, it is generally well-supported
+        - HTTP/2 allows multiplexing, meaning multiple requests in parallel can be initiated over a single TCP connection
+            - But this is not a perfect replacement to WebSocket as they are still very prevalent to this day
+    - HTTP/1 -> HTTP/2 -> HTTP/3
+        - HTTP/1 & 1.1
+            - Released in 1999
+            - For multiple requets, queued and requested one at a time
+            - Head-of-line blocking
+                - can only handle one request at a time, leads to inefficient use of network resource
+            - Lack of prioritization
+                - did not offer a way to prioritize requests, leads to less critical reources blocking more important ones
+            - Plain text headers being sent are large, especially cookies are in use etc...
+        - HTTP/2
+            - Released in 2015
+            - Multiplexing:
+                - requests the assets together
+            - Header Compression
+                - uses HPACK algo to compress request and response headers, reduceing the amout of data transmission
+            - Server Push
+                - servers can proactively push rerouces to the client's cache before they are requests, reducing latency
+            - Stream Prioritiation
+                - enables client to proritize request
+            - Binary Framing
+                - use binary framing leayer to encapsulate messages, make protocol more efficient and less error-prone compared to plain-text approach in HTTP/1.x
+        - HTTP/3
+            - Does away with TCP, instead utilize a flavor of UDP called Quick UDP Internet Connection (QUIC), which includes benefits:
+                - Built-in encrytion
+                    - incoporates TLS (transport layer security) 1.3 by default
+                    - ensure a secure connection without the need for a separate TLS handshake
+                        - reduce latency
+                - Reduce head-of-line blocking
+                    - QUIC handle packet loss at the individual stream level, means loss a single packet does not block the entire connection
+                - Connection migration
+                    - Better connection migration allows clients to change IP address without losing connectivity in incurring additional latency
+                - 0-RTT (zero round trip time) establishment
+                    - can significantly reduce latency when connecting to a previously visited server
+                - Improved congestion control
+                    - offers more advanced congestion control mechanisms
+                    - better adapt to varying network conditions and improve overall performance
+
+# API Paradigms[[Link](https://neetcode.io/courses/system-design-for-beginners/8)]
