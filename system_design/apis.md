@@ -195,4 +195,79 @@
                     - offers more advanced congestion control mechanisms
                     - better adapt to varying network conditions and improve overall performance
 
-# API Paradigms[[Link](https://neetcode.io/courses/system-design-for-beginners/8)]
+# API (application programming interface) Paradigms[[Link](https://neetcode.io/courses/system-design-for-beginners/8)]
+- Provide a say for clients to perform actions with server over the network
+- Consist of a set of rules and protocols for building and interacting with software applications
+- __Three Paradigms__
+    - `REST APIs`
+        - An API adheres to design principle and standard of the `Representation State Transfer` 
+        - Utilize straightforward HTTP for communication between machine, specifically the client and server
+        - Constriants:
+            - REST APIs require a client-server architecture
+                - client and server are distinct entities commnuicating over a network.
+                - this separation enables independent development and updates for both the client and server
+            - REST APIs are Stateless
+                - each client request to the server must include all necessary information for understanding and processing the request
+                - the server should not retain any details about the previous client requests
+                    - client must always send all needed info per request
+                    - server does not "remember" the client
+                - does not need to manage or update session states or cookies, facilitaes horizontal scaling
+        - Consider:
+            ```text
+            In the context of a client sending a request to a REST API to retrieve a specific resource (GET request), the request 
+            includes all the necessary information, eliminating the need for the server to remember previous requests. Now, 
+            let's delve into the concept of state.
+
+            Consider the example of a URL such as https://youtube.com/videos where we want to display a list of 10 videos on a 
+            page, and display more videos as the user scrolls. The constraint is that the server should not persist any 
+            state, such as how many videos have already been displayed.
+            
+            Instead, data stored on the client can be sent to the server with each request. This principle is particularly 
+            relevant in pagination scenarios. When a page loads the initial 10 videos, and the user keeps scrolling down to 
+            the second page, the server does not remember that the user was already shown 10 videos.
+
+            So, the client sends this information to the server by including parameters in the GET URL. For instance, the client might send a request like:
+
+            https://youtube.com/videos?offset=0&limit=10,
+
+            which fetches the first 10 videos, followed by
+
+            https://youtube.com/videos?offset=10&limit=10,
+
+            which fetches the next 10 videos.
+            ```
+        - `JSON` (JavaScript Object Notation)
+            - REST APIs accept data in JSON format and respond with data encapsulate in the same format
+        - Issues with REST APIs
+            - over-fetching: client receives more data than necessary
+                ```text
+                Let's consider an example where we need to fetch data to display comments on a website. The required data 
+                includes the user's profile picture, username, and the comment itself. However, the /user endpoint might 
+                provide additional, unnecessary information such as country or date joined. In this case we are required 
+                to over-fetch data and subsequently filter out the irrelevant fields.
+                ```
+            - under-fetching: 
+                - when endpoints are narrowly defined, resulting in the delivery of only a single field per request
+                - this situation requires making multiple calls to fetch required property separately.
+
+    - `GraphQL`
+        - Address limitations of REST APIs in mitigating issues related to over-fetching and under-fetching
+        - Client gains the ability to precisely specify the required data within a single request
+            - the server take on the responsibility of gathering all the necessary data and formatting it accordingly after the client's specification
+        - Two Primary type of operations:
+            - queries: retrive data
+            - mutations: modify data on the server
+        - Operate through a single endpoint, typically HTTP POST endpoint, where all queries are sent
+    
+    - `gRPC`: Google Remote Procedure Call
+        - Building on top of HTTP/2
+        - A framework for executing RPC: allows a program to execute a procedure in another address space
+        - Provides bidirectional commnunication, or multiplexing for multiple messages over a single TCP connection and server push
+        - Typically used for server-server communication
+            - much faster than REST APIs
+            - send data using protocol buffers
+                - language-neutral, platform-neutral extensible mechanism for serializng structure data (less size of data to transfer than REST APIs)
+            - provide streaming
+                - push data from the client to the server
+        - Does not ake use of the error cide provided by HTTP
+        
