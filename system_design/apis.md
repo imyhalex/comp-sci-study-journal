@@ -12,7 +12,8 @@
         - A computer, device, or software that provide resources, data, services, or functionality to the client or other servers on a network
         - Wait for incoming request from clients and respond by fufilling those requests
             ```text
-            e,g.: a web server delivers web pages to clients, an email server handles sending and receiving emails, and a database server provides clients with access to database services.
+            e,g.: a web server delivers web pages to clients, an email server handles sending and receiving emails, and a database server provides clients with access 
+            to database services.
             ```
     - The role of client and server can interchange
 - __PRCs(Remote Procedure Call)__
