@@ -270,4 +270,59 @@
             - provide streaming
                 - push data from the client to the server
         - Does not ake use of the error cide provided by HTTP
-        
+
+# API Design[[Link](https://neetcode.io/courses/system-design-for-beginners/9)]
+__Example: Twritter REST APIs__
+- APIs typcially provide general CRUD, in case of Twitter:
+    - `createTweet()`
+    - `getTweets()`
+    - `editTweet()`
+    - `deleteTweet()`
+        - These operatoins are performed on entities
+- __Why bother desiging good APIs?__
+    - Need to consider their public-facing nature
+    - Relied upon many application, and they use it by their own function call
+        - This restriction limits API developers from making excessive change to avoid potential crashes in the apps that rely on Twitter API
+    - `Create a Tweet: createTweet(userId, content)`
+        ```text
+        Suppose we want to introduce a reply feature. Modifying the original method signature to include a parentId parameter, 
+        like createTweet(userId, content, parentId), would potentially disrupt a large number of applications. To address this, a 
+        better approach would be to make the parentId parameter optional.
+        ```
+        - Design choice should be backward compatibility
+            - helps maintain a smooth transition and avoid breaking existing functionality for applications that rely on the original method
+        - A tweet object, url: `https://api.twitter.com/v1.0/tweet`
+            ```text
+            userId: string, // The creator of the tweet, passed by the client
+            tweetId: string, // Uniquely identifies each tweet, created server side
+            content: string, // Passed in by the client
+            createdAt: date, // The timestamp, handled server side
+            likes: int, // handled by the server side
+            ```
+    - `Retriving Tweets`
+        - Endpoint like: `https://api.twitter.com/v1.0/tweet/:userId`
+            - this fetch all tweet for a specific creator
+        - Example:
+            ```text
+            However, when it comes to retrieving a list of tweets, a different approach is needed. This situation often arises 
+            in Higher Education institutions' websites, where a segment on the homepage displays their Twitter activity. 
+            Using the same endpoint for retrieving a single tweet is not suitable in this case.
+
+            To address this, let's recall the concept of pagination discussed in the previous chapter. To fetch only 10 
+            tweets, we can structure our URL as follows: https://api.twitter.com/v1.0/users/:id/tweets?limit=10&offset=0. Here, 
+            the limit parameter indicates the number of tweets to be fetched per page, while the offset parameter determines 
+            the starting point. It's important to recall that GET requests are idempotent, meaning that regardless of how 
+            many times we call this URL, it should consistently return the same data without side effects. (Though, in twitter's 
+            case the homefeed data itself may change over time.)
+
+            By incorporating limit and offset parameters in the URL, we can implement pagination effectively, enabling the 
+            retrieval of a specific number of tweets at a time while maintaining consistency in the returned data.
+            ```
+    - `API Versions`
+        - Companies typically update the API version when significant changes are made such as adding new parameters, method, or completely changing how things work
+        - Easier to distinguish between different iterations and helps developers adapt their code to accomodate any changes or improvement
+- Take a look for some API docs
+    - [Stripe](https://docs.stripe.com/api)
+    - [Reddit](https://www.reddit.com/dev/api/)
+    - [Instagram](https://developers.facebook.com/docs/instagram-platform/instagram-api-with-facebook-login)
+    - [Facebook](https://developers.facebook.com/docs/)
