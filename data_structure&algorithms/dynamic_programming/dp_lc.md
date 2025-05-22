@@ -881,6 +881,7 @@ class Solution:
             curr = [False] * (len(s2) + 1)
             curr[len(s2)] = True
             for j in range(len(s2), -1, -1):
+                # these two lines mean either the bottom cell and the cell right to it is True
                 if i < len(s1) and s1[i] == s3[i + j] and dp[j]:
                     curr[j] = True
                 if j < len(s2) and s2[j] == s3[i + j] and curr[j + 1]:
