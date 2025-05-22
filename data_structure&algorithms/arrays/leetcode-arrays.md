@@ -114,3 +114,26 @@ class Solution:
             postfix *= nums[i]
         return res
 ```
+
+## *560. Subarray Sum Equals K[[Link](https://leetcode.com/problems/subarray-sum-equals-k/description/)]
+- video explaination[[Link](https://neetcode.io/problems/subarray-sum-equals-k)]
+- hint: 
+```python
+# time & space: O(n)
+class Solution:
+    def subarraySum(self, nums: List[int], k: int) -> int:
+        # hashmap: (prefix, count) pair
+        # default (0, 1) -> prefix=0, count=1
+        res = 0
+        curr_sum = 0
+        prefix_sum = {0: 1}
+
+        for num in nums:
+            curr_sum += num
+            diff = curr_sum - k
+            # lookup in the hashmap
+            res += prefix_sum.get(diff, 0)
+            prefix_sum[curr_sum] = 1 + prefix_sum.get(curr_sum, 0)
+        
+        return res
+```
