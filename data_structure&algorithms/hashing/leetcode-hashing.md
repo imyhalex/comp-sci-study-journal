@@ -26,7 +26,7 @@ class Solution:
         # two pointers left and right
         l = 0
         for r in range(len(nums)):
-            if r - l > k:
+            if r - l > k: # lock the size of window
                 window.remove(nums[l])
                 l += 1
             if nums[r] in window:

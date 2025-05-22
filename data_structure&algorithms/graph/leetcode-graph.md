@@ -260,7 +260,7 @@ class Solution:
 
 __Answer__
 - Explaination[[Link](https://neetcode.io/problems/clone-graph)]
-
+- hint: the visited in this question should be a hashmap that map old node to new clone node: old_to_new = 
 ```python
 # DFS
 """
