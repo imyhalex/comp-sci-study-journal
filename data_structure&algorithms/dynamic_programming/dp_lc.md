@@ -1010,6 +1010,8 @@ class Solution:
 
 ### 5. Longest Palindromic Substring[[Link](https://leetcode.com/problems/longest-palindromic-substring/description/?envType=study-plan-v2&envId=top-interview-150)]
 
+- hint: need to interate through every character and compare each time
+
 ```python
 class Solution:
     def longestPalindrome(self, s: str) -> str:
