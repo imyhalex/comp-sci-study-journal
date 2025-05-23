@@ -1,9 +1,4 @@
 # Proxies and Load Balancing[[Link](https://neetcode.io/courses/system-design-for-beginners/12)]
-Here's a clean and concise markdown summary of the key concepts related to **Proxies** and **Load Balancers**, based on the article you shared:
-
----
-
-# Proxies and Load Balancers (System Design Essentials)
 - __Forward Proxy__
     * Acts on behalf of the client.
     * Hides the **client's identity** (IP address) from the destination server.
