@@ -116,7 +116,7 @@ class LRUCache:
 ## 242. Valid Anagram[[Link](https://leetcode.com/problems/valid-anagram/description/?envType=study-plan-v2&envId=top-interview-150)]
 
 - video explaination[[Link](https://neetcode.io/problems/is-anagram)]
-
+- hint: constructure two hashmaps and compare if they are equal
 ```python
 class Solution:
     def isAnagram(self, s: str, t: str) -> bool:
@@ -145,11 +145,13 @@ class Solution:
 - video explaination[[Link](https://neetcode.io/problems/anagram-groups)]
 - hint: to store the count pattern as the key in hash table
 ```python
+# time: O(m * n)
+# spcae: O(m) extra space. O(m * n) space for the output list.
 class Solution:
     def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
         res = defaultdict(list)
         for s in strs:
-            count = [0] * 26
+            count = [0] * 26 # count pattern
             for c in s:
                 count[ord(c) - ord('a')] += 1
             res[tuple(count)].append(s) # conver to tuple because list is mutable so cannot be the key
