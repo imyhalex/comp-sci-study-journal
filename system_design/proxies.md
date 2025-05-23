@@ -51,3 +51,11 @@ Here's a clean and concise markdown summary of the key concepts related to **Pro
     * Operates at the **application layer** (HTTP/HTTPS).
     * Makes routing decisions based on content (URL, headers, cookies, etc).
     * **More intelligent**, supports complex routing logic (e.g., route /api differently from /images).
+
+| Feature           | Forward Proxy               | Reverse Proxy                        | Load Balancer                           |
+| ----------------- | --------------------------- | ------------------------------------ | --------------------------------------- |
+| Hides             | Client                      | Server                               | Server                                  |
+| Acts on behalf of | Client                      | Server                               | Server                                  |
+| Client aware?     | Yes                         | No                                   | No                                      |
+| Use Cases         | Privacy, Filtering, Caching | Load distribution, Security, Caching | Distribute traffic, Improve reliability |
+| Examples          | Corporate firewall, VPN     | CDN, API gateway                     | NGINX, HAProxy, AWS ELB                 |
