@@ -155,3 +155,26 @@ class Solution:
             res[tuple(count)].append(s) # conver to tuple because list is mutable so cannot be the key
         return list(res.values())
 ```
+
+## 128. Longest Consecutive Sequence[[Link](https://leetcode.com/problems/longest-consecutive-sequence/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/longest-consecutive-sequence)]
+- hint: check the left neigbor for each num in nums to determine the start, and check num + 1 for right to determine the consecutive numbers
+
+```python
+# time & space: O(n)
+class Solution:
+    def longestConsecutive(self, nums: List[int]) -> int:
+        num_set = set(nums)
+        longest = 0
+
+        for num in num_set: # change this from nums to num_set else LC time limit exceed
+            # check if its start of a sequence
+            if (num - 1) not in num_set: # if no left neigbor, then it is start
+                length = 0
+                while (num + length) in num_set: # num + length to detect consecutive nums
+                    length += 1
+                longest = max(longest, length)
+        return longest
+```
+
