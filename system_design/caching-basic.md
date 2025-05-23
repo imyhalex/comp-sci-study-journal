@@ -48,3 +48,34 @@
             - Image or **Font Caching in Web Browsers** or Rendering Engines
                 - Browsers render fonts, SVGs, or images repeatedly.
                 - **Fonts/images that are used often (like site logos or common fonts) stay cached.**
+
+# CDNs (Content Delivery Network)[[Link](https://neetcode.io/courses/system-design-for-beginners/11)]
+- A group of cache servers (or edge servers) that are located around the world so they can cache content close to end users
+- Using CDN, data can be accessed faster than fetching it from the origin server.
+- Caching and CDNs are closely related because:
+    - Behind CDN is to store copies of a website's content on multiple servers in different geographical locations
+    - Speeds up content delivery
+    - Reduces the load on the original server and the amount of data that has to be transmitted over a long distance
+    - CDN store static content, including:
+        - HTML, CSS, static JavaScript files
+        - images (etc..)
+- __Push CDN__
+    - Well-suited for websites where the content is static and doesn't change frequently
+    - Once new data is added to the origin server, it is immediately pushed to all of the cache servers
+    - Note: the content needs to be widely requested for a push CDN to be efficient
+        - they can be inefficient if the content isn't requested by user near those servers.
+    - Example:
+        ```text
+        A good example of a suitable use case for push CDNs is websites that host video content consumed around the globe. 
+        Push CDNs offer an advantage in that users don't have to wait for the content to be transferred from the original server to 
+        the CDN.
+        ```
+        - each user request will result in cache hit since the data has already been copied over
+
+- __Pull CDN__
+    - If the data that client or user is trying to access does not exist on the CDN:
+        - the cache server will be checked first
+        - cache server will retrive the data from the origin server and cache it (for this specific CDN) for future requests if the data is not found in local cache server
+    - This operation pull the content from the origin server on an 'as needed' based.
+    - Websites like Twitter are ideal candidates for a pull CDN due to enormous amount of content genrated every second
+        - would be a significant burden for twitter team to proactively push all that content to the CDN
