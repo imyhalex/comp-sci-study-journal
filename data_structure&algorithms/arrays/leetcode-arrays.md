@@ -239,8 +239,7 @@ class Solution:
 ```
 
 ## 125. Valid Palindrome[[Link](https://leetcode.com/problems/valid-palindrome/description/?envType=study-plan-v2&envId=top-interview-150)]
-
-- video explaination[[Linnk](https://neetcode.io/problems/is-palindrome)]
+- video explaination[[Link](https://neetcode.io/problems/is-palindrome)]
 ```python
 # first way: reverse string
 # time: O(n); space: O(n)
@@ -279,4 +278,102 @@ class Solution:
             (ord('a') <= ord(c) <= ord('z')) or 
             (ord('0') <= ord(c) <= ord('9'))
         )
+```
+
+## 1. Two Sum[[Link](https://leetcode.com/problems/two-sum/description/?envType=study-plan-v2&envId=top-interview-150)]
+- video explaination[[Link](https://neetcode.io/problems/two-integer-sum)]
+- important: return indices only if diff offset is in hash_map and the offset is not equal to the current one
+```python
+class Solution:
+    def twoSum(self, nums: List[int], target: int) -> List[int]:
+        hash_map = {}
+
+        for i, n in enumerate(nums):
+            hash_map[n] = i
+        
+        for i, n in enumerate(nums):
+            diff = target - n
+            if diff in hash_map and hash_map[diff] != i:
+                return [i, hash_map[diff]]
+```
+
+## 167. Two Sum II - Input Array Is Sorted[[Link](https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/two-integer-sum-ii)]
+
+```python
+class Solution:
+    def twoSum(self, numbers: List[int], target: int) -> List[int]:
+        l, r = 0, len(numbers) - 1
+        while l < r:
+            if numbers[l] + numbers[r] > target:
+                r -= 1
+            elif numbers[l] + numbers[r] < target:
+                l += 1
+            else:
+                return [l + 1, r + 1]
+                
+        return []
+```
+
+## 15. 3Sum[[Link](https://leetcode.com/problems/3sum/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/three-integer-sum)]
+
+```python
+# Brute Force
+# time: O(n^3); space: O(m)
+class Solution:
+    def threeSum(self, nums: List[int]) -> List[List[int]]:
+        res = set() # question asked the solution must not contains any duplicate triplets
+        nums.sort()
+        for i in range(len(nums)):
+            for j in range(i + 1, len(nums)):
+                for k in range(j + 1, len(nums)):
+                    if nums[i] + nums[j] + nums[k] == 0:
+                        res.add(tuple([nums[i], nums[j], nums[k]]))
+        return [list(i) for i in res]
+
+# two pointers
+# time: O(n^2); space: O(1) or O(n) depending on the sorting algo
+class Solution:
+    def threeSum(self, nums: List[int]) -> List[List[int]]:
+        res = []
+        nums.sort()
+
+        for i, num in enumerate(nums):
+            if i > 0 and num == nums[i - 1]:
+                continue
+            
+            l, r = i + 1, len(nums) - 1
+            while l < r:
+                three_sum = num + nums[l] + nums[r]
+                if three_sum > 0:
+                    r -= 1
+                elif three_sum < 0:
+                    l += 1
+                else:
+                    res.append([num, nums[l], nums[r]])
+                    # update the left pointer
+                    # also mind to jump over duplicate, so while loop
+                    l += 1
+                    while nums[l] == nums[l - 1] and l < r:
+                        l += 1
+        return res
+```
+
+## 392. Is Subsequence[[Link](https://leetcode.com/problems/is-subsequence/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/solutions/is-subsequence)]
+```python
+# two pointers way
+# time: O(n + m); space: O(1)
+class Solution:
+    def isSubsequence(self, s: str, t: str) -> bool:
+        i = j = 0
+        while i < len(s) and j < len(t):
+            if s[i] == t[j]:
+                i += 1
+            j += 1
+        return i == len(s)
 ```
