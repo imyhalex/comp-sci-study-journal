@@ -71,3 +71,50 @@
             requests data and it is stale. This can be true in apps like Twitter or Instagram where updating the follower 
             count may be delayed because the leader node has not updated the rest of the nodes.
             ```
+# Replication and Sharding[[Link](https://neetcode.io/courses/system-design-for-beginners/16)]
+- Two techniques commonly used together in a distributed system to achive high availability and throughput
+- __Replication__
+    - Involves creating a copy of the dataset called replica
+        - replica(s) hosted on a separate machine or server
+        - sync with the original database
+    - To increase data availabilty, improve scalability, and increase data durability
+    - In a leader/follower architecture:
+        - data replication flows from the leader to the follower
+        - leader is responsible for updating the follower
+    - `Synchronous Replication`
+        - Every write transaction on the leader is immediately replicated to the follower
+            - ensure consistency between two replicas
+        - This approach introduce latency (consitency in distributed system level)
+        - Benefit: the mostly updated follower can take its place if leader gose down
+    - `Asynchronous Replication`
+        - Involves a delay in data replication
+        - Leader database commits the transaction and sends replication data to the follower without waiting for the follower to acknowledge or apply the changes immediately
+            - This reduce latency
+            - but if a client makes a request to the follower before leader has updated it, the data might be stale untile the leader updates
+            - This trad-off made for increased availabilty
+    - `Master-Master(leader-leader;multi-leader) Replication`
+        - Is used when data needs to be served in different regions
+            - one leader server west while another servers east
+        - Both leaders can be written to and read from
+            - make it ideal for distributing data accross different parts of world
+            - but synchronization latency between leaders can be a challenge, and measures like periodic updates are needed to keep them sync
+- __Sharding__
+    - Is used when replication alone is insufficient to handle the high traffic volume on a single database
+        - involves divide databased into smaller shards
+        - each hosted on a separate machine or server
+    - System acheives improved performance, scalability, and availability by distributing data and workload across multiple shards
+    - Each shards contains only a subset of the entire dataset
+        - do not have a complete copy of the original database
+    - How data partitions:
+        - Range-based approach
+            - data split according to ranges
+    - Determing how data is partitioned among shards is done using a shard key
+- __Challenges with Sharding__
+    - It can be complex to ensure related table with related data end up in the same shard when dealing with hundreds of tables
+    - Challenge in maintaing ACID properties in RDMS
+        - they are not designed fo distribution
+        - MySQL, PostgreSQL do not inherently support sharding
+    - NoSQL, designed with horizontal scaling in mind, are better suited for sharding
+        - As they do not have the same constraints as relational databases.
+        - They offer eventual consistency, where data consistency across nodes is achieved over time.
+    - 
