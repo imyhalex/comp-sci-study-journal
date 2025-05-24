@@ -377,3 +377,128 @@ class Solution:
             j += 1
         return i == len(s)
 ```
+
+## 11. Container With Most Water[[Link](https://leetcode.com/problems/container-with-most-water/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/max-water-container)]
+
+```python
+class Solution:
+    def maxArea(self, height: List[int]) -> int:
+        l, r = 0, len(height) - 1
+        res = 0
+
+        while l < r:
+            area = min(height[l], height[r]) * (r - l) 
+            res = max(res, area)
+
+            if height[l] <= height[r]:
+                l += 1
+            else:
+                r -= 1
+                    
+        return res
+```
+
+## 42. Trapping Rain Water[[Link](https://leetcode.com/problems/trapping-rain-water/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/trapping-rain-water)]
+
+```python
+# two pointers
+# time: O(n); space: O(1)
+class Solution:
+    def trap(self, height: List[int]) -> int:
+        if not height:
+            return 0
+
+        l, r = 0, len(height) - 1
+        max_left, max_right = height[l], height[r]
+
+        res = 0
+        while l < r:
+            if max_left < max_right:
+                l += 1
+                max_left = max(max_left, height[l])
+                res += max_left - height[l]
+            else:
+                r -= 1
+                max_right = max(max_right, height[r])
+                res += max_right - height[r]
+        
+        return res
+```
+
+## 26. Remove Duplicates from Sorted Array[[Link](https://leetcode.com/problems/remove-duplicates-from-sorted-array/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/remove-duplicates-from-sorted-array)]
+
+```python
+class Solution:
+    def removeDuplicates(self, nums: List[int]) -> int:
+        l = 1
+        for r in range(1, len(nums)):
+            if nums[r] != nums[r - 1]:
+                nums[l] = nums[r]
+                l += 1
+        return l
+```
+
+## 80. Remove Duplicates from Sorted Array II[[Link](https://leetcode.com/problems/remove-duplicates-from-sorted-array-ii/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/solutions/remove-duplicates-from-sorted-array-ii)]
+
+```python
+class Solution:
+    def removeDuplicates(self, nums: List[int]) -> int:
+        l = 0
+        for r in range(len(nums)):
+            # l < 2 means we have added fewer than 2 elements
+            # so there’s no way we have more than 2 duplicates yet
+            if l < 2 or nums[r] != nums[l - 2]:
+                nums[l] = nums[r]
+                l += 1
+        return l
+```
+
+## 74. Search a 2D Matrix[[Link](https://leetcode.com/problems/search-a-2d-matrix/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/search-2d-matrix)]
+- hint: flatten the matix, indexing use same concept like hashing matrix[mid // cols][mid % cols]
+
+```python
+# based on
+# arr = [1, 3, 3, 4, 5, 6, 7, 8]
+
+# def binary_search(arr, tareget):
+#     l, r = 0, len(arr) - 1
+
+#     while l <= r:
+#         mid = (l + r) // 2
+
+#         if target > arr[mid]:
+#             l = mid + 1
+#         elif target < arr[mid]:
+#             r = mid - 1
+#         else:
+#             return mid
+#     return - 1
+
+# time: O(log(n * m))
+class Solution:
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        rows, cols = len(matrix), len(matrix[0])
+
+        l, r = 0, rows * cols - 1
+        while l <= r:
+            mid = (r + l) // 2
+            mid_val = matrix[mid // cols][mid % cols]
+            
+            if target > mid_val:
+                l = mid + 1
+            elif target < mid_val:
+                r = mid - 1
+            else:
+                return True
+        return False
+```
