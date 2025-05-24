@@ -15,7 +15,6 @@
         - Consistency
             - Ensure data integrity
             - Refers to the adherence to predefined rules and constraints that maintain the validity of the data throughout the execution of multiple transactions
-            - 
         - Isolation
             - refers to an intermediate state of transaction, such that a transaction is invisible to other transactions
             - transactions that run concurrently appear to be serialized
