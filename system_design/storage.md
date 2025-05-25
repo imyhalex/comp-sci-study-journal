@@ -117,4 +117,3 @@
     - NoSQL, designed with horizontal scaling in mind, are better suited for sharding
         - As they do not have the same constraints as relational databases.
         - They offer eventual consistency, where data consistency across nodes is achieved over time.
-    - 
