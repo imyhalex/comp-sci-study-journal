@@ -171,3 +171,34 @@
         Continuing within the leader-follower paradigm, in the absence of a network partition, we must opt to favor either latency or 
         consistency. This means that users will either receive consistent data or data with low latency.
         ```
+# Object Storage[[Link](https://neetcode.io/courses/system-design-for-beginners/18)]
+- More akin to file storage systems rather than traditional databases
+- __Diff in DB and Object Storage__
+    - Object Storage
+        - the concept of folder doesn't exist
+        - non-hierachical structure
+            - objects are stored in flat address space
+                - facilitates easier scalability compared to file storage systems
+                ```text
+                Object storage evolved from BLOB (Binary Large Object) storage and is commonly used for storing items such as 
+                images, videos, and database backups. Prominent examples include AWS S3 and Google Cloud Storage.
+                ```
+        - treats each piece of data as an object, like:
+            - actual data
+            - metadata
+            - unique identifier
+        - when retriving data, direct read from the object store itself are typically not performed
+            - a network HTTP request is made directly to the object storage to fetch the data
+    - DB
+        - hierachical structure
+        - From a design perspective:
+            ```text
+           It's crucial to note that storing images or videos in a database is typically not a recommended practice. Querying 
+           for specific images or videos in a database is rare, and storing such data in a database can hinder performance, 
+           increase storage requirements, and result in frequent read and write operations on the database.
+
+           Traditional RDBMSs are not optimized for handling large files, but object storage emerges as a solution to this 
+           challenge. It is specifically designed to handle unstructured data efficiently and is well-suited for 
+           storing large files. One significant advantage of using object-based storage is its scalability, allowing for easy 
+           scaling of the flat architecture without encountering the limitations associated with file storage.
+            ```
