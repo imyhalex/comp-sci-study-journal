@@ -502,3 +502,67 @@ class Solution:
                 return True
         return False
 ```
+
+## 374. Guess Number Higher or Lower[[Link](https://leetcode.com/problems/guess-number-higher-or-lower/description/)]
+- video explaination[[Link](https://neetcode.io/problems/guess-number-higher-or-lower)]
+
+```python
+class Solution:
+    def guessNumber(self, n: int) -> int:
+        l, r = 1, n
+        while l <= r:
+            mid = (l + r) // 2
+            if guess(mid) == 1:
+                l = mid + 1
+            elif guess(mid) == -1:
+                r = mid - 1
+            else:
+                return mid
+        return -1
+```
+
+## 153. Find Minimum in Rotated Sorted Array[[Link](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/description/?envType=study-plan-v2&envId=top-interview-150)]
+- video explaination[[Link](https://neetcode.io/problems/find-minimum-in-rotated-sorted-array)]
+
+```python
+# never let l, r pointer to overlap
+# so when break out the loop, the nums[l] will be the smallest
+class Solution:
+    def findMin(self, nums: List[int]) -> int:
+        l, r = 0, len(nums) - 1
+        while l < r:
+            mid = (l + r) // 2
+            if nums[mid] < nums[r]:
+                r = mid
+            else:
+                l = mid + 1
+        return nums[l]
+```
+
+## *33. Search in Rotated Sorted Array[[Link](https://leetcode.com/problems/search-in-rotated-sorted-array/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/find-target-in-rotated-sorted-array)]
+
+```python
+class Solution:
+    def search(self, nums: List[int], target: int) -> int:
+        l, r = 0, len(nums) - 1
+        while l <= r:
+            mid = l + (r - l) // 2
+            if target == nums[mid]:
+                return mid
+            # check which sorted portion we're in
+            # left portion
+            if nums[l] <= nums[mid]:
+                if target > nums[mid] or target < nums[l]:
+                    l = mid + 1
+                else:
+                    r = mid - 1
+            # right
+            else:
+                if target < nums[mid] or target > nums[r]:
+                    r = mid - 1
+                else:
+                    l = mid + 1
+        return -1
+```
