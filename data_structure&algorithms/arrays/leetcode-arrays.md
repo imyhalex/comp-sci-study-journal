@@ -410,6 +410,7 @@ class Solution:
 # time: O(n); space: O(1)
 class Solution:
     def trap(self, height: List[int]) -> int:
+        # handle a case when no values in list
         if not height:
             return 0
 
@@ -418,6 +419,7 @@ class Solution:
 
         res = 0
         while l < r:
+            # the code shown below logic, take the min(l, r) - h[i]
             if max_left < max_right:
                 l += 1
                 max_left = max(max_left, height[l])
