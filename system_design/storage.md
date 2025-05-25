@@ -117,3 +117,57 @@
     - NoSQL, designed with horizontal scaling in mind, are better suited for sharding
         - As they do not have the same constraints as relational databases.
         - They offer eventual consistency, where data consistency across nodes is achieved over time.
+
+# CAP Theorem
+- CAP stands for Consistency, Availablity, and Partition Tolerance
+    - the concept suggests that a distributed system can only ensure two out of these three guarantees simultaneously
+        - either Parition Tolerance or Availability, or Partition Tolerance and Consistency, but never all three at once
+    - `Partition Tolerance`
+        - Partition in a distributed system arises when a communication breakdown between the leader and follower nodes prevents the leader from updating the follower. various factors lead this include:
+            - network failure
+            - hardware issue
+            - etc...
+        - If a system demonstrates partition tolerance, it implies that it can persist in functioning despite network failures, thereby avoiding a total system collapse.
+    - `Consistency`
+        - in the context of the CAP theorem, refers to the uniformity of data between the leader and follower nodes. This should not be confused with consistency in `ACID`.
+        - Ensures that all nodes within the system perceive the data identically at any given moment.
+            - in the event of a data update, the clients will always access consistent data
+        - Regardless of the node from which they fetch the data, the information will remain consistent across all potential data-reading nodes. Every read will retrieve the most recent written data.
+        - If our system remains partitioned and data is written to the leader database, a client reading from the leader database will receive the most recent data.
+            - However, since updates to the follower database are blocked, reading from it could yield outdated data.
+                - A possible solution could be to **render the follower node redundant** (to prevent access from blocked node), ensuring no outdated data is read.
+    - `Availability`
+        - Differs from its definition in ACID, refers to every system request receives a response: be it successful or a failure, regardless of system faults.
+            - ensures the system stays operational and can manage requests even amid failures
+- __Consistency or Availability__
+    - Availability over Consistency
+        - Systems such as university's Learning Managment System:
+            - High Availability might be more crucial
+                ```text
+                For instance, if a student is attempting to submit an assignment, the LMS must be available to accept the 
+                submission. Even if there's a minor delay in updating the grade, it is unlikely to impact the operation negatively.
+                ```
+    - Consistency over Availability
+        - Some cases need data is absolutely crucial, such as banking and healthcare system
+            - consistency should be prioritized
+                ```text
+                In a banking system, the account balance must be correct and consistent across all nodes. If a network 
+                partition occurs, it might be acceptable to stop the operations, but still ensuring that the data remains 
+                consistent. In a similar manner, in a healthcare setting, having accurate and up-to-date medical 
+                records is a matter of life and death and inconsistent data will lead to severe consequences, so prioritizing 
+                consistency is critical.
+                ```
+    - Note:
+        ```text
+        Many modern databases aim to strike a balance between consistency and availability, rather than strictly adhering to 
+        being CP or AP. These databases often provide "tunable consistency", permitting the system to dynamically adjust 
+        between being more consistent and less available, or more available and less consistent.
+        ```
+- PACELC Theorem
+    - "Given P (a network partition), choose A (availability) or C (consistency). Else, favor low Latency or Consistency."
+        ```text
+        To delve deeper, when a network partition occurs, we have two choices: prioritize either availability or consistency.
+
+        Continuing within the leader-follower paradigm, in the absence of a network partition, we must opt to favor either latency or 
+        consistency. This means that users will either receive consistent data or data with low latency.
+        ```

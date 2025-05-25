@@ -566,3 +566,89 @@ class Solution:
                     l = mid + 1
         return -1
 ```
+
+## 875. Koko Eating Bananas[[Link](https://leetcode.com/problems/koko-eating-bananas/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/eating-bananas)]
+
+```python
+class Solution:
+    def minEatingSpeed(self, piles: List[int], h: int) -> int:
+        l, r = 1, max(piles)
+        res = r
+
+        while l <= r:
+            k = l + (r - l) // 2
+
+            total_time = 0
+            for p in piles:
+                total_time += math.ceil(float(p) / k)
+            if total_time <= h:
+                res = k
+                r = k - 1
+            else:
+                l = k + 1
+        return res
+```
+
+## 981. Time Based Key-Value Store[[Link](https://leetcode.com/problems/time-based-key-value-store/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/time-based-key-value-store)]
+
+```python
+class TimeMap:
+
+    def __init__(self):
+        self.hash_table = {} # key: list of [val, timestamp]
+
+    def set(self, key: str, value: str, timestamp: int) -> None:
+        if key not in self.hash_table:
+            self.hash_table[key] = []
+        self.hash_table[key].append([value, timestamp])
+
+    def get(self, key: str, timestamp: int) -> str:
+        res = ""
+        values = self.hash_table.get(key, [])
+
+        # run binary search
+        l, r = 0, len(values) - 1
+        while l <= r:
+            mid = l + (r - l) // 2
+            if values[mid][1] <= timestamp:
+                res = values[mid][0]
+                l = mid + 1
+            else:
+                r = mid - 1
+        return res
+
+
+# Your TimeMap object will be instantiated and called as such:
+# obj = TimeMap()
+# obj.set(key,value,timestamp)
+# param_2 = obj.get(key,timestamp)
+```
+
+## *4. Median of Two Sorted Arrays[[Link](https://leetcode.com/problems/median-of-two-sorted-arrays/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/median-of-two-sorted-arrays)]
+
+```python
+# brute force way
+# time: O((n + m) log(n + m)); space: O(n + m)
+class Solution:
+    def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
+        len1 = len(nums1)
+        len2 = len(nums2)
+        merged = nums1 + nums2
+        merged.sort()
+        
+        totalLen = len(merged)
+        if totalLen % 2 == 0:
+            return (merged[totalLen // 2 - 1] + merged[totalLen // 2]) / 2.0
+        else:
+            return merged[totalLen // 2]
+
+class Solution:
+    def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
+        
+```
