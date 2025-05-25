@@ -342,6 +342,7 @@ class Solution:
         nums.sort()
 
         for i, num in enumerate(nums):
+            # Notice that the solution set must not contain duplicate triplets.
             if i > 0 and num == nums[i - 1]:
                 continue
             
