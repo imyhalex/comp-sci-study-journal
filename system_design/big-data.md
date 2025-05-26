@@ -45,4 +45,40 @@
         ```
     - One more benefit: can introduce a completely different API as a subscriber without needing to alter pub/sub architecture
 # MapReduce[[Link](https://neetcode.io/courses/system-design-for-beginners/20)]
-
+- Pertains to big data processing, enabling the handling of extensive amounts of data, perform computation, and produce the result
+- A programming model deal with a specific implementation designed specifically for processing and generating large datasets
+    - beneficial for distributed computing on vast sets of data soanning terabytes or even petabytes
+- Two common methods how to process data
+    - __Batch Processing__
+        - data is processd in substantial groups
+        - all data is accumulated over a specific period and subsequently processed as a unit
+        - A practical example would be counting the frequency of each word occurring in a book, or a series of books.
+        - dosen't occur in real-time
+        - takes place when batch jobs are executed
+    - __Stream Processing__
+        - involves processing data in real-time as it is received
+        - instead of being stored, data is processed individually in it raw, unbatched form
+        - example:
+            - redacting a customer's credit card expiration date or last name upon payment. This task cannot be performed in a batch and must be done in real-time, since this information needs to be immediately updated for subsequent operations.
+- __Function and Implementation__
+    - Framework such as Apache Hadoop, the system typically consist of one "master" node and mutliple "worker" nodes
+        - `Master Node:`
+            - tasked with managing the distribution of the MapReduce job accross the worker nodes
+            - keeps an eye on the status of each task and re-assigns task if any failure occur
+        - `Worker Node:`
+            - nodes that processing data
+            - masted node assigns each worker node a portion of the data and a copy of MapReduce program
+        - `Map Phase`
+            - each worker nodes execute the Map operation on its assigned data portion
+            - entail mapping each word to a key-value pair where the key is the word, and the value is frequency of the word
+        - `Shuffle and Sort Phase`
+            - worker node reorganize the key-value pairs so that all values associated with the same key are grouped together
+            - This process is known as the shuffle and sort phase. So, for instance, given the word "The", if worker 1 processed 3 occurrences, worker 2 processed 7, and worker 3 processed 100, these would be grouped together during this phase.
+        - `Reduce Phase`
+            - is performed on each group of values, producing a final count for each word.
+            - this result is then written to some form of sotrage or database
+- Note:
+    - It does come with limitaions:
+        - restrictive data processing model
+        - works well with data that fits into the Map and Reduce steps
+            - for data processing task that don't align with this model, alternative models may prove to be more suitable
