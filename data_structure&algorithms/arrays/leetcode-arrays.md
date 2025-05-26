@@ -684,3 +684,123 @@ class Solution:
                 l = i + 1
         return -1
 ```
+
+## 1343. Number of Sub-arrays of Size K and Average Greater than or Equal to Threshold[[Link](https://leetcode.com/problems/number-of-sub-arrays-of-size-k-and-average-greater-than-or-equal-to-threshold/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/number-of-sub-arrays-of-size-k-and-average-greater-than-or-equal-to-threshold)]
+
+```python
+class Solution:
+    def numOfSubarrays(self, arr: List[int], k: int, threshold: int) -> int:
+        res = 0
+        curr_sum = sum(arr[:k - 1])
+
+        for l in range(len(arr) - k + 1):
+            curr_sum += arr[l + k - 1]
+            if (curr_sum / k) >= threshold:
+                res += 1
+            curr_sum -= arr[l]
+
+        return res
+```
+
+## 209. Minimum Size Subarray Sum[[Link](https://leetcode.com/problems/minimum-size-subarray-sum/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/minimum-size-subarray-sum)]
+
+```python
+class Solution:
+    def minSubArrayLen(self, target: int, nums: List[int]) -> int:
+        l, total = 0, 0
+        length = float("inf")
+
+        for r in range(len(nums)):
+            total += nums[r]
+            while total >= target:
+                length = min(length, r - l + 1)
+                total -= nums[l]
+                l += 1
+        
+        return 0 if length == float("inf") else length
+```
+
+## 3. Longest Substring Without Repeating Characters[[Link](https://leetcode.com/problems/longest-substring-without-repeating-characters/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/longest-substring-without-duplicates)]
+
+```python
+# time & space: O(n)
+class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        l, length = 0, 0
+        window = set() 
+
+        for r in range(len(s)):
+            while s[r] in window:
+                window.remove(s[l])
+                l += 1
+            window.add(s[r])
+            length = max(length, r - l + 1)
+        
+        return length
+```
+
+## 424. Longest Repeating Character Replacement[[Link](https://leetcode.com/problems/longest-repeating-character-replacement/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/longest-repeating-substring-with-replacement)]
+
+```python
+class Solution:
+    def characterReplacement(self, s: str, k: int) -> int:
+        count = {}
+        res = 0
+
+        l = 0
+        for r in range(len(s)):
+            count[s[r]] = 1 + count.get(s[r], 0)
+
+            while (r - l + 1) - max(count.values()) > k:
+                count[s[l]] -= 1
+                l += 1
+
+            res = max(res, r - l + 1)
+        return res
+```
+
+## 121. Best Time to Buy and Sell Stock[[Link]](https://leetcode.com/problems/best-time-to-buy-and-sell-stock/description/?envType=study-plan-v2&envId=top-interview-150)
+
+- video explaination[[Link](https://neetcode.io/problems/buy-and-sell-crypto)]
+```python
+class Solution:
+    def maxProfit(self, prices: List[int]) -> int:
+        l, r = 0, 1 # left=buy, right=sell
+        res = 0
+
+        while r < len(prices):
+            if prices[l] < prices[r]:
+                profit = prices[r] - prices[l]
+                res = max(res, profit)
+            else:
+                l = r
+            r += 1
+
+        return res
+```
+
+## 567. Permutation in String[[Link](https://leetcode.com/problems/permutation-in-string/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/permutation-string)]
+```python
+# brute-force
+class Solution:
+    def checkInclusion(self, s1: str, s2: str) -> bool:
+        s1 = sorted(s1)
+
+        for i in range(len(s2)):
+            for j in range(i, len(s2)):
+                sub_str = s2[i:j + 1]
+                sub_str = sorted(sub_str)
+                if s1 == sub_str:
+                    return True
+        return False
+```

@@ -100,3 +100,67 @@ def isCorrect(n):
     else:
         return 0
 ```
+
+## Sliding Window Fixed Size[[Link](https://neetcode.io/courses/advanced-algorithms/1)]
+
+- Q: Given an array, return true if there are two elements within a window of size k that are equal.
+
+```python
+# brute-force
+def closeDuplicatesBruteForce(nums, k):
+    for L in range(len(nums)):
+        for R in range(L + 1, min(len(nums), L + k)):
+            if nums[L] == nums[R]:
+                return True
+    return False
+
+# improved with hasing, use hashset
+# time: O(n); space O(1)
+def closeDuplicates(nums, k):
+    window = set()
+    l = 0
+
+    for r in range(len(nums)):
+        if r - l + 1 > k:
+            window.remove(nums[l])
+            l += 1 
+        if nums[r] in window:
+            return True
+        window.add(nums[r])
+
+    return False
+```
+
+## Sliding Window Variable Size[[Link](https://neetcode.io/courses/advanced-algorithms/2)]
+- Q: Find the length of the longest subarray with the same value in each position.
+
+```python
+def longestSubArray(nums):
+    length = 0
+    l = 0
+
+    for r in range(len(nums)):
+        if nums[l] != nums[r]:
+            l = r
+        length = max(length, r - l + 1)
+
+    return length
+```
+
+- Q: Find the minimum length subarray, where the sum is greater than or equal to the target. Assume all values are positive.
+
+```python
+# time: O(n)
+def shortestSubArray(nums, target):
+    l, total = 0, 0
+    length = float("inf")
+
+    for r in range(len(nums)):
+        total += nums[r]
+        while total >= target:
+            length = min(length, r - l + 1)
+            total -= nums[l]
+            l += 1
+            
+    return 0 if length == float("inf") else length
+```
