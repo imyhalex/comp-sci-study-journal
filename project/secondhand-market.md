@@ -226,3 +226,16 @@ This setup ensures your MongoDB-based real-time marketplace is:
 ✅ Fault-tolerant (Kafka/NATS for events, Redis for real-time updates)
 ✅ Horizontally scalable (Kubernetes, MongoDB’s sharding & replication)
 ✅ Robust and observable (Prometheus, Grafana, ELK/Loki)
+
+
+## MongoDB Command Lines in MacOS
+```text
+first time starter: sudo mongod --dbpath /Users/alex.y.s/data/db
+
+
+mongod --dbpath /Users/alex.y.s/data/db
+
+
+brew services start mongodb-community
+brew services status mongodb-community
+```
