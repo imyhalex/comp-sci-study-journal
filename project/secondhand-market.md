@@ -236,6 +236,19 @@ first time starter: sudo mongod --dbpath /Users/alex.y.s/data/db
 mongod --dbpath /Users/alex.y.s/data/db
 
 
+https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-os-x/
+start with Homebrew and let it run as a background
+# start & check status
 brew services start mongodb-community
 brew services status mongodb-community
+brew services stop mongodb-community
+
+# download formulae
+brew search mongodb-community
+brew install mongodb-community@8.0
+
+
+
+# Common opreations
+show dbs
 ```
