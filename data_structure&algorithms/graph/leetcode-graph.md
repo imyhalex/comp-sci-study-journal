@@ -141,7 +141,7 @@ class Solution:
                     visited.add((r + dr, c + dc))
             length += 1
         
-        return -1
+        return -1   
 ```
 
 ## 994. Rotting Oranges[[Link](https://leetcode.com/problems/rotting-oranges/description/)]
