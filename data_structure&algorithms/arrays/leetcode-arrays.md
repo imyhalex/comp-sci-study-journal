@@ -879,11 +879,12 @@ class Solution:
             return ""
         
         count_t, window = {}, {}
+        # we need to use count_t hashmap to compare with s
         for c in t:
             count_t[c] = 1 + count_t.get(c, 0)
         
         have, need = 0, len(count_t)
-        res, res_len = [-1, -1], float('inf')
+        res, res_len = [-1, -1], float('inf') # one store the result pointer, one store the
         l = 0
         for r in range(len(s)):
             c = s[r]

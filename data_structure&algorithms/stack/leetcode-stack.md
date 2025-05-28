@@ -55,3 +55,27 @@ class MinStack:
     def getMin(self) -> int:
         return self.min_stack[-1]
 ```
+
+## 150. Evaluate Reverse Polish Notation[[Link](https://leetcode.com/problems/evaluate-reverse-polish-notation/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/evaluate-reverse-polish-notation)]
+
+```python
+class Solution:
+    def evalRPN(self, tokens: List[str]) -> int:
+        stack = []
+        for t in tokens:
+            if t == "+":
+                stack.append(stack.pop() + stack.pop())
+            elif t == "-":
+                a, b = stack.pop(), stack.pop()
+                stack.append(b - a) 
+            elif t == "*":
+                stack.append(stack.pop() * stack.pop())
+            elif t == "/":
+                a, b = stack.pop(), stack.pop()
+                stack.append(int(float(b) / a))
+            else:
+                stack.append(int(t))
+        return stack[0]
+```
