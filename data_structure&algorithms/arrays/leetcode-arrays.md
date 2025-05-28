@@ -525,7 +525,7 @@ class Solution:
 ```
 
 ## 153. Find Minimum in Rotated Sorted Array[[Link](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/description/?envType=study-plan-v2&envId=top-interview-150)]
-- video explaination[[Link](https://neetcode.io/problems/find-minimum-in-rotated-sorted-array)]
+- video explaination[[Link](https://neetcode.io/pr  oblems/find-minimum-in-rotated-sorted-array)]
 
 ```python
 # never let l, r pointer to overlap
