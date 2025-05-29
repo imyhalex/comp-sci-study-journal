@@ -79,3 +79,63 @@ class Solution:
                 stack.append(int(t))
         return stack[0]
 ```
+
+## 739. Daily Temperatures[[Link](https://leetcode.com/problems/daily-temperatures/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/daily-temperatures)]
+
+```python
+class Solution:
+    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
+        res = [0] * len(temperatures)
+        stack = [] # pair: [temp, index]
+
+        for i, t in enumerate(temperatures):
+            while stack and t > stack[-1][0]:
+                stack_t, stack_idx = stack.pop()
+                res[stack_idx] = (i - stack_idx)
+            stack.append([t, i])
+        return res
+```
+
+## 853. Car Fleet[[Link](https://leetcode.com/problems/car-fleet/description/)]
+
+- video explainationp[[Link](http://neetcode.io/problems/car-fleet)]
+
+```python
+# time: O(n log n); space: O(n)
+class Solution:
+    def carFleet(self, target: int, position: List[int], speed: List[int]) -> int:
+        pairs = [(p, s) for p, s in zip(position, speed)]
+        pairs.sort(reverse=True) 
+        stack = []
+
+        for p, s in pairs:
+            stack.append((target - p) / s) # calculate time
+            # does it overlap with other one
+            if len(stack) >= 2 and stack[-1] <= stack[-2]:
+                stack.pop()
+        return len(stack)
+```
+
+## 71. Simplify Path[[Link](https://leetcode.com/problems/simplify-path/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/simplify-path)]
+
+```python
+# time & space: O(n)
+class Solution:
+    def simplifyPath(self, path: str) -> str:
+        stack = []
+        paths = path.split("/")
+
+        for cur in paths:
+            if cur == "..":
+                if stack:
+                    stack.pop()
+            elif cur != "" and cur != ".":
+                stack.append(cur)
+        
+        return "/" + "/".join(stack)
+        
+```

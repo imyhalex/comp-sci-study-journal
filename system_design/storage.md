@@ -171,6 +171,7 @@
         Continuing within the leader-follower paradigm, in the absence of a network partition, we must opt to favor either latency or 
         consistency. This means that users will either receive consistent data or data with low latency.
         ```
+        
 # Object Storage[[Link](https://neetcode.io/courses/system-design-for-beginners/18)]
 - More akin to file storage systems rather than traditional databases
 - __Diff in DB and Object Storage__
