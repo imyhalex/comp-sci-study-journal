@@ -203,3 +203,65 @@
            storing large files. One significant advantage of using object-based storage is its scalability, allowing for easy 
            scaling of the flat architecture without encountering the limitations associated with file storage.
             ```
+
+## Supplementaries
+- Consistency Patterns:
+    - Weak Consistency:
+        - After a write, reads may or may not see it.
+            - A best approach is taken
+        - Does not garantee all clients will see the same version of the data at the same time, or that updates will be reflected immediately across all nodes
+        - Means temporay lag between a write operation and when the update is visible to all clients
+        - This approach works well in:
+            - real-time use cases such as VoIP
+                - Voice over Internet Protocol (VoIP), is a technology that allows you to make voice calls using a broadband Internet connection instead of a regular (or analog) phone line.
+            - video chat
+            - real-time multiplayer games
+    - Eventual Consistency
+        - Reads will eventually see it. Data is replicated asynchronously
+        - This approach seen in systems such as DNS and email.
+        - Works well in highly avaible system
+            - Seach engine indexing
+            - DNS, SMTP, snail mail
+            - Amazon S3, SimpleDB
+    - Strong Consistency
+        - After a write, read will see it. Data is replicated synchronously
+        - This approach seen in file systems and RDBMS.
+        - Works well in system that need transactions.
+            - What is transactions?
+                - A sequence of operations that are treated as a single unit or work
+                - Has ACID properties to ensure realiability and consistency
+- Availability Patterns
+    - Two complementary patterns to support high availbility: fail-over and replication
+    - Fail-Over
+        - Definition: When a primary system (like server or databse) fails, the system automatically switches to backup (secondary) system to keep things running smoothly 
+        - Example: if main db goes down, system automatically switches to a replica to keep handing requests
+        - Goal: Minimize downtime and ensure uninterrupted service
+        - __Active-passive__
+            - Heatbeats are sent between the active and the passive server (standby)
+            - if the headtbeats interrputed, the passive server takes over the active's IP address and resume service
+            - also be referred to as master-slave (leader-follower) failover
+        - __Active-active__
+            - Both servers are managing traffic, spreading the load between them
+            - if the server are public-facing, the `DNS` would need to know about the public IPs of both servers.
+            - if the servers are internal-facing, `application logic` would need to know about both servers.
+            - also be referred to master-master failover
+        - __Disadvantage for failover:__
+            - Adds more hardware and additional complexity
+            - Potential loss of data if the active system fails `before` any newly written data can be replicated to the passive
+    - Replication
+        - leader-follower vs. leader-leader
+    - Availability in parallel vs. in sequence:
+        - In sequence:
+            - overall availability decreases when two components with availabilty less than 100% are in sequence:
+                ```text
+                Availability (Total) = Availability (Foo) * Availability (Bar)
+                ```
+            - if both Foo and Bar each had 99.9% availability, their total availability in sequence would be 99.8%.
+        - In parallel:
+            - overall availability increase when two component with availability less than 100% are in parallel
+                ```text
+                Availability (Total) = 1 - (1 - Availability (Foo)) * (1 - Availability (Bar))
+                ```
+            - if both Foo and Bar each had 99.9% availability, their total availability in parallel would be 99.9999%.
+    - What is Failback?
+        - Definition: After the primary system has recovered from the failure, the system swiches back from the backup system to the primary system.
