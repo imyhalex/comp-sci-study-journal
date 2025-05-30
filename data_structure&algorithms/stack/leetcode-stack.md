@@ -139,3 +139,82 @@ class Solution:
         return "/" + "/".join(stack)
         
 ```
+
+## 84. Largest Rectangle in Histogram[[Link](https://leetcode.com/problems/largest-rectangle-in-histogram/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/largest-rectangle-in-histogram)]
+
+```python
+# time: O(n); Space:O(n)
+class Solution:
+    def largestRectangleArea(self, heights: List[int]) -> int:
+        max_area = 0
+        stack = [] # pair: (index, height)
+
+        for i, h in enumerate(heights):
+            start_idx = i
+            while stack and stack [-1][1] > h:
+                index, height = stack.pop()
+                max_area = max(max_area, height * (i - index))
+                start_idx = index
+            stack.append((start_idx, h))
+        
+        # backward extended
+        for i, h in stack:
+            max_area = max(max_area, h * (len(heights) - i))
+        
+        return max_area
+```
+
+## 224. Basic Calculator[[Link](https://leetcode.com/problems/basic-calculator/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link]()]
+
+```python
+# time & space: O(n)
+class Solution:
+    def calculate(self, s: str) -> int:
+        stack = []
+        operand, res = 0, 0
+        sign = 1 # 1 means positive, -1 means negative
+
+        for c in s:
+            if c.isdigit():
+                # forming operand, since it could be more than one digit
+                operand = (operand * 10) + int(c)
+            elif c == "+":
+                # evaluate the expression to the left
+                # with result, sign, operand
+                res += sign * operand
+                # save the recently encontered "+" sign 
+                sign = 1
+                # reset the operand
+                operand = 0
+            elif c == "-":
+                res += sign * operand
+                sign = -1
+                operand = 0
+            elif c == "(":
+                # push the result and sign to the stack, for later
+                # push the result first, then sign 
+                stack.append(res) 
+                stack.append(sign) 
+                # reset the operand and result, as if new evaluation begins
+                # for the new sub-expression
+                sign = 1
+                res = 0
+            elif c == ")":
+                # eval the express to the left
+                # with result, sign, and operand
+                res += sign * operand
+                # ")" marks end of the expression within a set of parentheses
+                # its result is multiplied with sign on top of stack 
+                # as stack.pop() is the sign before parenthese
+                res *= stack.pop() # pop 1, sign
+                # then add to the next operand on the top
+                # as stack.pop() is the result cacluated before this parenthesis
+                res += stack.pop() # pop 2, operand
+                operand = 0
+        
+        return res + sign * operand
+```
