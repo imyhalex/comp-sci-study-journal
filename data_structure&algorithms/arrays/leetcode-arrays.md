@@ -727,7 +727,7 @@ class Solution:
 ## 3. Longest Substring Without Repeating Characters[[Link](https://leetcode.com/problems/longest-substring-without-repeating-characters/description/?envType=study-plan-v2&envId=top-interview-150)]
 
 - video explaination[[Link](https://neetcode.io/problems/longest-substring-without-duplicates)]
-
+- hint: main logic is, if the right pointer chacter is in hashset, then iterate through the window using left pointer and pop the left pointer charater when find it
 ```python
 # time & space: O(n)
 class Solution:
@@ -748,29 +748,34 @@ class Solution:
 ## 424. Longest Repeating Character Replacement[[Link](https://leetcode.com/problems/longest-repeating-character-replacement/description/)]
 
 - video explaination[[Link](https://neetcode.io/problems/longest-repeating-substring-with-replacement)]
+- hint: the offset of (r - l + 1) - max(count.values()) can get the val compare to k, if less than k, shrink the window using left pointer
 
 ```python
 class Solution:
     def characterReplacement(self, s: str, k: int) -> int:
-        count = {}
-        res = 0
+        l, res = 0, 0
+        count = {} # pair in character, frequency
 
-        l = 0
         for r in range(len(s)):
             count[s[r]] = 1 + count.get(s[r], 0)
 
             while (r - l + 1) - max(count.values()) > k:
                 count[s[l]] -= 1
                 l += 1
-
+            
             res = max(res, r - l + 1)
+        
         return res
 ```
 
 ## 121. Best Time to Buy and Sell Stock[[Link]](https://leetcode.com/problems/best-time-to-buy-and-sell-stock/description/?envType=study-plan-v2&envId=top-interview-150)
 
 - video explaination[[Link](https://neetcode.io/problems/buy-and-sell-crypto)]
+- hint: two pointers, if the value of r - l > 0, then compare, if value of r - l < 0, then reset the l = r
+    - outside the conditions, the r should be iterate throught each price anyway, so r += 1
+
 ```python
+# time: O(n); space: O(1)
 class Solution:
     def maxProfit(self, prices: List[int]) -> int:
         l, r = 0, 1 # left=buy, right=sell
@@ -914,4 +919,49 @@ class Solution:
 
 ```python
 
+```
+
+## 239. Sliding Window Maximum[[Link](https://leetcode.com/problems/sliding-window-maximum/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/sliding-window-maximum?list=blind75)]
+
+```python
+# brute force
+# time: O(n * k); space: O(1), O(n - k + 1) for output array
+class Solution:
+    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
+        res = []
+
+        for i in range(len(nums) - k + 1):
+            max_val = nums[i]
+            for j in range(i, i + k):
+                max_val = max(max_val, nums[j])
+            res.append(max_val)
+
+        return res
+
+
+# deque
+# time & space: O(n)
+class Solution:
+    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
+        res = []
+        l = r = 0
+        q = deque() # contains index
+
+        while r < len(nums):
+            while q and nums[q[-1]] < nums[r]:
+                q.pop()
+            q.append(r)
+
+            # remove left val from window
+            if l > q[0]:
+                q.popleft()
+            
+            if (r + 1) >= k:
+                res.append(nums[q[0]])
+                l += 1
+            r += 1
+        
+        return res
 ```
