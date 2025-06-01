@@ -243,3 +243,48 @@
         - Ports
             - HTTP/HTTPS protocol already default to certain port number (HTTP: 80; HTTPS: 443), call implcitly
             - For non-standard port must be specified in the URL
+# Supplementaries
+- __DNS__
+    - Hierachical, with a few authoritative servers at the top of the level
+    - Thr router or ISP provides information about which DNS server to contact whe doing a lookup
+    - Lower levl DNS server cache mapping,
+    - DNS results can also cached by your browser or OS for a certain period of time
+        - NS record (name server): specifies the DNS server for your domain/subdomain
+        - MX record (mail exchange): specifies the mail server for accepting messages
+        - A record (address): points a name to an IP address
+        - CNAME (canonical): points a name to another name or CNAME (example.com to www.example.com) or to `A` record
+    - Some DNS can route traffic through various methods:
+        - Weight round-robin
+        - Latency-based
+        - Geolocation-based
+    - Disadvantage of DNS:
+        - Accessing DNS introduces slight delay although caching 
+        - DNS server management could be complex and is generally managed by government, ISPs (Internet Server Providers), and large companies
+- __CDN__
+    - A globally distributed network of proxy servers
+    - Generally, static files such as HTML/CSS/JS, photos, and videos are served from CDN, although some CDNs such as Amazon's CloudFront support dynamic content
+    - The site's DNS resolution wil tell client which server to contact
+    - Serving content to CDN signicantly improve performance in two ways:
+        - User receive content from data center close to them
+        - Servers do not have to serve requests that the CDN fulfills
+    - `Push CDNs`
+        - What: You (the content owner) manually upload (or push) your content to the CDN’s edge servers in advance.
+        - How it works:
+            - You decide which files to upload.
+            - You use FTP, APIs, or other methods to transfer them to the CDN.
+            - The CDN then stores these files at its edge locations, ready to serve them directly to users.
+        - Example: Good for large, static assets that don’t change often (e.g., video, software downloads).
+    - `Pull CDNs`
+        - What: The CDN only fetches (or pulls) content from your origin server when a user requests it.
+        - How it works:
+            - When a user requests a file, the CDN checks if it’s already cached at the edge.
+            - If not, it retrieves the file from your origin server (pulls it) and caches it for future requests.
+            - No need to upload all assets to the CDN in advance.
+        - Example: Great for dynamic content or assets that change often.
+    - Disadvanatage of CDN:
+        - Costs can be significantly depending on traffic
+        - Content might be stale if it is updated before the TTL expires it
+        - Require changing URLs for static content to point to the CDN
+- __Load Balancer__
+    - Distribute incoming client requests to computing resources such as application servers and databases
+    
