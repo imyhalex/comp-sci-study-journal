@@ -1,4 +1,4 @@
-# SQL[[Link](https://neetcode.io/courses/system-design-for-beginners/14)]
+`# SQL[[Link](https://neetcode.io/courses/system-design-for-beginners/14)]
 - __B+ Tree__
     - Multi-way trees that can have more than two children per node
     - Store all their data in the leaf nodes which are linked in a sorted order
