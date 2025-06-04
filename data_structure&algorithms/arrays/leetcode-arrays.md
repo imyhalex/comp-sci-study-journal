@@ -214,6 +214,7 @@ class Solution:
 - hint: a hashmap to record the num: freqnecy pair
 
 ```python
+# time & space: O(n)
 class Solution:
     def topKFrequent(self, nums: List[int], k: int) -> List[int]:
         count = {}

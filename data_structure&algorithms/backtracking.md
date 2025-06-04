@@ -249,12 +249,30 @@ class Solution:
                 p_copy.insert(j, nums[i])
                 res.append(p_copy)
         return res
+
+class Solution:
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        
+        def dfs(i):
+            if i == len(nums):
+                return [[]]
+            
+            res = []
+            perms = dfs(i + 1)
+            for p in perms:
+                for j in range(len(p) + 1):
+                    p_copy = p.copy()
+                    p_copy.insert(j, nums[i])
+                    res.append(p_copy)
+            return res
+        
+        return dfs(0)
 ```
 
 ### *47. Permutations II[[Link](https://leetcode.com/problems/permutations-ii/description/)]
 - vids explaination[[Link](https://neetcode.io/solutions/permutations-ii)]
 ```python
-# Time: O(n * n!)
+# Time & Space: O(n * n!)
 class Solution:
     def permuteUnique(self, nums: List[int]) -> List[List[int]]:
         nums.sort()
