@@ -72,3 +72,14 @@
 - Other ways like round-robin or weight round-robin are useful when caching is not a concern
 - This technique find applicability in scenarios such as Content Delivery Network (CDNs), particulary when it is necessary to route specific users to the same cache server in their respective regions.
 - Also applied to databased where a user's data reside on a specific server, and consistent hashing of that user to that server is desired
+
+# Supplementaries
+- __Reverse Proxy (web server)__
+    - Is a web server that centralizes internal services and provides unified interfaces to the public
+    - Load Balancer vs. Reverse Proxy
+        - Load balancer is a specialized reverse proxy that balance load
+        - Deploying a load balancer is useful when you have multiple servers. 
+        - Reverse proxy can be useful even with just one web server or application server
+    - Disadvantage: reverse proxy
+        - Introduce reverse proxy results in increase complexity
+        - A single reverse proxy is a single point of failure, configuring multiple reverse proxies (ie a failover) further increases complexity.

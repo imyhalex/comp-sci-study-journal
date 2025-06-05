@@ -314,4 +314,39 @@
         - Session/cookies
         - Round-robin or weight round robin
         - Layer 4
+            - layer 4 load balancer look at info at the `transport layer` to decide how to distribute request
+            - involves the source, destination IP address, and ports in the header but not the contents of the packet
         - Layer 7
+            - layer 7 load balancer look at the application layer to decided how to distribute requests
+            - involves the contents of the headers, message, and cookies
+            - Layer 7 load balancers terminate network traffic, reads the message, makes a load-balancing decision, then opens a connection to the selected server.
+            - layer 4 load balancing requires less time and computing resources than layer 7
+    - Horizontal scalilng
+        - can also help with horizontal scaling to improve peformance and availability
+    - Disadvantages (horizontal scaling):
+        - introduce complexity and involves cloning servers
+            - servers should be stateless: they should not contain any user-related data like sessions or profile picture
+            - sessions can be stored in a centralized data store such as a database (SQL or NoSQL) or a persistent cache (redis, memcached)
+        - downstream servers such as caches and database need to handle more simultaneous connections as upstream servers scale out
+    - Disadvantage (load balancer):
+        - LB become a performance bottleneck if it does not have enough resources or if it is not configured properly
+        - Introducing a load balancer to help eliminate a single point of failure results in increased complexity.
+            ```text
+            Single point of failure: A component (like one server) that, if it fails, causes the whole system to fail.
+            Load balancer: Solves this by distributing traffic across multiple servers — if one server fails, others can take over.
+            So why does it increase complexity?
+                - Even though it improves reliability, a load balancer adds:
+                - More components to configure and manage (e.g., HAProxy, Nginx, AWS ELB)
+                - Extra logic for health checks, routing, failover handling
+                - Security considerations, like SSL termination
+                - Monitoring and logging requirements
+            ```
+        - A single load balancer is a single point of failure, configuring multiple load balancers further increases complexity.
+            ```text
+            If you only have one load balancer, and it goes down, your entire system can become unreachable — that’s a single point of failure.
+            To fix that, you can set up multiple load balancers (e.g., one active, one standby or in a cluster), but that:
+                - Requires failover configuration
+                - Adds network routing complexity
+                - Requires state synchronization or DNS tricks
+                - Needs more monitoring and maintenance
+            ```

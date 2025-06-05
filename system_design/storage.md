@@ -117,6 +117,17 @@
     - NoSQL, designed with horizontal scaling in mind, are better suited for sharding
         - As they do not have the same constraints as relational databases.
         - They offer eventual consistency, where data consistency across nodes is achieved over time.
+- __Federation__
+    - Also called functional partitioning.
+    - Splits up database by function
+        - E.g: instead of a single, monolithic database, you could have three databases: forums, users, and products.
+    - Smaler DBs result in more data that can fit in memory, which in turn results in more cache hits due to improved cache locality
+    - With no single central master serializing writes you can write in parallel, increasing throughput.
+    - Disadvantages:
+        - is not effective if schema requires huge functions or tables
+        - need to update application logic to determine which database to read and write
+        - joining data from two databases is more complex with a server link.
+        - Federation adds more hardware and additional complexity.
 
 # CAP Theorem
 - CAP stands for Consistency, Availablity, and Partition Tolerance
@@ -204,7 +215,7 @@
            scaling of the flat architecture without encountering the limitations associated with file storage.
             ```
 
-## Supplementaries
+# Supplementaries
 - Consistency Patterns:
     - Weak Consistency:
         - After a write, reads may or may not see it.
@@ -265,3 +276,11 @@
             - if both Foo and Bar each had 99.9% availability, their total availability in parallel would be 99.9999%.
     - What is Failback?
         - Definition: After the primary system has recovered from the failure, the system swiches back from the backup system to the primary system.
+- Denormalization
+    - Add redudant data to database (redundant copies of data are written in multiple table) to improve read performance (avoid expensive joins)
+    - Disadvantage:
+        - data is duplicated
+        - constraints can help redundant copies of information stay in sync, which increase complexity of the databse design
+        - denormalized databse under heavy write load might peform worse than its normalized counterpart
+- SQL Tuning
+    - 

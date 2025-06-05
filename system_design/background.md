@@ -244,4 +244,23 @@
         - Latency is not exclusive to network
             - even exists within a computer's internal components such as RAM and each cache making requests from the CPU
 
-    
+
+# Supplementaries
+- __Applicaiton Layer__
+    - Separating from web layer from the application layer allows you to scale and configure bothe layer independently
+        - adding new API results in adding application servers without necessarily adding additional web servers
+            - The web and application layers aren’t microservices themselves, but they:
+                - Support a microservices architecture
+                - Route to or run microservices
+                - Benefit from being separated for scalability and maintainability
+        - the `single responsiblility principle` advocates for small and sutonomous services that work together. Small team with small services can plan more aggresively for rapid growth
+            - workers in the application layer also help enable asynchronism
+    - `Microservice`
+        - can be described as a suite of independently deployable, small, modular services. Each service runs a unique process and communicates through a well-defined, lightweight mechanism to serve a business goal.
+    - `Service Discorvery`
+        - Systems such as Consul, Etcd, and Zookeeper can help services find each other by keeping track of registered names, addresses, and ports.
+        - Health checks help verify service integrity and are often done using an HTTP endpoint.
+        - Both Consul and Etcd have a built in key-value store that can be useful for storing config values and other shared data.
+    - Disadvantage: application layer
+        - Adding an application layer with loosely coupled services requires a different approach from an architectural, operations, and process viewpoint (vs a monolithic system).
+        - Microservices can add complexity in terms of deployments and operations.
