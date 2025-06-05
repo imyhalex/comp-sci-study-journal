@@ -287,4 +287,31 @@
         - Require changing URLs for static content to point to the CDN
 - __Load Balancer__
     - Distribute incoming client requests to computing resources such as application servers and databases
-    
+    - Returns the response from the computing resource to the appropriate client
+    - Effective at:
+        - preventing requests from going to unhealthy server
+        - preventing overloading resources
+        - helping to elimiate a single point of failure
+    - Can be implemented with hardware (expensive) or with software such as HAProxy
+    - More benefits:
+        - SSL termination:
+            - Definition: is when the load balancer handles the encryption and decryption of HTTPS traffic
+            - Offloads the CPU-intensive task of SSL/TLS encryption from the backend servers
+            - Simplfies SSL certificate management: only the load balancer needs the certificate
+            - Flow:
+                - Client sends HTTPS requests -> Load balancer decrypts it
+                - Load Balancer sends unencrypted request to backend servers (optional: re-encrypts if for secure internal traffic)
+        - Session persistence:
+            - Definition: Ensures all requests from a user go to the same backend server during a session
+            - Why it matters:
+                - Some applications store session data locally on the server (e.g., shopping cart, login state), so sending the same user to different 
+                servers can break functionality.
+            - How it works:
+                - The load balancer uses a method like cookies, source IP hashing, or custom header to "stick" a client to a specific server.
+    - Can route traffic based on various metrics:
+        - Random
+        - Least Loaded
+        - Session/cookies
+        - Round-robin or weight round robin
+        - Layer 4
+        - Layer 7
