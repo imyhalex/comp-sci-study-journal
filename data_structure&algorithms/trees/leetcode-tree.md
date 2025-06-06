@@ -253,3 +253,122 @@ class Solution:
         dfs(root)
         return self.max_diameter
 ```
+
+## 110. Balanced Binary Tree[[Link](https://leetcode.com/problems/balanced-binary-tree/description/)]
+- video explaination[[Link](https://neetcode.io/problems/balanced-binary-tree?list=blind75)]
+
+```python
+# time: O(n); Space: O(h)
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def isBalanced(self, root: Optional[TreeNode]) -> bool:
+        
+        def dfs(node):
+            if not node:
+                return [True, 0]
+            
+            left = dfs(node.left)
+            right = dfs(node.right)
+            is_balanced = left[0] and right[0] and abs(left[1] - right[1]) <= 1
+            return [is_balanced, 1 + max(left[1], right[1])]
+        
+        return dfs(root)[0]
+```
+
+## 100. Same Tree[[Link](https://leetcode.com/problems/same-tree/description/)]
+- video explaination[[Link](https://neetcode.io/problems/same-binary-tree?list=blind75)]
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:
+        if not p and not q:
+            return True
+        if p and q and p.val == q.val: 
+            return self.isSameTree(p.left, q.left) and self.isSameTree(p.right, q.right)
+        return False
+```
+
+## 572. Subtree of Another Tree[[Link](https://leetcode.com/problems/subtree-of-another-tree/description/)]
+- video explaination[[Link](https://neetcode.io/problems/subtree-of-a-binary-tree?list=blind75)]
+
+```python
+# time: O(n *m); space: O(n + m)
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def isSubtree(self, root: Optional[TreeNode], subRoot: Optional[TreeNode]) -> bool:
+        
+        def is_same_tree(a, b):
+            if not a and not b:
+                return True
+            if a and b and a.val == b.val:
+                return is_same_tree(a.left, b.left) and is_same_tree(a.right, b.right)
+            return False
+        
+        if not root:
+            return False
+        if not subRoot:
+            return True
+        
+        if is_same_tree(root, subRoot):
+            return True
+        return (self.isSubtree(root.left, subRoot) or self.isSubtree(root.right, subRoot))
+```
+
+## 235. Lowest Common Ancestor of a Binary Search Tree[[Link](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/description/)]
+- video explaination[[Link](https://neetcode.io/problems/lowest-common-ancestor-in-binary-search-tree?list=blind75)]
+
+```python
+# time: O(h); space: O(1)
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        curr = root
+
+        while curr:
+            if p.val < curr.val and q.val < curr.val:
+                curr = curr.left
+            elif p.val > curr.val and q.val > curr.val:
+                curr = curr.right
+            else:
+                return curr
+
+# or
+# time & space: O(h)
+class Solution:
+    def lowestCommonAncestor(self, root: TreeNode, p: TreeNode, q: TreeNode) -> TreeNode:
+        if p.val < root.val and q.val < root.val:
+            return self.lowestCommonAncestor(root.left, p, q)
+        elif p.val > root.val and q.val > root.val:
+            return self.lowestCommonAncestor(root.right, p, q)
+        else:
+            return root
+```
+
+## 236. Lowest Common Ancestor of a Binary Tree[[Link](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/description/)]
+- video explaination[[Link](https://www.youtube.com/watch?v=WO1tfq2sbsI)]
+
+```python
+
+```
