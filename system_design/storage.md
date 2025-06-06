@@ -283,4 +283,35 @@
         - constraints can help redundant copies of information stay in sync, which increase complexity of the databse design
         - denormalized databse under heavy write load might peform worse than its normalized counterpart
 - SQL Tuning
-    - 
+    - Benchmark and Profile are two techniques to uncover bottleneck
+        - `Benchmark`
+            - measures overall performance of a database system under certain condition
+            - purpose:
+                - compare different database, configurations, or hardware
+                - stress test a system before deployment
+            - typical metrics:
+                - Queries per second
+                - Transactions per second
+                - Latency
+                - Througput
+            - example tools:
+                - `sysbench` (for MySQL/PostgreSQL)
+                - TPC-C, TPC-H (industry-standard benchmark suites)
+                - `pgbench` (PostgreSQL)
+                - YCSB (for NoSQL)
+        - `Profiling`
+            - analyze and diagnose peformance of individual queries or workload in a running system
+            - purpose:
+                - find the slow queries bottleneck, or inefficient execution plans
+                - optimize indexes or rewrite queries
+            - shows:
+                - query execution time
+                - index usage
+                - join method
+                - i/o stats
+                - memory consumption
+            - example tools:
+                - `EXPLAIN`, `EXPLAIN ANALYZE`(SQL)
+                - MySQL: `SHOW PROFILE`, `slow_query_log`
+                - PostgreSQL: `pg_stat_statements`, `auto_explain`
+                - MongoDB: `db.collection.explain()`

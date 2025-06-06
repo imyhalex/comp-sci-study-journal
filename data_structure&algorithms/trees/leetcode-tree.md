@@ -156,3 +156,100 @@ class Solution:
         root.right = self.buildTree(preorder[mid + 1: ], inorder[mid + 1: ])
         return root
 ```
+
+## 106. Construct Binary Tree from Inorder and Postorder Traversal[[Link](https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+```python
+# time: O(n ^ 2); space: O(n)
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def buildTree(self, inorder: List[int], postorder: List[int]) -> Optional[TreeNode]:
+        if not inorder or not postorder:
+            return None
+        
+        root = TreeNode(postorder[-1])
+        mid = inorder.index(postorder[-1])
+        root.left = self.buildTree(inorder[: mid], postorder[: mid])
+        root.right = self.buildTree(inorder[mid+1:], postorder[mid:-1])
+        return root
+```
+
+## 226. Invert Binary Tree[[Link](https://leetcode.com/problems/invert-binary-tree/description/?envType=study-plan-v2&envId=top-interview-150)]
+- video explaination[[Link](https://neetcode.io/problems/invert-a-binary-tree?list=blind75)]
+
+```python
+# time: O(n); Space: O(h)
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        if not root:
+            return None
+        
+        if root:
+            tmp = root.left
+            root.left= self.invertTree(root.right)
+            root.right = self.invertTree(tmp)
+        
+        return root
+```
+
+## 104. Maximum Depth of Binary Tree[[Link](https://leetcode.com/problems/maximum-depth-of-binary-tree/description/?envType=study-plan-v2&envId=top-interview-150)]
+- video explaination[[Link](https://neetcode.io/problems/depth-of-binary-tree?list=blind75)]
+
+```python
+# time: O(n); Space: O(h)
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        if not root:
+            return 0
+
+        return 1 + max(self.maxDepth(root.left), self.maxDepth(root.right))
+```
+
+## 543. Diameter of Binary Tree[[Link](https://leetcode.com/problems/diameter-of-binary-tree/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/binary-tree-diameter?list=blind75)]
+
+```python
+# time: O(n); Space: O(h)
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def diameterOfBinaryTree(self, root: Optional[TreeNode]) -> int:
+        self.max_diameter = 0
+
+        def dfs(node):
+            if not node:
+                return 0
+            
+            left = dfs(node.left)
+            right = dfs(node.right)
+
+            # update max diameter (edge = left + right)
+            self.max_diameter = max(self.max_diameter, left + right)
+
+            return 1 + max(left, right) # height of this node
+        
+        dfs(root)
+        return self.max_diameter
+```

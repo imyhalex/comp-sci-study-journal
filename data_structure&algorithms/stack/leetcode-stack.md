@@ -85,6 +85,7 @@ class Solution:
 - video explaination[[Link](https://neetcode.io/problems/daily-temperatures)]
 
 ```python
+# time & space: O(n)
 class Solution:
     def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
         res = [0] * len(temperatures)

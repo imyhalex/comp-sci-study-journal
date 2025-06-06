@@ -652,6 +652,7 @@ class Solution:
         else:
             return merged[totalLen // 2]
 
+# time: O(log(min(n, m))); space: O(1)
 class Solution:
     def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
         a, b = nums1, nums2 # assign two arrs to a, b
@@ -661,6 +662,7 @@ class Solution:
         if len(b) < len(a):
             a, b = b, a
         
+        # run binary search on a
         l, r = 0, len(a) - 1
         while True:
             i = l + (r - l) // 2 # middle value of arr a
@@ -879,6 +881,7 @@ class Solution:
 - video explaination[[Link](https://neetcode.io/problems/minimum-window-with-characters)]
 
 ```python
+# time & space: O(n)
 class Solution:
     def minWindow(self, s: str, t: str) -> str:
         if t == "":
