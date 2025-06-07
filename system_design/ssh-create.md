@@ -93,7 +93,7 @@ Save and exit: `Ctrl + O`, `Enter`, then `Ctrl + X`
 Now test that GitHub accepts your SSH key:
 
 ```bash
-ssh -T git@github.com-github
+ssh -T git@github.com
 ```
 
 If successful, you’ll see:
