@@ -108,7 +108,7 @@ class Solution:
 class Solution:
     def carFleet(self, target: int, position: List[int], speed: List[int]) -> int:
         pairs = [(p, s) for p, s in zip(position, speed)]
-        pairs.sort(reverse=True) 
+        pairs.sort(reverse=True) # This sorts the list of (position, speed) tuples in descending order, by default on the first element of the tuple — which is position.
         stack = []
 
         for p, s in pairs:

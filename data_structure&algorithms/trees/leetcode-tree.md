@@ -390,3 +390,93 @@ class Solution:
         
         return left if left else right # one node found in subtree
 ```
+
+## 102. Binary Tree Level Order Traversal[[Link](https://leetcode.com/problems/binary-tree-level-order-traversal/description/?envType=study-plan-v2&envId=top-interview-150)]
+- video explaination[[Link](https://neetcode.io/problems/level-order-traversal-of-binary-tree?list=blind75)]
+
+```python
+# time & space: O(n)
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        res = []
+        q = deque()
+        q.append(root)
+
+        while q:
+            level = []
+            for _ in range(len(q)):
+                node = q.popleft()
+                if node:
+                    level.append(node.val)
+                    q.append(node.left)
+                    q.append(node.right)
+            if level:
+                res.append(level)
+        
+        return res
+```
+
+## 199. Binary Tree Right Side View[[Link](https://leetcode.com/problems/binary-tree-right-side-view/description/?envType=study-plan-v2&envId=top-interview-150)]
+- video explaination[[Link](https://neetcode.io/problems/binary-tree-right-side-view?list=blind75)]
+
+```python
+# time & space: O(n)
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
+        res = []
+        q = deque()
+        q.append(root)
+
+        while q:
+            right_side = None
+            for _ in range(len(q)):
+                node = q.popleft() 
+                if node:
+                    right_side = node
+                    q.append(node.left)
+                    q.append(node.right)
+            if right_side:
+                res.append(right_side.val)
+        
+        return res
+```
+
+## 1448. Count Good Nodes in Binary Tree[[Link](https://leetcode.com/problems/count-good-nodes-in-binary-tree/description/)]
+- video explaination[[Link](https://neetcode.io/problems/count-good-nodes-in-binary-tree?list=blind75)]
+
+```python
+# time & space: O(n)
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def goodNodes(self, root: TreeNode) -> int:
+
+        def dfs(node, max_val):
+            if not node:
+                return 0
+            
+            count = 1 if node.val >= max_val else 0 # means for every node, you deserve to get value 1 if your node val is larger than the current max val
+            max_val = max(max_val, node.val)
+            count += dfs(node.left, max_val)
+            count += dfs(node.right, max_val)
+            return count
+        
+        return dfs(root, root.val)
+
+```
