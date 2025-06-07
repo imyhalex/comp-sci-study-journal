@@ -315,3 +315,30 @@
                 - MySQL: `SHOW PROFILE`, `slow_query_log`
                 - PostgreSQL: `pg_stat_statements`, `auto_explain`
                 - MongoDB: `db.collection.explain()`
+    - __Tighten up the schema__
+        - MySQL dumps to disk in continguous block for faster access
+        - Use `CHAR` instead of `VARCHAR` for fixed-length fields
+            - `CHAR`allows fast, randon access
+            - `VARCHAR` must find the end of a string before moving onto the next one
+        - Use `TEXT` for large blocks of text such as blog posts.
+            - allows for boolean search
+            - this field result storing a pointer on disk that is used to locate the next block
+        - Use `INT` for larger number up to 2 ^ 32 or 4 billion
+        - Use `DECIMAL` for currency to avoid floating point representation errors
+        - Avoid storing large `BLOB`, store the location of where to get the object instead
+        - `VARCHAR(255)` is the largest number of characters that can be counted in an 8 bit number, often maximizing the use of a byte in some RDBMS.
+        - Set the NOT NULL constraint where applicable to improve search performance.
+    - __Use good indices__
+        - Columns that you are querying (SELECT, GROUP BY, ORDER BY, JOIN) could be faster with indices.
+        - Idices ususlly represented as self-balancing B-tree 
+            - keeps data sorted and allows searches, sequential access, insertions, and deletions in logarithmic time.
+        - place an index can keep the data in memory, requires more space
+        - Load large amount of data, it might be faster to disable indices, load the data, then rebuild the indices
+    - __Avoid expensive joins__
+        - Denormalize
+    - __Partition Tables__
+        - break up a table by putting hot spots in a separate tale to help keep in memory
+    - __Tune the query cache__
+        - in some cases, the query cache could lead to performance issues
+- NoSQL
+
