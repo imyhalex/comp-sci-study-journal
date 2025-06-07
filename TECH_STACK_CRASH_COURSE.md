@@ -495,4 +495,180 @@ npm run lint -- --fix     # Auto-fix issues
 - [ ] Configure Vite development environment
 - [ ] Set up ESLint for code quality
 
+**Happy learning! 🎉**
+
+## 🧩 Component-by-Component Reference
+
+Below is a walk-through of every important file in `src/`, what it does, and how the code works line-by-line.  Copy any snippet into your editor while you follow along.
+
+### 1. `src/components/Button.jsx`
+Purpose – a fully reusable **button** that supports variants (`primary | secondary | danger | outline`) and sizes (`sm | md | lg`).  It also forwards refs so parent components can imperatively focus/measure the `<button>` element.
+
+```jsx
+import { forwardRef } from 'react'
+
+const Button = forwardRef(({
+  children,
+  variant = 'primary',
+  size = 'md',
+  className = '',
+  type = 'button',
+  disabled = false,
+  ...props
+}, ref) => {
+  /* 1️⃣  Base style shared by all buttons */
+  const base = 'inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2'
+
+  /* 2️⃣  Variant palette (Tailwind classes) */
+  const variants = {
+    primary:   'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500',
+    secondary: 'bg-gray-200  text-gray-800 hover:bg-gray-300  focus:ring-gray-500',
+    danger:    'bg-red-600   text-white hover:bg-red-700    focus:ring-red-500',
+    outline:   'bg-transparent text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-primary-500',
+  }
+
+  /* 3️⃣  Size map */
+  const sizes = {
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2   text-base',
+    lg: 'px-6 py-3   text-lg',
+  }
+
+  const disabledCss = disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+
+  return (
+    <button
+      ref={ref}
+      type={type}
+      disabled={disabled}
+      className={`${base} ${variants[variant]} ${sizes[size]} ${disabledCss} ${className}`}
+      {...props}
+    >
+      {children}
+    </button>
+  )
+})
+
+Button.displayName = 'Button'
+export default Button
+```
+
+**Key points**
+1. `forwardRef` lets parent components pass a `ref` that lands on the real DOM element.
+2. Props receive sane defaults, so `<Button>Create</Button>` produces a primary medium button.
+3. All Tailwind class groups are computed up-front, then concatenated.
+4. Variants & sizes are plain objects – easy to extend.
+
+---
+
+### 2. `src/pages/Dashboard.jsx`
+Home page that displays summary cards.  **No API yet** – all numbers are placeholders.
+
+```jsx
+import { Link } from 'react-router-dom'
+function Dashboard () {
+  return (
+    <div className="container py-10">
+      <h1 className="text-3xl mb-6">Dashboard</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Recent Bookings */}
+        <Card title="Recent Bookings">
+          <p>You have 5 upcoming bookings</p>
+          <Link to="/booking" className="btn-primary inline-block mt-4">View Bookings</Link>
+        </Card>
+        {/* Analytics */}
+        <Card title="Analytics">
+          <p>Your booking rate increased by 12% this month</p>
+        </Card>
+        {/* Quick Actions */}
+        <Card title="Quick Actions">
+          <Button className="w-full mb-2">Create Booking</Button>
+          <Button variant="secondary" className="w-full">View Reports</Button>
+        </Card>
+      </div>
+    </div>
+  )
+}
+```
+
+*The helper `Card` component is written inline for brevity; you could extract it to `src/components/Card.jsx`.*
+
+---
+
+### 3. `src/pages/Booking.jsx`
+Shows a **read-only table** of five mock bookings.
+
+Important snippets:
+```jsx
+const [bookings] = useState([
+  { id: 1, client: 'Acme',  date: '2024-05-15', status: 'confirmed' },
+  // …
+])
+```
+`bookings` is a constant (no setter used) so the sample data never changes.  Replace this with `const { data: bookings } = useApi('/bookings')` once the backend is up.
+
+The status pill uses conditional Tailwind classes:
+```jsx
+<span className={
+  `px-2 inline-flex text-xs font-semibold rounded-full ${
+     booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+     booking.status === 'pending'   ? 'bg-yellow-100 text-yellow-800' :
+                                      'bg-red-100 text-red-800'}`}
+>
+  {booking.status}
+</span>
+```
+
+---
+
+### 4. `src/features/booking/BookingForm.jsx`
+A fully controlled form component.  Every `<input>` drives `formData` state.
+
+```jsx
+const [formData, setFormData] = useState({
+  clientName: '', date: '', time: '', duration: '60', notes: ''
+})
+
+const handleChange = e =>
+  setFormData(p => ({ ...p, [e.target.name]: e.target.value }))
+```
+
+On submit it calls the optional `onSubmit` prop so the parent can decide what to do (API call, optimistic UI, etc.).
+
+---
+
+### 5. `src/features/dashboard/DashboardStats.jsx`
+Reusable stats grid.  Accepts optional `stats` prop; otherwise uses hard-coded defaults so the UI never breaks while the API is offline.
+
+---
+
+### 6. `src/hooks/useApi.js`
+Generic Axios-powered CRUD helper.  Key ideas:
+* **Instance** – all requests share baseURL and JSON headers.
+* **Interceptor** – silently injects `Authorization: Bearer <token>` if stored.
+* **Return shape** – `{ data, loading, error, fetchData, createData, updateData, deleteData }` – simple enough to destructure anywhere.
+
+---
+
+### 7. `src/utils/index.js`
+Pure helper functions – date formatting, text truncate, deep clone, etc.  No React imports, so they're tree-shakable.
+
+---
+
+### 8. Routing (`src/App.jsx`)
+Lazy-loads pages for performance.  Unknown routes fall back to `<NotFound />`, giving you a 404 screen.
+
+```jsx
+<Route path="*" element={<NotFound />} />
+```
+
+To add a new page:
+1. Drop a file in `src/pages/` – e.g. `Reports.jsx`.
+2. Add `const Reports = lazy(() => import('./pages/Reports'))` at top.
+3. Add `<Route path="/reports" element={<Reports />} />`.
+
+---
+
+This new section should give you a **clear, hands-on understanding** of every file so you can confidently extend or refactor the application.
+
 **Happy learning! 🎉** 
