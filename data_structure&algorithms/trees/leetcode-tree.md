@@ -480,3 +480,64 @@ class Solution:
         return dfs(root, root.val)
 
 ```
+
+## 98. Validate Binary Search Tree[[Link](https://leetcode.com/problems/validate-binary-search-tree/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/valid-binary-search-tree?list=blind75)]
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        
+        def dfs(node, res):
+            if node:
+                dfs(node.left, res)
+                res.append(node.val)
+                dfs(node.right, res)
+        
+        res = []
+        dfs(root, res)
+        for i in range(1, len(res)):
+            if res[i] <= res[i - 1]:
+                return False
+        
+        return True
+```
+
+## 124. Binary Tree Maximum Path Sum[[Link](https://leetcode.com/problems/binary-tree-maximum-path-sum/description/?envType=study-plan-v2&envId=top-interview-150)] 
+- video explaination[[Link](https://neetcode.io/problems/binary-tree-maximum-path-sum?list=blind75)]
+
+```python
+# time & space: O(n)
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def maxPathSum(self, root: Optional[TreeNode]) -> int:
+        self.max_sum = root.val
+
+        def dfs(node):
+            if not node:
+                return 0
+
+            left = dfs(node.left) 
+            right = dfs(node.right)
+            left = max(left, 0)
+            right = max(right, 0)
+            # Candidate max path sum using both children + current node
+            self.max_sum = max(self.max_sum, node.val + left + right)
+            # Only return one-side path to parent
+            return node.val + max(left, right)
+        
+        dfs(root)
+        return self.max_sum
+```

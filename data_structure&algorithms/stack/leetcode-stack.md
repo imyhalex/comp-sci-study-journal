@@ -217,5 +217,5 @@ class Solution:
                 res += stack.pop() # pop 2, operand
                 operand = 0
         
-        return res + sign * operand
+        return res + sign * operand # this is to add the last element that can't handled by conditions above
 ```
