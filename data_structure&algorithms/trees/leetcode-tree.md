@@ -602,3 +602,170 @@ class Codec:
 # deser = Codec()
 # ans = deser.deserialize(ser.serialize(root))
 ```
+
+## 208. Implement Trie (Prefix Tree)[[Link](https://leetcode.com/problems/implement-trie-prefix-tree/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/implement-prefix-tree?list=blind75)]
+
+```python
+class TireNode:
+    def __init__(self):
+        self.children = {}
+        self.word = False
+
+class Trie:
+
+    def __init__(self):
+        self.root = TireNode()
+
+    def insert(self, word: str) -> None:
+        curr = self.root
+        for c in word:
+            if c not in curr.children:
+                curr.children[c] = TireNode()
+            curr = curr.children[c]
+        curr.word = True
+
+    def search(self, word: str) -> bool:
+        curr = self.root
+        for c in word:
+            if c not in curr.children:
+                return False
+            curr = curr.children[c]
+        return curr.word
+
+    def startsWith(self, prefix: str) -> bool:
+        curr = self.root
+        for c in prefix:
+            if c not in curr.children:
+                return False
+            curr = curr.children[c]
+        return True
+
+
+# Your Trie object will be instantiated and called as such:
+# obj = Trie()
+# obj.insert(word)
+# param_2 = obj.search(word)
+# param_3 = obj.startsWith(prefix)
+```
+
+## 1804. Implement Trie II (Prefix Tree)[[Link](https://leetcode.com/problems/implement-trie-ii-prefix-tree/description/)]
+
+- video expalination[[Link]()]
+
+```python
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.word = False
+        self.count = 0
+        self.prefix_count = 0
+
+class Trie:
+
+    def __init__(self):
+        self.root = TrieNode()
+
+    def insert(self, word: str) -> None:
+        curr = self.root
+        for c in word:
+            if c not in curr.children:
+                curr.children[c] = TrieNode()
+            curr = curr.children[c]
+            curr.prefix_count += 1
+        curr.word = True
+        curr.count += 1
+
+    def countWordsEqualTo(self, word: str) -> int:
+        curr = self.root
+        for c in word:
+            if c not in curr.children:
+                return 0
+            curr = curr.children[c]
+        return curr.count
+
+    def countWordsStartingWith(self, prefix: str) -> int:
+        curr = self.root
+        for c in prefix:
+            if c not in curr.children:
+                return 0
+            curr = curr.children[c]
+        return curr.prefix_count
+
+    def erase(self, word: str) -> None:
+        curr = self.root
+        track = []
+        for c in word:
+            if c not in curr.children:
+                return
+            track.append((curr, c))
+            curr = curr.children[c]
+        
+        if curr.count > 0:
+            curr.count -= 1
+            if curr.count == 0:
+                curr.word = False
+            
+        for node, char in track:
+            node.children[char].prefix_count -= 1
+
+
+# Your Trie object will be instantiated and called as such:
+# obj = Trie()
+# obj.insert(word)
+# param_2 = obj.countWordsEqualTo(word)
+# param_3 = obj.countWordsStartingWith(prefix)
+# obj.erase(word)
+```
+
+## 211. Design Add and Search Words Data Structure[[Link](https://leetcode.com/problems/design-add-and-search-words-data-structure/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/design-word-search-data-structure?list=blind75)]
+
+```python
+# time: O(n); space: O(n) for both two methods
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.word = False
+
+class WordDictionary:
+
+    def __init__(self):
+        self.root = TrieNode()
+
+    def addWord(self, word: str) -> None:
+        curr = self.root
+        for c in word:
+            if c not in curr.children:
+                curr.children[c] = TrieNode()
+            curr = curr.children[c]
+        curr.word = True
+
+    def search(self, word: str) -> bool:
+
+        def dfs(j, node):
+            curr = node
+
+            for i in range(j, len(word)):
+                c = word[i]
+                if c == ".":
+                    for child in curr.children.values():
+                        if dfs(i + 1, child):
+                            return True
+                    return False
+                else:
+                    if c not in curr.children:
+                        return False
+                    curr = curr.children[c]
+            return curr.word
+
+        return dfs(0, self.root)
+
+
+# Your WordDictionary object will be instantiated and called as such:
+# obj = WordDictionary()
+# obj.addWord(word)
+# param_2 = obj.search(word)
+```
