@@ -526,7 +526,7 @@ class Solution:
 ```
 
 ## 153. Find Minimum in Rotated Sorted Array[[Link](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/description/?envType=study-plan-v2&envId=top-interview-150)]
-- video explaination[[Link](https://neetcode.io/pr  oblems/find-minimum-in-rotated-sorted-array)]
+- video explaination[[Link](https://neetcode.io/problems/find-minimum-in-rotated-sorted-array)]
 
 ```python
 # never let l, r pointer to overlap
@@ -556,9 +556,9 @@ class Solution:
             if target == nums[mid]:
                 return mid
             # check which sorted portion we're in
-            # left portion
+            # left portion, determin the mid belongs to left portion or right portion
             if nums[l] <= nums[mid]:
-                if target > nums[mid] or target < nums[l]:
+                if target > nums[mid] or target < nums[l]: # two cases: 1. imagine a sorted array with no rotation, if target > mid val, them l = mid + 1 search right portion. 2. in rotated scinario, if target < l pointer val, this also should find right portion
                     l = mid + 1
                 else:
                     r = mid - 1
@@ -950,22 +950,36 @@ class Solution:
 class Solution:
     def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
         res = []
-        l = r = 0
-        q = deque() # contains index
+        q = deque()  # store indices
+        l = 0
 
-        while r < len(nums):
-            while q and nums[q[-1]] < nums[r]:
+        for r in range(len(nums)):
+            # Remove indices from back while nums[r] > nums[q[-1]]
+            while q and nums[r] > nums[q[-1]]:
                 q.pop()
             q.append(r)
 
-            # remove left val from window
-            if l > q[0]:
+            # Remove left index if it's out of the current window
+            if q[0] < l:
                 q.popleft()
-            
-            if (r + 1) >= k:
+
+            # Start recording results when the window reaches size k
+            if r + 1 >= k:
                 res.append(nums[q[0]])
                 l += 1
-            r += 1
-        
-        return res
+
+        return res  
+
+        # more logically make sense
+        # for r in range(len(nums)):
+        #     while q and nums[r] > nums[q[-1]]:
+        #         q.pop()
+        #     q.append(r) 
+
+        #     if r + 1 >= k:
+        #         res.append(nums[q[0]])
+        #         l += 1
+            
+        #     if q[0] < l:
+        #         q.popleft()
 ```
