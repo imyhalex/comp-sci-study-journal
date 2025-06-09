@@ -576,17 +576,21 @@ class Solution:
 - video explaination[[Link](https://neetcode.io/problems/eating-bananas)]
 
 ```python
+# time: O(n * log m); space: O(1)
+# l , r poiinter record the number of banana koko may eat per hour
 class Solution:
     def minEatingSpeed(self, piles: List[int], h: int) -> int:
         l, r = 1, max(piles)
         res = r
-
+        # k: minumum eating speed
         while l <= r:
             k = l + (r - l) // 2
 
             total_time = 0
             for p in piles:
                 total_time += math.ceil(float(p) / k)
+            # we want to find the minimun value of k, so if we find total hour(total time) is less than h, 
+            # try to find one that is slowr (smaller k)
             if total_time <= h:
                 res = k
                 r = k - 1
@@ -693,6 +697,7 @@ class Solution:
 - video explaination[[Link](https://neetcode.io/solutions/number-of-sub-arrays-of-size-k-and-average-greater-than-or-equal-to-threshold)]
 
 ```python
+# time: O(n); space: O(1)
 class Solution:
     def numOfSubarrays(self, arr: List[int], k: int, threshold: int) -> int:
         res = 0
