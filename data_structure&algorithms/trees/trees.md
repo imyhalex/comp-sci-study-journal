@@ -137,3 +137,6 @@ class Trie:
         return True
 
 ```
+
+## Union Find (Disjoint Sets)[[Link](https://neetcode.io/courses/advanced-algorithms/7)]
+
