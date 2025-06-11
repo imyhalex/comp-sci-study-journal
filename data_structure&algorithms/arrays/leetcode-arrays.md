@@ -710,6 +710,22 @@ class Solution:
             curr_sum -= arr[l] # pop the window
         
         return res
+
+class Solution:
+    def numOfSubarrays(self, arr: List[int], k: int, threshold: int) -> int:
+        l, total, res = 0, 0, 0
+
+        for r in range(len(arr)):
+            total += arr[r]
+
+            if r - l + 1 == k:
+                avg = total / k
+                if avg >= threshold:
+                    res += 1
+                total -= arr[l]
+                l += 1
+
+        return res
 ```
 
 ## 209. Minimum Size Subarray Sum[[Link](https://leetcode.com/problems/minimum-size-subarray-sum/description/?envType=study-plan-v2&envId=top-interview-150)]
@@ -729,7 +745,7 @@ class Solution:
                 total -= nums[l]
                 l += 1
         
-        return 0 if length == float("inf") else length
+       return length if length != float('inf') else 0
 ```
 
 ## 3. Longest Substring Without Repeating Characters[[Link](https://leetcode.com/problems/longest-substring-without-repeating-characters/description/?envType=study-plan-v2&envId=top-interview-150)]
