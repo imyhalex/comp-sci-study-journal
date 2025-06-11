@@ -102,3 +102,79 @@ class Solution:
         
         return -res
 ```
+
+## 621. Task Scheduler[[Link](https://leetcode.com/problems/task-scheduler/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/task-scheduling?list=blind75)]
+
+```python
+# time: O(n * m); space O(1)
+class Solution:
+    def leastInterval(self, tasks: List[str], n: int) -> int:
+        count = Counter(tasks)
+        max_heap = [-cnt for cnt in count.values()]
+        heapq.heapify(max_heap)
+
+        time = 0
+        q = deque() # pairs of [-cnt, idle_time]
+
+        while max_heap or q:
+            time += 1
+            if max_heap:
+                cnt = 1 + heapq.heappop(max_heap)
+                if cnt:
+                    q.append([cnt, time + n])
+            
+            if q and q[0][1] == time:
+                heapq.heappush(max_heap, q.popleft()[0])
+        return time
+```
+
+## *355. Design Twitter[[Link](https://leetcode.com/problems/design-twitter/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/design-twitter-feed?list=blind75)]
+
+```python
+# time: O(n log n) for getfeed(), rest of them are O(1)
+# space:O(N * m + N * M + n)
+class Twitter:
+
+    def __init__(self):
+        self.count = 0
+        self.follow_map = defaultdict(set)
+        self.tweet_map = defaultdict(list)
+
+    def postTweet(self, userId: int, tweetId: int) -> None:
+        self.tweet_map[userId].append([self.count, tweetId])
+        self.count -= 1
+
+    def getNewsFeed(self, userId: int) -> List[int]:
+        res = [] # order start from recent
+        min_heap = []
+
+        self.follow_map[userId].add(userId)
+        for followee_id in self.follow_map[userId]:
+            if followee_id in self.tweet_map:
+                index = len(self.tweet_map[followee_id]) - 1
+                count, tweet_id = self.tweet_map[followee_id][index]
+                min_heap.append([count, tweet_id, followee_id, index - 1])
+
+        heapq.heapify(min_heap)
+        while min_heap and len(res) < 10:
+            count, tweet_id, followee_id, index = heapq.heappop(min_heap)
+            res.append(tweet_id)
+            
+            if index >= 0:
+                count, tweet_id = self.tweet_map[followee_id][index]
+                heapq.heappush(min_heap, [count, tweet_id, followee_id, index - 1])
+        
+        return res
+
+    def follow(self, followerId: int, followeeId: int) -> None:
+        self.follow_map[followerId].add(followeeId)
+
+    def unfollow(self, followerId: int, followeeId: int) -> None:
+        if followeeId in self.follow_map[followerId]:
+            self.follow_map[followerId].remove(followeeId)
+
+``` 
