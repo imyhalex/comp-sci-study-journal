@@ -64,3 +64,41 @@ class Solution:
 
         return abs(stones[0]) if stones else 0
 ```
+
+## 973. K Closest Points to Origin[[Link](https://leetcode.com/problems/k-closest-points-to-origin/description/)]
+- video explaination[[Link](https://neetcode.io/problems/k-closest-points-to-origin?list=blind75)]
+
+```python
+# time: O(k log n); space: O(n)
+import heapq
+class Solution:
+    def kClosest(self, points: List[List[int]], k: int) -> List[List[int]]:
+        heap = [(x**2 + y**2, [x, y]) for x , y in points]
+        heapify(heap)
+        res = []
+
+        while k > 0:
+            dist, point = heappop(heap)
+            res.append(point)
+            k -= 1
+        
+        return res
+```
+
+## 215. Kth Largest Element in an Array[[Link](https://leetcode.com/problems/kth-largest-element-in-an-array/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/kth-largest-element-in-an-array?list=blind75)]
+
+```python
+# time: O(n log k); space: O(k)
+class Solution:
+    def findKthLargest(self, nums: List[int], k: int) -> int:
+        nums = [-n for n in nums]
+        heapq.heapify(nums)
+        res = 0
+
+        for _ in range(k):
+            res = heapq.heappop(nums) 
+        
+        return -res
+```
