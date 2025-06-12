@@ -178,3 +178,40 @@ class Twitter:
             self.follow_map[followerId].remove(followeeId)
 
 ``` 
+
+## 295. Find Median from Data Stream[[Link](https://leetcode.com/problems/find-median-from-data-stream/description/)]
+
+- video explaination[[Link](https://leetcode.com/problems/find-median-from-data-stream/description/)]
+
+```python
+class MedianFinder:
+
+    def __init__(self):
+        self.small = []  # max heap (invert values to simulate)
+        self.large = []  # min heap
+
+    def addNum(self, num: int) -> None:
+        # Add to max heap (small) first
+        heapq.heappush(self.small, -num)
+
+        # Balance: ensure max(small) ≤ min(large)
+        if self.small and self.large and (-self.small[0] > self.large[0]):
+            val = -heapq.heappop(self.small)
+            heapq.heappush(self.large, val)
+
+        # Balance size: max difference is 1
+        if len(self.small) > len(self.large) + 1:
+            val = -heapq.heappop(self.small)
+            heapq.heappush(self.large, val)
+        elif len(self.large) > len(self.small) + 1:
+            val = heapq.heappop(self.large)
+            heapq.heappush(self.small, -val)
+
+    def findMedian(self) -> float:
+        if len(self.small) > len(self.large):
+            return -self.small[0]
+        elif len(self.large) > len(self.small):
+            return self.large[0]
+        else:
+            return (-self.small[0] + self.large[0]) / 2
+```
