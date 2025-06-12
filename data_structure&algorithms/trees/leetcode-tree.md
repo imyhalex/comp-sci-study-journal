@@ -820,3 +820,72 @@ class Solution:
 
         return list(res)
 ```
+
+## 684. Redundant Connection[[Link](https://leetcode.com/problems/redundant-connection/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/redundant-connection?list=blind75)]
+```python
+# union find disjoint set
+
+class Solution:
+    def findRedundantConnection(self, edges: List[List[int]]) -> List[int]:
+        parent = {}
+        rank = {}
+
+        for i in range(1, len(edges) + 1):
+            parent[i] = i
+            rank[i] = 0
+        
+        def find(n):
+            p = parent[n]
+            while p != parent[p]:
+                parent[p] = parent[parent[p]]
+                p = parent[p]
+            return p
+        
+        def union(n1, n2):
+            p1, p2 = find(n1), find(n2)
+            if p1 == p2:
+                return False
+
+            if rank[p1] > rank[p2]:
+                parent[p2] = p1
+            elif rank[p1] < rank[p2]:
+                parent[p1] = p2
+            else:
+                parent[p2] = p1
+                rank[p1] += 1
+            return True
+        
+        for n1, n2 in edges:
+            if not union(n1, n2):
+                return [n1, n2]
+
+# dfs cycle detection
+# time: O(E * (V + E)); space: O(V + E)
+class Solution:
+    def findRedundantConnection(self, edges: List[List[int]]) -> List[int]:
+        n = len(edges)
+        adj = [[] for _ in range(n + 1)] # or adj = defaultdict(list)
+
+        def dfs(node, par):
+            if visit[node]:
+                return True
+            
+            visit[node] = True
+            for nei in adj[node]:
+                if nei == par:
+                    continue
+                if dfs(nei, node):
+                    return True
+            return False
+        
+        for u, v in edges:
+            adj[u].append(v)
+            adj[v].append(u)
+            visit = [False] * (n + 1)
+            
+            if dfs(u, -1):
+                return [u, v]
+        return []
+```
