@@ -889,3 +889,97 @@ class Solution:
                 return [u, v]
         return []
 ```
+
+## 721. Accounts Merge[[Link](https://leetcode.com/problems/accounts-merge/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/accounts-merge?list=neetcode150)]
+
+```python
+# time: O((n * m)log(n * m)); space: O(n * m)
+class UnionFind:
+    def __init__(self, n):
+        self.parent = {}
+        self.rank = {}
+
+        for i in range(n):
+            self.parent[i] = i
+            self.rank[i] = 0
+    
+    def find(self, n):
+        p = self.parent[n]
+        while p != self.parent[p]:
+            self.parent[p] = self.parent[self.parent[p]]
+            p = self.parent[p]
+        return p
+    
+    def union(self, n1, n2):
+        p1, p2 = self.find(n1), self.find(n2)
+        if p1 == p2:
+            return False
+        
+        if self.rank[p1] > self.rank[p2]:
+            self.parent[p2] = p1
+        elif self.rank[p1] < self.rank[p2]:
+            self.parent[p1] = p2
+        else:
+            self.parent[p2] = p1
+            self.rank[p1] += 1
+
+class Solution:
+    def accountsMerge(self, accounts: List[List[str]]) -> List[List[str]]:
+        uf = UnionFind(len(accounts))
+        email_to_account = {} # email -> index of account
+
+        for i, account in enumerate(accounts):
+            for e in account[1:]:
+                if e in email_to_account:
+                    uf.union(i, email_to_account[e])
+                else:
+                    email_to_account[e] = i
+        
+        email_group = defaultdict(list)  # index of account -> list of emails
+        for e, i in email_to_account.items():
+            leader = uf.find(i)
+            email_group[leader].append(e)
+        
+        res = []
+        for i, email in email_group.items():
+            name = accounts[i][0]
+            res.append([name] + sorted(email))
+        
+        return res
+
+# approch 2: DFS
+class Solution:
+    def accountsMerge(self, accounts: List[List[str]]) -> List[List[str]]:
+        graph = defaultdict(list)
+        email_to_name = {}
+
+        # Step 1: Build the graph and email-to-name map
+        for account in accounts:
+            name = account[0]
+            first_email = account[1]
+            for email in account[1:]:
+                graph[first_email].append(email)
+                graph[email].append(first_email)
+                email_to_name[email] = name
+
+        # Step 2: DFS to find connected components (i.e., merged accounts)
+        visited = set()
+        res = []
+
+        def dfs(email, component):
+            visited.add(email)
+            component.append(email)
+            for neighbor in graph[email]:
+                if neighbor not in visited:
+                    dfs(neighbor, component)
+
+        for email in graph:
+            if email not in visited:
+                component = []
+                dfs(email, component)
+                res.append([email_to_name[email]] + sorted(component))
+
+        return res
+```
