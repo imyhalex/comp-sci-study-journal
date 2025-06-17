@@ -215,3 +215,34 @@ class MedianFinder:
         else:
             return (-self.small[0] + self.large[0]) / 2
 ```
+
+## 480. Sliding Window Median[[Link](https://leetcode.com/problems/sliding-window-median/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/sliding-window-median)]
+
+```python
+
+```
+
+## 502. IPO[[Link](https://leetcode.com/problems/ipo/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/ipo?list=neetcode150)]
+
+```python
+# time: O(n loh n); space: O(n)
+class Solution:
+    def findMaximizedCapital(self, k: int, w: int, profits: List[int], capital: List[int]) -> int:
+        max_profit = [] # only project we can afford
+        min_capital = [(c, p) for c, p in zip(capital, profits)]
+        heapq.heapify(min_capital)
+
+        for _ in range(k):
+            while min_capital and min_capital[0][0] <= w:
+                c, p = heapq.heappop(min_capital)
+                heapq.heappush(max_profit, -p)
+            
+            if not max_profit:
+                break
+            w += -heapq.heappop(max_profit)
+        return w
+```
