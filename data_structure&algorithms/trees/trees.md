@@ -138,7 +138,7 @@ class Trie:
 
 ```
 
-## Union Find (Disjoint Sets)[[Link](https://neetcode.io/courses/advanced-algorithms/7)]
+# Union Find (Disjoint Sets)[[Link](https://neetcode.io/courses/advanced-algorithms/7)]
 
 - useful tool for keeping track of nodes connected in a graph and detecting cycles in a graph
     - can achived with dfs but this is only effiencent when there is a staic graph
@@ -178,4 +178,60 @@ class UnionFind:
             self.par[p1] = p2
             self.rank[p2] += 1
         return True
+```
+
+# Segment Tree[[Link](https://neetcode.io/courses/advanced-algorithms/8)]
+
+- Suppose we were given a range of values. Then, given a left and a right pointer that defines the range, we want to be able to calculate the sum of the range.
+
+```python
+class SegmentTree:
+    def __init__(self, total, L, R):
+        self.sum = total
+        self.left = None
+        self.right = None
+        self.L = L
+        self.R = R
+
+    # O(n)
+    @staticmethod
+    def build(nums, L, R):
+        if L == R:
+            return SegmentTree(nums[L], L, R)
+
+        M = (L + R) // 2
+        root = SegmentTree(0, L, R)
+        root.left = SegmentTree.build(nums, L, M)
+        root.right = SegmentTree.build(nums, M + 1, R)
+        root.sum = root.left.sum + root.right.sum
+        return root
+    
+    # O(log n)
+    def update(self, index, val):
+        if self.L == self.R:
+            self.sum = val
+            return
+        
+        M = (self.L + self.R) // 2
+        if index < M:
+            self.left.update(index, val)
+        else:
+            self.right.update(index, val)
+        self.sum = self.left.sum + self.right.sum
+    
+    # O(log n)
+    def rangeQuery(self, L, R):
+        if L == self.L and R == self.R:
+            return self.sum
+        
+        M = (self.L + self.R) // 2
+        if R <= M:
+            return self.left.rangeQuery(L, R)
+        elif L > M:
+            return self.right.rangeQuery(L, R)
+        else:
+            return (
+                self.left.rangeQuery(L, M) + 
+                self.right.rangeQuery(L, M + 1)
+            )
 ```
