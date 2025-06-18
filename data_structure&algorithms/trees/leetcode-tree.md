@@ -1031,3 +1031,11 @@ class Solution:
                 res -= 1
         return res
 ```
+
+## 307. Range Sum Query - Mutable[[Link](https://leetcode.com/problems/range-sum-query-mutable/description/)]
+
+- explaination[[Link](https://neetcode.io/solutions/range-sum-query-mutable)]
+
+```python
+
+```

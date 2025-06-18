@@ -1084,3 +1084,45 @@ class Solution:
         
         return LCS(s, s[::-1])
 ```
+
+### Greedy Part
+
+### 53. Maximum Subarray[[Link](https://leetcode.com/problems/maximum-subarray/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/maximum-subarray?list=neetcode150)]
+
+```python
+# time: O(n); space: O(1)
+class Solution:
+    def maxSubArray(self, nums: List[int]) -> int:
+        max_sum = float('-inf') # or set nums[0]
+        curr_sum = 0
+
+        for n in nums:
+            curr_sum = max(curr_sum, 0) # or use curr_sum = (n, curr_sum + n)
+            curr_sum += n
+            max_sum = max(max_sum, curr_sum)
+        return max_sum
+```
+
+### 918. Maximum Sum Circular Subarray[[Link](https://leetcode.com/problems/maximum-sum-circular-subarray/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/maximum-sum-circular-subarray?list=neetcode150)]
+
+```python
+# time: O(n); space: O(1)
+class Solution:
+    def maxSubarraySumCircular(self, nums: List[int]) -> int:
+        global_max, global_min = nums[0], nums[0]
+        curr_max, curr_min = 0, 0
+        total = 0
+
+        for n in nums:
+            curr_max = max(curr_max + n, n)
+            curr_min = min(curr_min + n, n)
+            total += n
+            global_max = max(global_max, curr_max)
+            global_min = min(global_min, curr_min)
+        
+        return max(global_max, total - global_min) if global_max > 0 else global_max
+```
