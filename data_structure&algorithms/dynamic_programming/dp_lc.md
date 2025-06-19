@@ -1126,3 +1126,129 @@ class Solution:
         
         return max(global_max, total - global_min) if global_max > 0 else global_max
 ```
+
+### 978. Longest Turbulent Subarray[[Link](https://leetcode.com/problems/longest-turbulent-subarray/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/longest-turbulent-subarray?list=neetcode150)]
+
+```python
+# time: O(n); space: O(1)
+class Solution:
+    def maxTurbulenceSize(self, arr: List[int]) -> int:
+        l, r = 0, 0
+        res, prev = 1, ""
+
+        while r < len(arr):
+            if arr[r - 1] > arr[r] and prev != ">":
+                res = max(res, r - l + 1)
+                r += 1
+                prev = ">"
+            elif arr[r - 1] < arr[r] and prev != "<":
+                res = max(res, r - l + 1)
+                r += 1
+                prev = "<"
+            else:
+                r = r + 1 if arr[r - 1] == arr[r] else r
+                l = r - 1
+                prev = ""
+        return res
+```
+
+### 55. Jump Game[[Link](https://leetcode.com/problems/jump-game/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/jump-game?list=neetcode150)]
+
+```python
+# top down dp
+# time: O(n^2); space: O(n)
+class Solution:
+    def canJump(self, nums: List[int]) -> bool:
+        dp = {}
+
+        def dfs(i):
+            if i in dp:
+                return dp[i]
+            
+            if i == len(nums) - 1:
+                return True
+            
+            if nums[i] == 0:
+                return False
+            
+            end = min(len(nums), i + nums[i] + 1) # +1 = include that index in the range(...) call
+            for j in range(i + 1, end):
+                if dfs(j):
+                    dp[i] = True
+                    return True
+            dp[i] = False
+            return False
+            
+        return dfs(0)
+
+# greedy
+# time: O(n); spcae: O(1)
+class Solution:
+    def canJump(self, nums: List[int]) -> bool:
+        goal = len(nums) - 1 # goal index
+        for i in range(len(nums) - 1, -1, -1):
+            if i + nums[i] >= goal:
+                goal = i # shift the goal post closer
+        return True if goal == 0 else False
+
+# nums = [2, 3, 1, 1, 4]
+# # goal starts at index 4
+
+# Iteration:
+# i = 4 -> 4 + nums[4] = 8 >= 4 ✅ --> goal = 4
+# i = 3 -> 3 + nums[3] = 4 >= 4 ✅ --> goal = 3
+# i = 2 -> 2 + nums[2] = 3 >= 3 ✅ --> goal = 2
+# i = 1 -> 1 + nums[1] = 4 >= 2 ✅ --> goal = 1
+# i = 0 -> 0 + nums[0] = 2 >= 1 ✅ --> goal = 0
+
+# Since goal reached index 0, return True.
+
+```
+
+### 45. Jump Game II[[Link](https://leetcode.com/problems/jump-game-ii/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/jump-game-ii?list=neetcode150)]
+
+```python
+# time: O(n^2); space: o(n)
+class Solution:
+    def jump(self, nums: List[int]) -> int:
+        dp = {}
+
+        def dfs(i):
+            if i in dp:
+                return dp[i]
+
+            if i == len(nums) - 1:
+                return 0
+            
+            if nums[i] == 0:
+                return float('inf')
+
+            res = float('inf')
+            end = min(len(nums), i + nums[i] + 1)
+            for j in range(i + 1, end):
+                res = min(res, 1 + dfs(j))
+            dp[i] = res
+            return res
+        
+        return dfs(0)
+
+# time: O(n); space: O(1)
+class Solution:
+    def jump(self, nums: List[int]) -> int:
+        res = 0
+        l, r = 0, 0
+        while r < len(nums) - 1:
+            farthest = 0
+            for i in range(l, r + 1):
+                farthest = max(farthest, i + nums[i])
+            l = r + 1
+            r = farthest
+            res += 1
+        return res
+```
