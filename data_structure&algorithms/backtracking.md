@@ -206,6 +206,37 @@ class Solution:
         return combs
 ```
 
+### 40. Combination Sum II[[Link](https://leetcode.com/problems/combination-sum-ii/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/combination-target-sum-ii?list=neetcode150)]
+
+```python
+# time: O(n * 2^n); space: O(n)
+class Solution:
+    def combinationSum2(self, candidates: List[int], target: int) -> List[List[int]]:
+        candidates.sort()
+        combs, curr = [], []
+
+        def dfs(i, total):
+            if total == target:
+                combs.append(curr.copy())
+                return
+            
+            if i >= len(candidates) or total > target:
+                return
+            
+            curr.append(candidates[i])
+            dfs(i + 1, candidates[i] + total)
+            curr.pop()
+
+            while i + 1 < len(candidates) and candidates[i] == candidates[i + 1]:
+                i += 1
+            dfs(i + 1, total)
+
+        dfs(0, 0)
+        return combs
+```
+
 ### 17. Letter Combinations of a Phone Number[[Link](https://leetcode.com/problems/letter-combinations-of-a-phone-number/description/?envType=study-plan-v2&envId=top-interview-150)]
 
 ```python

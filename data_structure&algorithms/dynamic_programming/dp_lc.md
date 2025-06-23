@@ -1252,3 +1252,23 @@ class Solution:
             res += 1
         return res
 ```
+
+### 134. Gas Station[[Link](https://leetcode.com/problems/gas-station/description/?envType=study-plan-v2&envId=top-interview-150)]
+-vide explaination[[Link](https://neetcode.io/problems/gas-station?list=neetcode150)]
+
+```python
+# time: O(n); space: O(1)
+class Solution:
+    def canCompleteCircuit(self, gas: List[int], cost: List[int]) -> int:
+        if sum(gas) < sum(cost):
+            return -1
+
+        total, index = 0, 0
+        for i in range(len(gas)):
+            total += (gas[i] - cost[i])
+            if total < 0:
+                total = 0
+                index = i + 1
+        return index
+
+```

@@ -180,3 +180,102 @@ class Solution:
         return longest
 ```
 
+## 846. Hand of Straights[[Link](https://leetcode.com/problems/hand-of-straights/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/hand-of-straights?list=neetcode150)]
+
+```python
+# time: O(n log n); space: O(n)
+class Solution:
+    def isNStraightHand(self, hand: List[int], groupSize: int) -> bool:
+        if len(hand) % groupSize:
+            return False
+        
+        count = {}
+        for n in hand:
+            count[n] = 1 + count.get(n, 0)
+        
+        min_heap = list(count.keys())
+        heapq.heapify(min_heap)
+        while min_heap:
+            first = min_heap[0]
+            for i in range(first, first + groupSize):
+                if i not in count:
+                    return False
+                count[i] -= 1
+                if count[i] == 0:
+                    if i != min_heap[0]:
+                        return False
+                    heapq.heappop(min_heap) 
+        return True
+```
+
+## 1899. Merge Triplets to Form Target Triplet[[Link](https://leetcode.com/problems/merge-triplets-to-form-target-triplet/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/merge-triplets-to-form-target?list=neetcode150)]
+
+```python
+# time: O(n); space: O(1)
+class Solution:
+    def mergeTriplets(self, triplets: List[List[int]], target: List[int]) -> bool:
+        good = set()
+
+        for t in triplets:
+            if t[0] > target[0] or t[1] > target[1] or t[2] > target[2]:
+                continue
+            
+            for i, v in enumerate(t):
+                if v == target[i]:
+                    good.add(i)
+        return len(good) == 3
+```
+
+## 763. Partition Labels[[Link](https://leetcode.com/problems/partition-labels/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/partition-labels?list=neetcode150)]
+
+```python
+# time: O(n); space: O(m)
+class Solution:
+    def partitionLabels(self, s: str) -> List[int]:
+        hash_map = {} # char -> last_index of character
+
+        for i, c in enumerate(s):
+            hash_map[c] = i
+        
+        res = []
+        size, end = 0, 0
+        for i, c in enumerate(s):
+            size += 1
+            end = max(end, hash_map[c])
+            if i == end:
+                res.append(size)
+                size = 0
+        return res
+```
+
+## *678. Valid Parenthesis String[[Link](https://leetcode.com/problems/valid-parenthesis-string/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/valid-parenthesis-string?list=neetcode150)]
+
+```python
+# time: O(n); space: O(1)
+class Solution:
+    def checkValidString(self, s: str) -> bool:
+        left_min, left_max = 0, 0
+
+        for c in s:
+            if c == "(":
+                left_min, left_max = left_min + 1, left_max + 1
+            elif c == ")":
+                left_min, left_max = left_min - 1, left_max - 1
+            else:
+                left_min, left_max = left_min - 1, left_max + 1
+            
+            if left_max < 0: # ))(( negative left max, return false
+                return False
+            if left_min < 0: # whenever hit negative, reset it to zero
+                left_min = 0 # s = ( * ) (
+        
+        return left_min == 0
+```
