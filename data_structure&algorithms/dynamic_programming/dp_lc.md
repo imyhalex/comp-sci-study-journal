@@ -487,7 +487,7 @@ class Solution:
             # include the string at index i or not include the string at index i
             # opt1: don't include the current string
             cache[(i, m, n)] = dfs(i + 1, m, n) 
-            # opt2: include the current string
+            # opt2: include the current string, also move one with 1 + dfs()
             if zero_cnt <= m and one_cnt <= n:
                 cache[(i, m, n)] = max(cache[(i, m, n)], 1 + dfs(i + 1, m - zero_cnt, n - one_cnt))
             return cache[(i, m, n)]
