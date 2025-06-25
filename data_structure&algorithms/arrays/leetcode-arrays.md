@@ -756,8 +756,8 @@ class Solution:
 # time & space: O(n)
 class Solution:
     def lengthOfLongestSubstring(self, s: str) -> int:
+        window = set()
         l, length = 0, 0
-        window = set() 
 
         for r in range(len(s)):
             while s[r] in window:
@@ -765,7 +765,6 @@ class Solution:
                 l += 1
             window.add(s[r])
             length = max(length, r - l + 1)
-        
         return length
 ```
 

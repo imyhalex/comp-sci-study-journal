@@ -24,8 +24,8 @@ class Solution:
         # finally if stack is empty means all are matches
         # return true
         # else return false
-        return True if not stack else False
-```
+        return len(stack) == 0
+``` 
 
 ## 155. Min Stack[[Link](https://leetcode.com/problems/min-stack/description/?envType=study-plan-v2&envId=top-interview-150)]
 

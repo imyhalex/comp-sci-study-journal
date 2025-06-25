@@ -425,3 +425,112 @@ class Solution:
         dfs(0, 0)
         return combs 
 ```
+
+### 131. Palindrome Partitioning[[Link](https://leetcode.com/problems/palindrome-partitioning/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/palindrome-partitioning?list=neetcode150)]
+
+```python
+# time: O(n * 2^n); space: O(n) extra space, O(n * 2^n) for the output list
+class Solution:
+    def _is_palindrome(self, s, l, r):
+        while l < r:
+            if s[l] != s[r]:
+                return False
+            l += 1
+            r -= 1
+        return True
+
+    def partition(self, s: str) -> List[List[str]]:
+        res, curr = [], []
+
+        def dfs(i):
+            if i >= len(s):
+                res.append(curr.copy())
+                return
+            
+            for j in range(i, len(s)):
+                if self._is_palindrome(s, i, j):
+                    curr.append(s[i: j + 1])
+                    dfs(j + 1)
+                    curr.pop()
+            
+        dfs(0)
+        return res
+```
+
+### 51. N-Queens[[Link](https://leetcode.com/problems/n-queens/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/n-queens?list=neetcode150)]
+
+```python
+# time: O(n!); time: O(n^2)
+class Solution:
+    def solveNQueens(self, n: int) -> List[List[str]]:
+        col = set()
+        postive_diag = set() # -> (r + c)
+        negative_diag = set() # -> (r - c)
+
+        res = []
+        board = [["."] * n for _ in range(n)]
+
+        def dfs(r):
+            if r == n:
+                copy = ["".join(row) for row in board]
+                res.append(copy)
+                return
+            
+            for c in range(n):
+                if c in col or (r + c) in postive_diag or (r - c) in negative_diag:
+                    continue
+                col.add(c)
+                postive_diag.add(r + c)
+                negative_diag.add(r - c)
+                board[r][c] = "Q"
+                dfs(r + 1)
+
+                # do the cleanup for the next iteration of the loop
+                col.remove(c)
+                postive_diag.remove(r + c)
+                negative_diag.remove(r - c)
+                board[r][c] = "."
+            
+        dfs(0)
+        return res
+```
+
+### 52. N-Queens II[[Link](https://leetcode.com/problems/n-queens-ii/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/n-queens?list=neetcode150)]
+
+```python
+# time: O(n!); time: O(n^2)
+class Solution:
+    def totalNQueens(self, n: int) -> int:
+        col = set()
+        neg_diag = set()
+        pos_diag = set()
+        
+        self.res = 0
+        def dfs(r):
+            if r == n:
+                self.res += 1
+                return
+            
+            for c in range(n):
+                if c in col or (r + c) in pos_diag or (r - c) in neg_diag:
+                    continue
+                
+                col.add(c)
+                neg_diag.add(r - c)
+                pos_diag.add(r + c)
+
+                dfs(r + 1)
+
+                col.remove(c)
+                neg_diag.remove(r - c)
+                pos_diag.remove(r + c)
+
+        dfs(0)
+        return self.res
+```
