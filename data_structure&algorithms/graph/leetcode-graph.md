@@ -505,3 +505,123 @@ class Solution:
             res += 1
         return 0
 ```
+
+## 743. Network Delay Time[[Link](https://leetcode.com/problems/network-delay-time/description/)]
+- video explaination[[Link](https://neetcode.io/problems/network-delay-time?list=neetcode150)]
+
+```python
+# time: O(E log V); space: O(v + E)
+class Solution:
+    def networkDelayTime(self, times: List[List[int]], n: int, k: int) -> int:
+        adj_list = defaultdict(list)
+        for u, v, w in times:
+            adj_list[u].append((v, w))
+        
+        min_heap = [(0, k)]
+        visited = set()
+        t = 0 # for result
+        while min_heap:
+            w1, n1 = heapq.heappop(min_heap)
+            if n1 in visited:
+                continue
+            visited.add(n1)
+            t = max(t, w1)
+
+            for n2, w2 in adj_list[n1]:
+                if n2 not in visited:
+                    heapq.heappush(min_heap, (w1 + w2, n2))
+        
+        return t if len(visited) == n else -1
+```
+
+## 1514. Path with Maximum Probability[[Link](https://leetcode.com/problems/path-with-maximum-probability/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/path-with-maximum-probability)
+
+```python
+# time: O(V + E log V); space: O(V + E)
+class Solution:
+    def maxProbability(self, n: int, edges: List[List[int]], succProb: List[float], start_node: int, end_node: int) -> float:
+        adj_list = defaultdict(list)
+        for i in range(len(edges)):
+            src, dst = edges[i]
+            adj_list[src].append((dst, succProb[i]))
+            adj_list[dst].append((src, succProb[i]))
+        
+        max_heap = [(-1, start_node)]
+        visited = set()
+
+        while max_heap:
+            p1, n1 = heapq.heappop(max_heap)
+            visited.add(n1)
+            if n1 == end_node:
+                return -p1
+            
+            for n2, p2 in adj_list[n1]:
+                if n2 not in visited:
+                    heapq.heappush(max_heap, (p2 * p1, n2))
+        
+        return 0
+```
+
+## 778. Swim in Rising Water[[Link](https://leetcode.com/problems/swim-in-rising-water/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/swim-in-rising-water?list=neetcode150)]
+
+```python
+# time: O(n ^ 2 log n); space: O(n ^ 2)
+class Solution:
+    def swimInWater(self, grid: List[List[int]]) -> int:
+        n = len(grid)
+        visited = set()
+        directions = [[0, 1], [0, -1], [1, 0], [-1, 0]] 
+        min_heap = [(grid[0][0], 0, 0)] # (time or max-length, r, c)
+        
+        visited.add((0, 0))
+        while min_heap:
+            t, r, c = heapq.heappop(min_heap)
+
+            if r == n - 1 and c == n - 1:
+                return t
+            
+            for dr, dc in directions:
+                nr, nc = r + dr, c + dc
+                if (nr < 0 or nc < 0 or nr == n or nc == n or
+                    (nr, nc) in visited):
+                    continue
+                visited.add((nr, nc))
+                heapq.heappush(min_heap, (max(t, grid[nr][nc]), nr, nc))
+```
+
+## 1631. Path With Minimum Effort[[Link](https://leetcode.com/problems/path-with-minimum-effort/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/path-with-minimum-effort?list=neetcode250)]
+
+```python
+# time: O(m * n * log(m * n)); sapce:O(m * n)
+class Solution:
+    def minimumEffortPath(self, heights: List[List[int]]) -> int:
+        rows, cols = len(heights), len(heights[0])
+        visited = set()
+        directions = [[1, 0], [-1, 0], [0, 1], [0, -1]]
+        min_heap = [(0, 0, 0)] # (effort, r, c)
+
+        while min_heap:
+            e, r, c = heapq.heappop(min_heap)
+
+            if (r, c) in visited:
+                continue
+            
+            visited.add((r, c))
+
+            if r == rows - 1 and c == cols - 1:
+                return e
+            for dr, dc in directions:
+                nr, nc = r + dr, c + dc
+                if (nr < 0 or nc < 0 or nr == rows 
+                    or nc == cols or (nr, nc) in visited):
+                    continue
+                next_effort = abs(heights[nr][nc] - heights[r][c])
+                heapq.heappush(min_heap, (max(e, next_effort), nr, nc))
+        return 0
+```

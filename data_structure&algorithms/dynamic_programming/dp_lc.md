@@ -769,11 +769,10 @@ If i == len(word1): we have to insert all remaining word2[j:] → cost = len(wor
 
 If j == len(word2): we have to delete all remaining word1[i:] → cost = len(word1) - i
 """
-
 class Solution:
     def minDistance(self, word1: str, word2: str) -> int:
         m, n = len(word1), len(word2)
-        cache = [[-1] * n for _ in range(m)]
+        dp = {}
 
         def dfs(i, j):
             if i == m:
@@ -781,21 +780,21 @@ class Solution:
             
             if j == n:
                 return m - i
-            
-            if cache[i][j] != -1:
-                return cache[i][j] 
-            
+        
+            if (i, j) in dp:
+                return dp[(i, j)]
+
             # when character are equal, no operation, move pointer
             if word1[i] == word2[j]:
-                cache[i][j] = dfs(i + 1, j + 1)
+                dp[(i, j)] = dfs(i + 1, j + 1)
             # when diff, do operationm move pointer accordingly, and find min move
             else:
                 insert = 1 + dfs(i, j + 1)
                 delete = 1 + dfs(i + 1, j)
                 replace = 1 + dfs(i + 1, j + 1)
-                cache[i][j] = min(insert, delete, replace)
-            return cache[i][j]
-            
+                dp[(i, j)] = min(insert, delete, replace)
+            return dp[(i, j)]
+        
         return dfs(0, 0)
 ```
 

@@ -119,6 +119,18 @@ class Solution:
 - video explaination[[Link](https://neetcode.io/problems/subarray-sum-equals-k)]
 - hint: 
 ```python
+# brute force:
+class Solution:
+    def subarraySum(self, nums: List[int], k: int) -> int:
+        res = 0
+        for i in range(len(nums)):
+            sum = 0
+            for j in range(i, len(nums)):
+                sum += nums[j]
+                if sum == k:
+                    res += 1
+        return res
+
 # time & space: O(n)
 class Solution:
     def subarraySum(self, nums: List[int], k: int) -> int:
@@ -133,9 +145,19 @@ class Solution:
             diff = curr_sum - k
             # lookup in the hashmap
             res += prefix_sum.get(diff, 0)
+            # incrementing one for the current prefix we calculated
             prefix_sum[curr_sum] = 1 + prefix_sum.get(curr_sum, 0)
         
         return res
+
+# same as
+# https://leetcode.com/problems/contiguous-array/description/
+# https://leetcode.com/problems/subarray-sum-equals-k/description/
+# https://leetcode.com/problems/subarrays-with-k-different-integers/description/
+# https://leetcode.com/problems/count-number-of-nice-subarrays/description/
+# https://leetcode.com/problems/binary-subarrays-with-sum/description/
+# https://leetcode.com/problems/subarray-product-less-than-k/description/
+# https://leetcode.com/problems/count-subarrays-where-max-element-appears-at-least-k-times/description/
 ```
 
 ## 271. Encode and Decode Strings[[Link](https://leetcode.com/problems/encode-and-decode-strings/description/)]
@@ -789,6 +811,20 @@ class Solution:
             res = max(res, r - l + 1)
         
         return res
+
+class Solution:
+    def characterReplacement(self, s: str, k: int) -> int:
+        l, length = 0, 0
+        count = {} # char -> freq
+
+        for r in range(len(s)):
+            count[s[r]] = 1 + count.get(s[r], 0)
+            while (r - l + 1) - max(count.values()) > k:
+                count[s[l]] -= 1
+                l += 1
+            length = max(length, (r - l + 1))
+
+        return length
 ```
 
 ## 121. Best Time to Buy and Sell Stock[[Link]](https://leetcode.com/problems/best-time-to-buy-and-sell-stock/description/?envType=study-plan-v2&envId=top-interview-150)
@@ -801,17 +837,15 @@ class Solution:
 # time: O(n); space: O(1)
 class Solution:
     def maxProfit(self, prices: List[int]) -> int:
-        l, r = 0, 1 # left=buy, right=sell
-        res = 0
-
-        while r < len(prices):
-            if prices[l] < prices[r]:
+        l, res = 0, 0
+        
+        for r in range(len(prices)):
+            if prices[r] > prices[l]:
                 profit = prices[r] - prices[l]
                 res = max(res, profit)
             else:
                 l = r
-            r += 1
-
+        
         return res
 ```
 
