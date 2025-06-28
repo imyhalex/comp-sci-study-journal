@@ -379,11 +379,56 @@ class Solution:
                 else:
                     res.append([num, nums[l], nums[r]])
                     # update the left pointer
-                    # also mind to jump over duplicate, so while loop
                     l += 1
-                    while nums[l] == nums[l - 1] and l < r:
+                    # also mind to jump over duplicate, so while loop
+                    while nums[l] == nums[l - 1] and l < r: # l += 1 but should never pass r
                         l += 1
         return res
+```
+
+## 16. 3Sum Closest[[Link](https://leetcode.com/problems/3sum-closest/?envType=problem-list-v2&envId=two-pointers)]
+
+```python
+# time: O(n log n) + O(n²) = O(n²)
+class Solution:
+    def threeSumClosest(self, nums: List[int], target: int) -> int:
+        res = nums[0] + nums[1] + nums[2] # initialize with the first triplets sum for compare contrast
+        nums.sort()
+
+        for i, num in enumerate(nums):
+            l, r = i + 1, len(nums) - 1
+            while l < r:
+                three_sum = num + nums[l] + nums[r]
+                if abs(three_sum - target) < abs(res - target):
+                    res = three_sum
+
+                if three_sum < target:
+                    l += 1
+                elif three_sum > target:
+                    r -= 1
+                else:
+                    return target # return target for exact match
+        return res
+```
+
+## *259. 3Sum Smaller[[Link](https://leetcode.com/problems/3sum-smaller/description/)]
+
+```python
+class Solution:
+    def threeSumSmaller(self, nums: List[int], target: int) -> int:
+        nums.sort()
+        count = 0
+
+        for i in range(len(nums) - 2):
+            l, r = i + 1, len(nums) - 1
+            while l < r:
+                three_sum = nums[i] + nums[l] + nums[r]
+                if three_sum < target:
+                    count += r - l # All elements from l+1 to r are valid
+                    l += 1
+                else:
+                    r -= 1
+        return count
 ```
 
 ## 392. Is Subsequence[[Link](https://leetcode.com/problems/is-subsequence/description/?envType=study-plan-v2&envId=top-interview-150)]
