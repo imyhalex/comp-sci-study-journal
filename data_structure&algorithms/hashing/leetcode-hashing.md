@@ -279,3 +279,49 @@ class Solution:
         
         return left_min == 0
 ```
+
+## 36. Valid Sudoku[[Link](https://leetcode.com/problems/valid-sudoku/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/valid-sudoku)]
+
+```python
+# time & space: O(n ^ 2)
+class Solution:
+    def isValidSudoku(self, board: List[List[str]]) -> bool:
+        rows = defaultdict(set)
+        cols = defaultdict(set)
+        square = defaultdict(set) # key = (r // 3, c // 3)
+
+        for r in range(9):
+            for c in range(9):
+                if board[r][c] == ".":
+                    continue
+
+                if (board[r][c] in rows[r] or
+                    board[r][c] in cols[c] or 
+                    board[r][c] in square[(r // 3, c // 3)]):
+                    return False
+
+                cols[c].add(board[r][c])
+                rows[r].add(board[r][c])
+                square[(r // 3, c // 3)].add(board[r][c])
+
+        return True
+
+# the square in sudoku can be represented as sections 0 - 9 by (r //3, c // 3)
+"""example
+. . . . . . . . .
+. 1 . . 2 . . 3 .
+. . . . . . . . .
+. . . . . . . . .
+. 4 . . 5 . . 6 .
+. . . . . . . . .
+. . . . . . . . .
+. 7 . . 8 . . 9 .
+. . . . . . . . .
+
+e.g.
+1 // 3 = 0 if r, c = 0, 0
+every coordinates in first sections fall in square[(1 //3, 1 // 3)]
+"""
+```

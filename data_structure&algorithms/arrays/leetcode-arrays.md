@@ -250,35 +250,6 @@ i = j
 # codec.decode(codec.encode(strs))
 ```
 
-## 36. Valid Sudoku[[Link](https://leetcode.com/problems/valid-sudoku/description/?envType=study-plan-v2&envId=top-interview-150)]
-
-- video explaination[[Link](https://neetcode.io/problems/valid-sudoku)]
-
-```python
-# time & space: O(n ^ 2)
-class Solution:
-    def isValidSudoku(self, board: List[List[str]]) -> bool:
-        rows = defaultdict(set)
-        cols = defaultdict(set)
-        square = defaultdict(set) # key = (r // 3, c // 3)
-
-        for r in range(9):
-            for c in range(9):
-                if board[r][c] == ".":
-                    continue
-
-                if (board[r][c] in rows[r] or
-                    board[r][c] in cols[c] or 
-                    board[r][c] in square[(r // 3, c // 3)]):
-                    return False
-
-                cols[c].add(board[r][c])
-                rows[r].add(board[r][c])
-                square[(r // 3, c // 3)].add(board[r][c])
-
-        return True
-```
-
 ## 347. Top K Frequent Elements[[Link](https://leetcode.com/problems/top-k-frequent-elements/description/)]
 - video explaination[[Link](https://neetcode.io/problems/top-k-elements-in-list)]
 - concepts: hash table, bucket sort
