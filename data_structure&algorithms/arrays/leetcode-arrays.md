@@ -195,6 +195,55 @@ class Codec:
 
         return res
 
+# j = i
+# while s[j] != "#":
+#     j += 1
+# length = int(s[i:j]) # slice out the number
+# i = j + 1
+# j = i + length
+# res.append(s[i:j])
+# i = j # update the i to the next num
+
+"""example
+5#Hello5#World
+
+j = i
+5#Hello5#World
+i
+j
+
+while s[j] != "#":
+    j +=1
+5#Hello5#World
+i
+ j
+
+length = int(s[i:j])
+[5] #Hello5#World
+i
+    j
+
+i = j + 1
+[5] #Hello5#World
+     i
+    j
+
+j = i + length
+[5] #Hello5#World
+     i
+          j
+
+res.append(s[i:j])
+[5] # [Hello] 5#World
+       i
+             j
+
+i = j
+[5] #[Hello] 5#World
+             i
+             j
+"""
+
 
 # Your Codec object will be instantiated and called as such:
 # codec = Codec()
@@ -431,6 +480,47 @@ class Solution:
         return count
 ```
 
+## 18. 4Sum[[Link](https://leetcode.com/problems/4sum/description/?envType=problem-list-v2&envId=two-pointers)]
+
+- video explaination[[Link](https://neetcode.io/problems/4sum?list=neetcode250)]
+
+```python
+# time: O(n^3); space: O(1) or O(n) depends on sorting algo
+class Solution:
+    def fourSum(self, nums: List[int], target: int) -> List[List[int]]:
+        nums.sort()
+        res, quad = [], []
+
+        def k_sum(k, start_idx, target):
+            if k != 2:
+                for i in range(start_idx, len(nums) - k + 1):
+                    if i > start_idx and nums[i] == nums[i - 1]:
+                        continue
+                    
+                    quad.append(nums[i])
+                    k_sum(k - 1, i + 1, target - nums[i])
+                    quad.pop()
+                return
+            # the previous one handeld two values for quad
+            
+            # base case, two sum 
+            l, r = start_idx, len(nums) - 1
+            while l < r:
+                two_sum = nums[l] + nums[r]
+                if two_sum < target:
+                    l += 1
+                elif two_sum > target:
+                    r -= 1
+                else:
+                    res.append(quad + [nums[l], nums[r]])
+                    l += 1
+                    while l < r and nums[l] == nums[l - 1]:
+                        l += 1
+        
+        k_sum(4, 0, target)
+        return res
+```
+
 ## 392. Is Subsequence[[Link](https://leetcode.com/problems/is-subsequence/description/?envType=study-plan-v2&envId=top-interview-150)]
 
 - video explaination[[Link](https://neetcode.io/solutions/is-subsequence)]
@@ -445,6 +535,45 @@ class Solution:
                 i += 1
             j += 1
         return i == len(s)
+```
+## *31. Next Permutation[[Link](https://leetcode.com/problems/next-permutation/description/?envType=problem-list-v2&envId=two-pointers)]
+
+- explaination[[Link](https://neetcode.io/problems/next-permutation?list=allNC)]
+
+```python
+# time: O(n); space: O(1)
+class Solution:
+    def nextPermutation(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        n = len(nums)
+        # 🔍 Step 1: Find the first "dip" from the right
+        # This loop scans from right to left.
+        # It finds the first number where the sequence stops increasing.
+        # This means the sequence to the right of i is non-increasing (i.e., descending).
+        i = n - 2
+        while i >= 0 and nums[i] >= nums[i + 1]:
+            i -= 1
+
+        # 🔄 Step 2: If such a number exists (not fully descending), swap it
+        # Now find the smallest number greater than nums[i] to the right of i.
+        # Swap it with nums[i].
+        if i >= 0:
+            j = n - 1
+            while nums[j] <= nums[i]:
+                j -= 1
+            nums[i], nums[j] = nums[j], nums[i]
+
+        # 🔃 Step 3: Reverse the rest (make it the smallest suffix)
+        # After the swap, the part to the right of i is still in descending order.
+        # To make the number as small as possible, reverse it to ascending order.
+        l, r = i + 1, n - 1
+        while l < r:
+            nums[l], nums[r] = nums[r], nums[l]
+            l += 1
+            r -= 1
+
 ```
 
 ## 11. Container With Most Water[[Link](https://leetcode.com/problems/container-with-most-water/description/?envType=study-plan-v2&envId=top-interview-150)]
