@@ -325,3 +325,33 @@ e.g.
 every coordinates in first sections fall in square[(1 //3, 1 // 3)]
 """
 ```
+
+## 2661. First Completely Painted Row or Column[[Link](https://leetcode.com/problems/first-completely-painted-row-or-column/description/)]
+
+<!-- - video explaination[[Link]()] -->
+
+```python
+# time: O(m * n + len(arr)); space: O(m * n)
+class Solution:
+    def firstCompleteIndex(self, arr: List[int], mat: List[List[int]]) -> int:
+        m, n = len(mat), len(mat[0])
+
+        # build valid -> (row, col) map
+        position = {}
+        for r in range(m):
+            for c in range(n):
+                position[mat[r][c]] = (r, c)
+        
+        # track how many cells are painted in each row/col
+        # row -> total_paint each row
+        # col -> total_paint each col
+        row_count, col_count = defaultdict(int), defaultdict(int)
+        for i, num in enumerate(arr):
+            r, c = position[num]
+            row_count[r] += 1
+            col_count[c] += 1
+            if row_count[r] == n or col_count[c] == m:
+                return i
+        
+        return -1
+```

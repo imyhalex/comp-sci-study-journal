@@ -406,6 +406,9 @@ class Solution:
 #         self.right = right
 class Solution:
     def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        if not root:
+            return []
+            
         res = []
         q = deque()
         q.append(root)
@@ -414,12 +417,12 @@ class Solution:
             level = []
             for _ in range(len(q)):
                 node = q.popleft()
-                if node:
-                    level.append(node.val)
+                level.append(node.val)
+                if node.left:
                     q.append(node.left)
+                if node.right:
                     q.append(node.right)
-            if level:
-                res.append(level)
+            res.append(level)
         
         return res
 ```
@@ -453,6 +456,41 @@ class Solution:
                 res.append(right_side.val)
         
         return res
+```
+
+## *993. Cousins in Binary Tree[[Link](https://leetcode.com/problems/cousins-in-binary-tree/description/)]
+
+```python
+# time & space: O(n)
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def isCousins(self, root: Optional[TreeNode], x: int, y: int) -> bool:
+        if not root:
+            return False
+        
+        q = deque()
+        q.append((root, None)) # store (node, parent)
+        
+        while q:
+            found = {} # the hashmap to build up the relationship between current level node and parent node
+            for _ in range(len(q)):
+                node, parent = q.popleft()
+                if node.val == x or node.val == y:
+                    found[node.val] = parent
+                if node.left:
+                    q.append((node.left, node))
+                if node.right:
+                    q.append((node.right, node))
+
+            if x in found and y in found:
+                return found[x] != found[y] # return true if two parents are not the same
+            if x in found or y in found:
+                return False
 ```
 
 ## 1448. Count Good Nodes in Binary Tree[[Link](https://leetcode.com/problems/count-good-nodes-in-binary-tree/description/)]
@@ -544,12 +582,14 @@ class Solution:
         return self.max_sum
 ```
 
-## 297. Serialize and Deserialize Binary Tree[[Link](https://leetcode.com/problems/serialize-and-deserialize-binary-tree/description/)]
+## *297. Serialize and Deserialize Binary Tree[[Link](https://leetcode.com/problems/serialize-and-deserialize-binary-tree/description/)]
 
 - video explaination[[Link](https://neetcode.io/problems/serialize-and-deserialize-binary-tree?list=blind75)]
+- use iter(), next() for deserialize
 
 ```python
 # time & space: O(n)
+# use "," to seperate node, use "#" to indicate null
 # Definition for a binary tree node.
 # class TreeNode(object):
 #     def __init__(self, x):
