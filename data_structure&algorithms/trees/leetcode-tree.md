@@ -493,7 +493,7 @@ class Solution:
                 return False
 ```
 
-## 1448. Count Good Nodes in Binary Tree[[Link](https://leetcode.com/problems/count-good-nodes-in-binary-tree/description/)]
+## *1448. Count Good Nodes in Binary Tree[[Link](https://leetcode.com/problems/count-good-nodes-in-binary-tree/description/)]
 - video explaination[[Link](https://neetcode.io/problems/count-good-nodes-in-binary-tree?list=blind75)]
 
 ```python

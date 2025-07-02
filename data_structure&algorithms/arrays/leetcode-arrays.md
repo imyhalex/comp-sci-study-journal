@@ -552,6 +552,7 @@ class Solution:
 - video explaination[[Link](https://neetcode.io/problems/max-water-container)]
 
 ```python
+# time: O(n); space: O(1)
 class Solution:
     def maxArea(self, height: List[int]) -> int:
         l, r = 0, len(height) - 1
@@ -576,11 +577,15 @@ class Solution:
 ```python
 # two pointers
 # time: O(n); space: O(1)
+# hint: max_left, max_right to contains actual values 
+# take the minimum of the max left height and max right height
+# maximum height to the left of i (inclusive).
+# maximum height to the right of i (inclusive).
 class Solution:
     def trap(self, height: List[int]) -> int:
-        # handle a case when no values in list
-        if not height:
-            return 0
+        # handle a case when no values in list (optional)
+        # if not height:
+        #     return 0
 
         l, r = 0, len(height) - 1
         max_left, max_right = height[l], height[r]
@@ -596,6 +601,49 @@ class Solution:
                 r -= 1
                 max_right = max(max_right, height[r])
                 res += max_right - height[r]
+        
+        return res
+"""explain
+so the overal logic is min(i, j) - h[i]
+in code
+    min(i, j) => 
+        if max_left < max_right:
+            l += 1
+            max_left = max(max_left, height[l])
+            res += max_left - height[l] => the part find the min i or j and - h[i]
+"""
+```
+
+## 2560. House Robber IV[[Link](https://leetcode.com/problems/house-robber-iv/description/)]
+- video explaination[[Link](https://neetcode.io/solutions/house-robber-iv)]
+
+```python
+# searching in a range
+# time: O(n log m); space: O(1)
+class Solution:
+    def minCapability(self, nums: List[int], k: int) -> int:
+        def can_rob_with_capability(cap): # this function is to test if rob can rob one given the capacity and k
+            i = 0
+            count = 0
+            while i < len(nums):
+                if nums[i] <= cap:
+                    count += 1
+                    i += 2
+                else:
+                    i += 1
+                if count == k:
+                    break
+            return count == k
+
+        l, r = min(nums), max(nums) # indicates capacity range
+        res = 0
+        while l <= r:
+            mid = l + (r - l) // 2 # try to find one possible max capacity
+            if can_rob_with_capability(mid):
+                res = mid
+                r = mid - 1
+            else:
+                l = mid + 1
         
         return res
 ```
@@ -933,6 +981,72 @@ class Solution:
             window.add(s[r])
             length = max(length, r - l + 1)
         return length
+    
+# Longest Substring with At Most Two Distinct Characters
+# Medium
+# Longest Substring with At Most K Distinct Characters
+# Medium
+# Subarrays with K Different Integers
+# Hard
+# Maximum Erasure Value
+# Medium
+# Number of Equal Count Substrings
+# Medium
+# Minimum Consecutive Cards to Pick Up
+# Medium
+# Longest Nice Subarray
+# Medium
+# Optimal Partition of String
+# Medium
+# Count Complete Subarrays in an Array
+# Medium
+# Find Longest Special Substring That Occurs Thrice II
+# Medium
+# Find Longest Special Substring That Occurs Thrice I
+# Medium
+```
+
+## 159. Longest Substring with At Most Two Distinct Characters[[Link](https://leetcode.com/problems/longest-substring-with-at-most-two-distinct-characters/description/)]
+
+```python
+# time & space: O(n)
+class Solution:
+    def lengthOfLongestSubstringTwoDistinct(self, s: str) -> int:
+        window = defaultdict(int) # char -> freq
+        l, length = 0, 0
+
+        for r in range(len(s)):
+            window[s[r]] += 1
+
+            while len(window) > 2:
+                window[s[l]] -= 1
+                if window[s[l]] == 0:
+                    del window[s[l]]
+                l += 1
+            
+            length = max(length, r - l + 1)
+        
+        return length
+
+# or similar question - 340. Longest Substring with At Most K Distinct Characters
+class Solution:
+    def lengthOfLongestSubstringKDistinct(self, s: str, k: int) -> int:
+        l, length = 0, 0
+        window = defaultdict(int)
+
+        for r in range(len(s)):
+            window[s[r]] += 1
+
+            while len(window) > k:
+                window[s[l]] -=1
+                if window[s[l]] == 0:
+                    del window[s[l]]
+                l += 1
+
+            length = max(length, r - l + 1)
+        
+        return length
+
 ```
 
 ## 424. Longest Repeating Character Replacement[[Link](https://leetcode.com/problems/longest-repeating-character-replacement/description/)]

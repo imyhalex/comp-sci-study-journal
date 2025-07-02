@@ -625,3 +625,52 @@ class Solution:
                 heapq.heappush(min_heap, (max(e, next_effort), nr, nc))
         return 0
 ```
+
+## 1584. Min Cost to Connect All Points[[Link](https://leetcode.com/problems/min-cost-to-connect-all-points/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/min-cost-to-connect-points?list=neetcode150)]
+
+```python
+# Example 2:
+
+# Input: points = [[3,12],[-2,5],[-4,1]]
+# Output: 18
+
+# adj = {
+#     0: [[dist(0,1), 1], [dist(0,2), 2]],
+#     1: [[dist(1,0), 0], [dist(1,2), 2]],
+#     2: [[dist(2,0), 0], [dist(2,1), 1]]
+# }
+
+# time: O(n^2 log n); space: O(n^2)
+class Solution:
+    def minCostConnectPoints(self, points: List[List[int]]) -> int:
+        n = len(points)
+        adj_list = {}
+        for i in range(n):
+            adj_list[i] = []
+        
+        for i in range(n):
+            x1, y1 = points[i]
+            for j in range(i + 1, n):
+                x2, y2 = points[j]
+                dist = abs(x1 - x2) + abs(y1 - y2)
+                adj_list[i].append((dist, j))
+                adj_list[j].append((dist, i))
+        
+        res = 0
+        visited = set()
+        min_heap = [(0, 0)] # (cost, node_index)
+        while min_heap:
+            cost, i = heapq.heappop(min_heap)
+            if i in visited:
+                continue
+            
+            res += cost
+            visited.add(i)
+            for nei_cost, neighbor in adj_list[i]:
+                if neighbor not in visited:
+                    heapq.heappush(min_heap, (nei_cost, neighbor))
+        return res
+
+```
