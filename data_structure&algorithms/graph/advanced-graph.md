@@ -76,3 +76,93 @@ def minimumSpanningTree(edges, n):
                 heapq.heappush(min_heap, [weight, node, neighbor])
     return mst
 ```
+
+# Kruskal's[[Link](https://neetcode.io/courses/advanced-algorithms/16)]
+
+- find  minimum spanning tree
+
+```python
+# time: O(E log V); space: O(E)
+class UnionFind:
+    def __init__(self, n):
+        self.par = {}
+        self.rank = {}
+
+        for i in range(1, n + 1):
+            self.par[i] = i
+            self.rank[i] = 0
+    
+    # Find parent of n, with path compression.
+    def find(self, n):
+        p = self.par[n]
+        while p != self.par[p]:
+            self.par[p] = self.par[self.par[p]]
+            p = self.par[p]
+        return p
+
+    # Union by height / rank.
+    # Return false if already connected, true otherwise.
+    def union(self, n1, n2):
+        p1, p2 = self.find(n1), self.find(n2)
+        if p1 == p2:
+            return False
+        
+        if self.rank[p1] > self.rank[p2]:
+            self.par[p2] = p1
+        elif self.rank[p1] < self.rank[p2]:
+            self.par[p1] = p2
+        else:
+            self.par[p1] = p2
+            self.rank[p2] += 1
+        return True
+
+# Given an list of edges of a connected undirected graph,
+# with nodes numbered from 1 to n,
+# return a list edges making up the minimum spanning tree.
+def minimumSpanningTree(edges, n):
+    min_heap = []
+    for n1, n2, weight in edges:
+        heapq.heappush(min_heap, [weight, n1, n2])
+    
+    union_find = UnionFind(n)
+    mst = []
+    while len(mst) < n - 1:
+        weight, n1, n2 = heapq.heappop(min_heap)
+        if not union_find.union(n1, n2):
+            continue
+        mst.append([n1, n2])
+    return mst
+```
+
+# Topological Sort[[Link](https://neetcode.io/courses/advanced-algorithms/17)]
+
+- only work on directed, acyclical graph
+- graph does not have to be connected
+
+```python
+# postorder, reverse the result
+# for cycle detection, use another hashset : path = set()
+
+def dfs(src, adj_list, visited, top_sort):
+    if src in visited:
+        return True
+
+    for neighbor in adj[src]:
+        dfs(neigbhor, adj_list, visited, top_sort)
+    visited.add(src)
+    top_sort.append(src)
+
+def topological_sort(edges, n):
+    adj_list = {}
+    for i in range(1, n + 1):
+        adj_list[i] = []
+    for src, dst in edges:
+        adj_list[src].append(dst)
+    
+    top_sort = []
+    visited = set()
+    for i in range(1, n + 1):
+        dfs(i, adj_list, visited, top_sort)
+    top_sort.reverse()
+    return top_sort
+```

@@ -331,35 +331,30 @@ class Solution:
 ```python
 class Solution:
     def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
-        pre_map_adjlist = {i:[] for i in range(numCourses)}
-        # feed adj List
+        adj_list = defaultdict(list)
         for crs, pre in prerequisites:
-            pre_map_adjlist[crs].append(pre)
-
-        # visited set
-        visited = set() 
+            adj_list[crs].append(pre)
+        
+        path = set()
+        visited = set()
         def dfs(crs):
-            if crs in visited:
+            if crs in path:
                 return False
-            
-            if pre_map_adjlist[crs] == []:
+            if crs in visited:
                 return True
             
-            visited.add(crs)
-            # looking through the neighbor
-            for pre in pre_map_adjlist[crs]:
+            path.add(crs)
+            for pre in adj_list[crs]:
                 if not dfs(pre):
                     return False
-            visited.remove(crs)
-            pre_map_adjlist[crs] = [] # add this line to reduce time executed
+            path.remove(crs)
+            visited.add(crs)
             return True
         # need to manually loop to cover the disconnected graph cases
         for crs in range(numCourses):
             if not dfs(crs):
                 return False
-        
-        return True
-            
+        return True  
 ```
 - Time Complexity: O(N + P)
 
@@ -403,6 +398,53 @@ class Solution:
         return output
 ```
 - Time Complexity: O(E + V) / O(N + P)
+
+## 630. Course Schedule III[[Link](https://leetcode.com/problems/course-schedule-iii/description/)]
+
+```python
+
+```
+
+## *1462. Course Schedule IV[[Link](https://leetcode.com/problems/course-schedule-iv/description/)]
+- video explaination[[Link](https://neetcode.io/problems/course-schedule-iv?list=neetcode150)]
+
+```python
+# time: O(V * (V + E) + m); space: O(V^2 + E + m)
+class Solution:
+    def checkIfPrerequisite(self, numCourses: int, prerequisites: List[List[int]], queries: List[List[int]]) -> List[bool]:
+        adj_list = defaultdict(list)
+        for pre, crs in prerequisites:  # original edge pre → crs
+            adj_list[crs].append(pre) # store it as crs → pre
+        
+        prereq_map = {}
+        def dfs(crs):
+            if crs not in prereq_map:  # first time we see this course
+                prereq_map[crs] = set()
+                for pre in adj_list[crs]: # walk *backwards* to every prerequisite
+                    prereq_map[crs] |= dfs(pre)  # union with their prerequisite sets
+                prereq_map[crs].add(crs) # add itself (handy for queries) (optional)
+            return prereq_map[crs]
+        """
+        why return prereq_map[crs]?
+            - dfs(crs) is solving for one specific course
+            - It's computing: "What are the prerequisites of course crs?"
+            - So it only needs to return the result for that course: prereq_map[crs]
+            
+            for pre in adj_list[crs]:
+                prereq_map[crs] |= dfs(pre)
+            Here: You're saying: "Get the prerequisites of course pre (a prerequisite of crs) using dfs(pre)"
+                The return value should be: "just the set of prerequisites for pre" — which is prereq_map[pre]
+                So dfs(pre) returns prereq_map[pre]
+        """
+        # iterate throughh every single course (start from every single course) and construct the map
+        for crs in range(numCourses):
+            dfs(crs)
+
+        res = []
+        for u, v in queries:
+            res.append(u in prereq_map[v])
+        return res
+```
 
 ## 909. Snakes and Ladders[[Link](https://leetcode.com/problems/snakes-and-ladders/?envType=study-plan-v2&envId=top-interview-150)]
 
@@ -646,10 +688,8 @@ class Solution:
 class Solution:
     def minCostConnectPoints(self, points: List[List[int]]) -> int:
         n = len(points)
-        adj_list = {}
-        for i in range(n):
-            adj_list[i] = []
-        
+        adj_list = {i:[] for i in range(n)} # adj_list node_index -> [(distance(or weight, node_index))]
+
         for i in range(n):
             x1, y1 = points[i]
             for j in range(i + 1, n):
@@ -665,12 +705,79 @@ class Solution:
             cost, i = heapq.heappop(min_heap)
             if i in visited:
                 continue
-            
             res += cost
             visited.add(i)
-            for nei_cost, neighbor in adj_list[i]:
-                if neighbor not in visited:
-                    heapq.heappush(min_heap, (nei_cost, neighbor))
+            for nei_cost, nei_idx in adj_list[i]:
+                if nei_idx not in visited:
+                    heapq.heappush(min_heap, (nei_cost, nei_idx))
+        
         return res
 
+```
+
+## **1489. Find Critical and Pseudo-Critical Edges in Minimum Spanning Tree[[Link](https://leetcode.com/problems/find-critical-and-pseudo-critical-edges-in-minimum-spanning-tree/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/find-critical-and-pseudo-critical-edges-in-minimum-spanning-tree?list=neetcode150)]
+
+```python
+# time: O(E^2); space: O(V + E)
+class UnionFind:
+    def __init__(self, n):
+        self.par = [i for i in range(n)]
+        self.rank = [1] * n
+
+    def find(self, v1):
+        while v1 != self.par[v1]:
+            self.par[v1] = self.par[self.par[v1]]
+            v1 = self.par[v1]
+        return v1
+
+    def union(self, v1, v2):
+        p1, p2 = self.find(v1), self.find(v2)
+        if p1 == p2:
+            return False
+        if self.rank[p1] > self.rank[p2]:
+            self.par[p2] = p1
+            self.rank[p1] += self.rank[p2]
+        else:
+            self.par[p1] = p2
+            self.rank[p2] += self.rank[p1]
+        return True
+
+
+class Solution:
+    def findCriticalAndPseudoCriticalEdges(self, n: int, edges: List[List[int]]) -> List[List[int]]:
+        for i, e in enumerate(edges):
+            e.append(i)  # [v1, v2, weight, original_index]
+
+        edges.sort(key=lambda e: e[2])
+
+        mst_weight = 0
+        uf = UnionFind(n)
+        for v1, v2, w, i in edges:
+            if uf.union(v1, v2):
+                mst_weight += w
+
+        critical, pseudo = [], []
+        for n1, n2, e_weight, i in edges:
+            # Try without curr edge
+            weight = 0
+            uf = UnionFind(n)
+            for v1, v2, w, j in edges:
+                if i != j and uf.union(v1, v2):
+                    weight += w
+            if max(uf.rank) != n or weight > mst_weight:
+                critical.append(i)
+                continue
+
+            # Try with curr edge
+            uf = UnionFind(n)
+            uf.union(n1, n2)
+            weight = e_weight
+            for v1, v2, w, j in edges:
+                if uf.union(v1, v2):
+                    weight += w
+            if weight == mst_weight:
+                pseudo.append(i)
+        return [critical, pseudo]
 ```
