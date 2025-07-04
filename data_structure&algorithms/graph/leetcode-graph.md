@@ -400,9 +400,30 @@ class Solution:
 - Time Complexity: O(E + V) / O(N + P)
 
 ## 630. Course Schedule III[[Link](https://leetcode.com/problems/course-schedule-iii/description/)]
-
+- Greedy + Max Heap Intuition:
+    - Sort courses by lastDay so you consider the most urgent ones first.
+    - Maintain a running total of time spent.
+    - Use a max-heap to keep track of the durations of the courses you've taken.
+    - If adding a course causes you to go over its lastDay, remove the longest course you've taken (since it cost the most time).
 ```python
+# time & space: O(n log n)
+class Solution:
+    def scheduleCourse(self, courses: List[List[int]]) -> int:
+        # sort courses by their deadlines
+        courses.sort(key=lambda x: x[1])
 
+        current_total_time = 0
+        max_heap = []
+
+        for duration, last_day in courses:
+            current_total_time += duration
+            heapq.heappush(max_heap, -duration) # max-heap pushing negative value
+
+            if current_total_time > last_day:
+                # drop the longest duration course to fit the deadline
+                current_total_time += heapq.heappop(max_heap) # remove the largest duration (since in python, the max_heap is represents numbers in negative, just add it)
+        
+        return len(max_heap)
 ```
 
 ## *1462. Course Schedule IV[[Link](https://leetcode.com/problems/course-schedule-iv/description/)]

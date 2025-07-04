@@ -135,7 +135,7 @@ class Solution:
 class Solution:
     def subarraySum(self, nums: List[int], k: int) -> int:
         # hashmap: (prefix, count) pair
-        # default (0, 1) -> prefix=0, count=1
+        # default (0, 1) -> prefix=0, count=1, default setup for prefix question
         res = 0
         curr_sum = 0
         prefix_sum = {0: 1}
@@ -143,8 +143,9 @@ class Solution:
         for num in nums:
             curr_sum += num
             diff = curr_sum - k
-            # lookup in the hashmap
+            # lookup the diff for exclude the "left" part of current prefix
             res += prefix_sum.get(diff, 0)
+            # take record of current prefix sum
             # incrementing one for the current prefix we calculated
             prefix_sum[curr_sum] = 1 + prefix_sum.get(curr_sum, 0)
         
@@ -329,11 +330,11 @@ class Solution:
 ```python
 class Solution:
     def twoSum(self, nums: List[int], target: int) -> List[int]:
-        hash_map = {}
-
+        hash_map = {} # num -> num_idx
+        # construct a hash_map
         for i, n in enumerate(nums):
             hash_map[n] = i
-        
+        # find the two sum using offset technique
         for i, n in enumerate(nums):
             diff = target - n
             if diff in hash_map and hash_map[diff] != i:
