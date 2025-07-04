@@ -282,48 +282,6 @@ class Solution:
         return None
 ```
 
-## 125. Valid Palindrome[[Link](https://leetcode.com/problems/valid-palindrome/description/?envType=study-plan-v2&envId=top-interview-150)]
-- video explaination[[Link](https://neetcode.io/problems/is-palindrome)]
-```python
-# first way: reverse string
-# time: O(n); space: O(n)
-class Solution:
-    def isPalindrome(self, s: str) -> bool:
-        new_str = ""
-        for c in s:
-            if c.isalnum():
-                new_str += c.lower()
-        return new_str == new_str[::-1]
-
-# second way: two pointer
-# time: O(n); space: O(1)
-class Solution:
-    def isPalindrome(self, s: str) -> bool:
-        l, r = 0, len(s) - 1
-        while l < r:
-            # because we need to skip non alpha-numerical characters, use while loop
-            while l < r and not self.is_alphanum(s[l]):
-                l += 1
-            while l < r and not self.is_alphanum(s[r]):
-                r -= 1
-            # if left pointer not equals to right pointer
-            # return false immediately
-            if s[l].lower() != s[r].lower():
-                return False
-            # increment normally
-            l += 1
-            r -= 1
-        return True
-
-    # maybe interviewer wants you not using .isalnum()
-    def is_alphanum(self, c) -> bool:
-        return (
-            (ord('A') <= ord(c) <= ord('Z')) or 
-            (ord('a') <= ord(c) <= ord('z')) or 
-            (ord('0') <= ord(c) <= ord('9'))
-        )
-```
-
 ## 1. Two Sum[[Link](https://leetcode.com/problems/two-sum/description/?envType=study-plan-v2&envId=top-interview-150)]
 - video explaination[[Link](https://neetcode.io/problems/two-integer-sum)]
 - important: return indices only if diff offset is in hash_map and the offset is not equal to the current one
