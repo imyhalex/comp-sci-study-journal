@@ -164,3 +164,26 @@ class Solution:
         reverse(0, k - 1)
         reverse(k, n - 1)
 ```
+
+## 881. Boats to Save People[[Link](https://leetcode.com/problems/boats-to-save-people/description/)]
+
+- video explaination[[link](https://neetcode.io/problems/boats-to-save-people?list=neetcode250)]
+
+```python
+# time: O(n log n); space: O(1)
+# no person has weight greater than boat's limit in this question
+class Solution:
+    def numRescueBoats(self, people: List[int], limit: int) -> int:
+        people.sort()
+        res = 0
+        l, r = 0, len(people) - 1
+
+        while l <= r:
+            remain = limit - people[r]
+            r -= 1
+            res += 1
+            if l <= r and remain >= people[l]:
+                l += 1
+
+        return res
+```
