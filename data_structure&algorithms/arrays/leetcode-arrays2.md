@@ -187,3 +187,71 @@ class Solution:
 
         return res
 ```
+
+## 14. Longest Common Prefix[[Link](https://leetcode.com/problems/longest-common-prefix/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/longest-common-prefix?list=neetcode250)]
+
+```python
+# time: O(n * m); space: O(1)
+"""method
+    pick a arbitrary string (choose the frist one in this example)
+    itrete: ptr i in strs[0]:
+        loop though every string in strs
+            need to check the i ptr is in-bound and if the s[i] is equal to strs[0][i]
+            if i == len(s) or s[i] != strs[0][i], return result immediatly 
+        increment ressult by add strs[0][i] since we pick arbitrary one
+    return result
+"""
+class Solution:
+    def longestCommonPrefix(self, strs: List[str]) -> str:
+        res = ""
+
+        for i in range(len(strs[0])):
+            for s in strs:
+                if i == len(s) or s[i] != strs[0][i]:
+                    return res
+            
+            res += strs[0][i]
+        
+        return res
+```
+
+## 27. Remove Element[[Link](https://leetcode.com/problems/remove-element/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/remove-element?list=neetcode250)]
+
+```python
+# time: O(n); space: O(1)
+class Solution:
+    def removeElement(self, nums: List[int], val: int) -> int:
+        k = 0
+        for i in range(len(nums)):
+            if nums[i] != val:
+                nums[k] = nums[i]
+                k += 1
+        return k
+```
+
+## 169. Majority Element[[Link](https://leetcode.com/problems/majority-element/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/majority-element?list=neetcode250)]
+- Boyer-Moore Voting Algorithm[[Link](https://en.wikipedia.org/wiki/Boyer%E2%80%93Moore_majority_vote_algorithm)]
+```python
+# Boyer-Moore Voting Algorithm
+# time: O(n); space: O(1)
+class Solution:
+    def majorityElement(self, nums: List[int]) -> int:
+        res, count = 0, 0
+
+        for num in nums:
+            if count == 0:
+                res = num
+
+            if res == num:
+                count += 1
+            else:
+                count -= 1
+        
+        return res
+```
