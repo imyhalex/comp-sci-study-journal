@@ -255,3 +255,146 @@ class Solution:
         
         return res
 ```
+## 229. Majority Element II[[Link](https://leetcode.com/problems/majority-element-ii/description/)]
+- video explaination[[Link](https://neetcode.io/problems/majority-element-ii?list=neetcode250)]
+
+```python
+# time: O(n); space: O(1)
+class Solution:
+    def majorityElement(self, nums: List[int]) -> List[int]:
+        count = defaultdict(int) # num -> freq of num
+        res = []
+
+        for n in nums:
+            count[n] += 1
+
+            if len(count) <= 2:
+                continue
+            
+            new_count = defaultdict(int)
+            for n, c in count.items():
+                if c > 1:
+                    new_count[n] = c - 1
+            count = new_count
+        
+        for n in count.keys():
+            if nums.count(n) > len(nums) // 3:
+                res.append(n)
+        
+        return res
+
+```
+
+## 912. Sort an Array[[Link](https://leetcode.com/problems/sort-an-array/description/)]
+
+```python
+# bubble sort - TLE
+class Solution:
+    def sortArray(self, nums: List[int]) -> List[int]:
+        
+        def swap(arr, l, r):
+            tmp = arr[l]
+            arr[l] = arr[r]
+            arr[r] = tmp
+        
+        n = len(nums)
+        while True:
+            swapped = False
+            for i in range(n - 1):
+                if nums[i] > nums[i + 1]:
+                    swap(nums, i, i + 1)
+                    swapped = True
+            if not swapped:
+                break
+            n -= 1  # Each pass bubbles the largest to the end
+        
+        return nums
+
+# selection sort - TLE
+# keep finding the min_idx
+class Solution:
+    def sortArray(self, nums: List[int]) -> List[int]:
+        
+        def swap(arr, l, r):
+            tmp = arr[l]
+            arr[l] = arr[r]
+            arr[r] = tmp
+        
+        n = len(nums)
+        for i in range(n - 1):
+            min_idx = i
+
+            for j in range(i + 1, n):
+                if nums[j] < nums[min_idx]:
+                    min_idx = j
+            
+            if min_idx != i:
+                swap(nums, i, min_idx)
+
+        return nums
+
+# insertion sort -TLE
+class Solution:
+    def sortArray(self, nums: List[int]) -> List[int]:
+        n = len(nums)
+
+        for i in range(1, n):
+            key = nums[i]
+            j = i - 1 # j is for prev one
+
+            while j >= 0 and nums[j] > key:
+                nums[j + 1] = nums[j]
+                j -= 1
+            
+            nums[j + 1] = key
+
+        return nums
+
+# merge sort
+class Solution:
+    def sortArray(self, nums: List[int]) -> List[int]:
+
+        def merge(arr, l, m, r):
+            left_arr, right_arr = arr[l : m + 1], arr[m + 1 : r + 1]
+            
+            # merge temp arrays
+            # initial indices for first and second subarray
+            i, j = 0, 0
+            k = l # ← This tells us where to start writing the merged elements in `arr`
+            """
+            Why not start at k = 0?
+                Because you're only merging a subrange of the array: arr[l:r+1].
+                Starting at k = 0 would overwrite unrelated parts of arr outside the merge range.
+            """
+
+            while i < len(left_arr) and j < len(right_arr):
+                if left_arr[i] < right_arr[j]:
+                    arr[k] = left_arr[i]
+                    i += 1
+                else:
+                    arr[k] = right_arr[j]
+                    j += 1
+                k += 1
+            
+            while i < len(left_arr):
+                arr[k] = left_arr[i]
+                k += 1
+                i += 1
+            
+            while j < len(right_arr):
+                arr[k] = right_arr[j]
+                k += 1
+                j += 1
+
+
+        def sort(arr, l, r):
+            if l < r:
+                m = l + (r - l) // 2
+
+                sort(arr, l, m)
+                sort(arr, m + 1, r)
+                merge(arr, l, m, r)
+        
+        sort(nums, 0, len(nums) - 1)
+        return nums
+```
