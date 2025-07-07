@@ -386,4 +386,68 @@ class Solution:
 
 ```
 
-## 
+## 705. Design HashSet[[Link](https://leetcode.com/problems/design-hashset/description/)]
+
+- video explaintation[[Link](https://neetcode.io/problems/design-hashset?list=neetcode250)]
+
+```python
+# time & space: O(n)
+class MyHashSet:
+
+    def __init__(self):
+        self.hash_set = []
+
+    def add(self, key: int) -> None:
+        if key not in self.hash_set:
+            self.hash_set.append(key)
+
+    def remove(self, key: int) -> None:
+        if key in self.hash_set:
+            self.hash_set.remove(key)
+
+    def contains(self, key: int) -> bool:
+        return key in self.hash_set
+
+
+# Your MyHashSet object will be instantiated and called as such:
+# obj = MyHashSet()
+# obj.add(key)
+# obj.remove(key)
+# param_3 = obj.contains(key)
+```
+
+
+## 706. Design HashMap[[Link](https://leetcode.com/problems/design-hashmap/description/)]
+- video explaination[[Link](https://neetcode.io/problems/design-hashmap?list=neetcode250)]
+
+```python
+# time: O(1); space: O(1000001)
+class MyHashMap:
+
+    def __init__(self):
+        self.hash_map = [-1] * 1000001
+
+    def put(self, key: int, value: int) -> None:
+        self.hash_map[key] = value
+
+    def get(self, key: int) -> int:
+        return self.hash_map[key]
+
+    def remove(self, key: int) -> None:
+        self.hash_map[key] = -1
+
+
+# Your MyHashMap object will be instantiated and called as such:
+# obj = MyHashMap()
+# obj.put(key,value)
+# param_2 = obj.get(key)
+# obj.remove(key)
+```
+
+## 75. Sort Colors[[Link](https://leetcode.com/problems/sort-colors/description/)]
+
+```python
+# either merge or bucket sort
+
+# 
+```
