@@ -450,7 +450,5 @@ No arr[j] < pivot is ever true (pivot is 3, all arr[j] > 3) → i stays -1
 Final step: swap(i + 1, high) → swap(0, 3) → puts pivot at index 0
 
 ✅ Correct output: [3, 5, 7, 10]
-
-
 """
 ```
