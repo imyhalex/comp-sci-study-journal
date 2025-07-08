@@ -1067,6 +1067,27 @@ class Solution:
         return res
 ```
 
+## 122. Best Time to Buy and Sell Stock II[[Link](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/description/)]
+
+```python
+# the biggest diff from buy & sell stock I is:
+#       multiple buy & sell
+#       profit is incremented through every purchases and sell
+# time: O(n); space: O(1)
+class Solution:
+    def maxProfit(self, prices: List[int]) -> int:
+        l, res = 0, 0
+
+        for r in range(1, len(prices)):
+            if prices[r] > prices[l]:
+                res += prices[r] - prices[l]
+                l = r
+            else:
+                l = r
+        
+        return res
+```
+
 ## 567. Permutation in String[[Link](https://leetcode.com/problems/permutation-in-string/description/)]
 
 - video explaination[[Link](https://neetcode.io/problems/permutation-string)]

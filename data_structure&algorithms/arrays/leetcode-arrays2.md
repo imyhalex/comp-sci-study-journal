@@ -238,6 +238,14 @@ class Solution:
 - video explaination[[Link](https://neetcode.io/problems/majority-element?list=neetcode250)]
 - Boyer-Moore Voting Algorithm[[Link](https://en.wikipedia.org/wiki/Boyer%E2%80%93Moore_majority_vote_algorithm)]
 ```python
+"""
+Start with no leader and zero votes (res = 0, count = 0)
+Go through each number:
+    If your vote count hits zero, pick the current number as your new candidate (res).
+    If the current number equals your candidate, you gain a vote.
+    If the current number differs, you lose a vote.
+At the end, the majority element is the only one that could have survived all the cancellations.
+"""
 # Boyer-Moore Voting Algorithm
 # time: O(n); space: O(1)
 class Solution:
@@ -277,6 +285,7 @@ class Solution:
                     new_count[n] = c - 1
             count = new_count
         
+        # verification step, check the possible candidatesd after cancellation
         for n in count.keys():
             if nums.count(n) > len(nums) // 3:
                 res.append(n)
@@ -406,14 +415,55 @@ class Solution:
 
 ```python
 # same idea from quick sort quick select
+
+"""pseudo code
+procedure three-way-partition(A : array of values, mid : value):
+    i ← 0
+    j ← 0
+    k ← size of A - 1
+
+    while j <= k:
+        if A[j] < mid:
+            swap A[i] and A[j]
+            i ← i + 1
+            j ← j + 1
+        else if A[j] > mid:
+            swap A[j] and A[k]
+            k ← k - 1
+        else:
+            j ← j + 1
+"""
+class Solution:
+    def sortColors(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        def swap(arr, i, j):
+            tmp = arr[i]
+            arr[i] = arr[j]
+            arr[j] = tmp
+        
+        low, mid, high = 0, 0, len(nums) - 1
+        while mid <= high:
+            if nums[mid] == 0:
+                swap(nums, low, mid)
+                low += 1
+                mid += 1
+            elif nums[mid] == 1:
+                mid += 1
+            else: # nums[mid] == 2
+                swap(nums, mid, high)
+                high -= 1
+
+# a second way: merge sort or quick sort
 # a quick sort problem, time: O(n log n); space: O(log n)
 class Solution:
     def sortArray(self, nums: List[int]) -> List[int]:
 
-        def swap(arr, l, r):
-            tmp = arr[l]
-            arr[l] = arr[r]
-            arr[r] = tmp
+        def swap(arr, i, j):
+            tmp = arr[i]
+            arr[i] = arr[j]
+            arr[j] = tmp
 
         def partition(arr, low, high):  
             pivot = arr[high]           # use the last element as pivot

@@ -219,3 +219,24 @@ class Solution:
         
         return res + sign * operand # this is to add the last element that can't handled by conditions above
 ```
+
+## 682. Baseball Game[[Link](https://leetcode.com/problems/baseball-game/)]
+- video explaination[[Link](https://neetcode.io/problems/baseball-game?list=neetcode250)]
+
+```python
+# time & space: O(n)
+class Solution:
+    def calPoints(self, operations: List[str]) -> int:
+        stack = []
+        for op in operations:
+            if op == "C":
+                stack.pop()
+            elif op == "D":
+                stack.append(stack[-1] * 2)
+            elif op == "+":
+                stack.append(stack[-1] + stack[-2])
+            else:
+                stack.append(int(op))
+        
+        return sum(stack)
+```
