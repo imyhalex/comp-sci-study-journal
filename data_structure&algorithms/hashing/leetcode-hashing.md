@@ -443,11 +443,3 @@ class MyHashMap:
 # param_2 = obj.get(key)
 # obj.remove(key)
 ```
-
-## 75. Sort Colors[[Link](https://leetcode.com/problems/sort-colors/description/)]
-
-```python
-# either merge or bucket sort
-
-# 
-```

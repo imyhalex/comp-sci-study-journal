@@ -398,3 +398,59 @@ class Solution:
         sort(nums, 0, len(nums) - 1)
         return nums
 ```
+
+## 75. Sort Colors[[Link](https://leetcode.com/problems/sort-colors/description/)]
+- video explaination[[Link](https://neetcode.io/problems/sort-colors?list=neetcode250)]
+- Dutch national flag problem[[Link](https://en.wikipedia.org/wiki/Dutch_national_flag_problem)]
+- quick sort[[Link](https://neetcode.io/courses/dsa-for-beginners/12)]
+
+```python
+# same idea from quick sort quick select
+# a quick sort problem, time: O(n log n); space: O(log n)
+class Solution:
+    def sortArray(self, nums: List[int]) -> List[int]:
+
+        def swap(arr, l, r):
+            tmp = arr[l]
+            arr[l] = arr[r]
+            arr[r] = tmp
+
+        def partition(arr, low, high):  
+            pivot = arr[high]           # use the last element as pivot
+
+            i = low - 1                 # pointer for smaller element
+            for j in range(low, high):
+                if arr[j] < pivot:
+                    i += 1
+                    swap(arr, i, j)    # place smaller element to the left
+
+            swap(arr, i + 1, high)      # do the final swap to swap the selected pivot to the right position
+            return i + 1                # return the pivot index
+
+        def quick_sort(arr, low, high):
+            if low < high:
+                pi = partition(arr, low, high)  # partition index
+
+                quick_sort(arr, low, pi - 1)    # sort left, pivot is not included bc already sorted into right position
+                quick_sort(arr, pi + 1, high)   # sort right, pivot is not included bc already sorted into right position
+
+        quick_sort(nums, 0, len(nums) - 1)
+        return nums
+"""
+Test Case:
+arr = [10, 5, 7, 3], pivot = 3
+low = 0, high = 3
+
+i = -1
+for j in range(0, 3):  # j = 0,1,2
+    if arr[j] < pivot:
+        i += 1
+        swap(i, j)
+No arr[j] < pivot is ever true (pivot is 3, all arr[j] > 3) → i stays -1
+Final step: swap(i + 1, high) → swap(0, 3) → puts pivot at index 0
+
+✅ Correct output: [3, 5, 7, 10]
+
+
+"""
+```
