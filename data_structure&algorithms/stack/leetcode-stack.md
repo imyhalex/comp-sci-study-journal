@@ -240,3 +240,77 @@ class Solution:
         
         return sum(stack)
 ```
+
+## 225. Implement Stack using Queues[[Link](https://leetcode.com/problems/implement-stack-using-queues/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/implement-stack-using-queues?list=neetcode250)]
+
+```python
+class MyStack:
+
+    def __init__(self):
+        self.q = deque()
+
+    def push(self, x: int) -> None:
+        self.q.append(x)
+
+    def pop(self) -> int:
+        for _ in range(len(self.q) - 1):
+            self.push(self.q.popleft())
+        return self.q.popleft()
+
+    def top(self) -> int:
+        return self.q[-1]
+
+    def empty(self) -> bool:
+        return len(self.q) == 0
+
+
+# Your MyStack object will be instantiated and called as such:
+# obj = MyStack()
+# obj.push(x)
+# param_2 = obj.pop()
+# param_3 = obj.top()
+# param_4 = obj.empty()
+```
+
+## 232. Implement Queue using Stacks[[Link](https://leetcode.com/problems/implement-queue-using-stacks/description/)]
+
+- video explaination[[Link](https://leetcode.com/problems/implement-queue-using-stacks/description/)]
+
+```python
+# O(1) time for initialization.
+# O(1) time for each push() and empty() function calls.
+# O(1) amortized time for each pop() and peek() function calls.
+class MyQueue:
+
+    def __init__(self):
+        self.s1 = []
+        self.s2 = []
+
+    def push(self, x: int) -> None:
+        self.s1.append(x)
+
+    def pop(self) -> int:
+        if not self.s2:
+            while self.s1:
+                self.s2.append(self.s1.pop())
+        return self.s2.pop()
+
+    def peek(self) -> int:
+        if not self.s2:
+            while self.s1:
+                self.s2.append(self.s1.pop())
+        return self.s2[-1]
+
+    def empty(self) -> bool:
+        return max(len(self.s1), len(self.s2)) == 0
+
+
+# Your MyQueue object will be instantiated and called as such:
+# obj = MyQueue()
+# obj.push(x)
+# param_2 = obj.pop()
+# param_3 = obj.peek()
+# param_4 = obj.empty()
+```
