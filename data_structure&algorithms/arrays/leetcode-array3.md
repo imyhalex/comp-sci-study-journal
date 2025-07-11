@@ -141,3 +141,167 @@ class Solution:
         
         return arr[l: l + k]
 ```
+
+## 41. First Missing Positive[[Link](https://leetcode.com/problems/first-missing-positive/description/)]
+
+```python
+# solution 1: greedy with sort
+# time: O(n log n); time: O(1)
+class Solution:
+    def firstMissingPositive(self, nums: List[int]) -> int:
+        nums.sort()
+        res = 1
+        for n in nums:
+            if n > 0 and res == n:
+                res += 1
+        return res
+
+# solution 2: cycle sort
+# time: O(n); space: O(1)
+class Solution:
+    def firstMissingPositive(self, nums: List[int]) -> int:
+        n = len(nums)
+        i = 0
+
+        while i < n:
+            if nums[i] <= 0 or nums[i] > n:
+                i += 1
+                continue
+            
+            index = nums[i] - 1
+            if nums[i] != nums[index]:
+                nums[i], nums[index] = nums[index], nums[i]
+            else:
+                i += 1
+        
+        for i in range(n):
+            if nums[i] != i + 1:
+                return i + 1
+        
+        return n + 1
+```
+
+---
+
+## 🎯 Goal:
+
+Given an array of numbers, like:
+
+```python
+[3, 4, -1, 1]
+```
+
+We want to **find the smallest missing positive number**, starting from **1**, in O(n) time and using **no extra space**.
+
+---
+
+## 🤔 What are we trying to do?
+
+We're trying to **reorganize** the array **in-place** so that:
+
+* The number **1** is at index `0`
+* The number **2** is at index `1`
+* The number **3** is at index `2`
+* The number **4** is at index `3`
+* And so on...
+
+This way, we can just walk through the array and find out **which number is missing**.
+
+---
+
+## 🧪 Step-by-step Example
+
+### Input:
+
+```python
+nums = [3, 4, -1, 1]
+```
+
+### Step 1: Rearrange the numbers
+
+We loop through each number and try to **put it in the right place**.
+
+Let’s walk through this loop:
+
+#### First pass:
+
+* `i = 0`: `nums[0] = 3`
+
+  * 3 should be at index `2` → swap `nums[0]` and `nums[2]`
+  * Array becomes: `[-1, 4, 3, 1]`
+
+* `i = 0`: now `nums[0] = -1` → ignore it (negative or zero or too big)
+
+* `i = 1`: `nums[1] = 4`
+
+  * 4 should be at index `3` → swap `nums[1]` and `nums[3]`
+  * Array becomes: `[-1, 1, 3, 4]`
+
+* `i = 1`: now `nums[1] = 1`
+
+  * 1 should be at index `0` → swap `nums[1]` and `nums[0]`
+  * Array becomes: `[1, -1, 3, 4]`
+
+* `i = 1`: now `nums[1] = -1` → skip
+
+* `i = 2`: `nums[2] = 3`
+
+  * 3 is already in the right place (index 2) → skip
+
+* `i = 3`: `nums[3] = 4`
+
+  * Already in the right place → skip
+
+### Now the array looks like:
+
+```
+[1, -1, 3, 4]
+```
+
+---
+
+### Step 2: Find the missing number
+
+Now we go through the array:
+
+* index 0 → has 1 ✅
+* index 1 → has -1 ❌ (we expected 2 here)
+
+So the answer is:
+
+```python
+2
+```
+
+---
+
+## ✅ What's the trick here?
+
+We're **reusing the array itself** like a "bucket" to store where each number should go.
+
+Instead of sorting or using extra memory, we just:
+
+1. Try to put each number in its correct index
+2. Then look for the **first place** where the number doesn't match the index + 1
+
+---
+
+## ✅ Key Rules in the loop:
+
+* Ignore numbers ≤ 0 or > n (they can't be the answer)
+* Swap each number into the position it belongs (value `x` goes to index `x - 1`)
+* Stop swapping if it's already in the right place or a duplicate
+
+---
+
+## Summary:
+
+| Step      | What happens                                            |
+| --------- | ------------------------------------------------------- |
+| Rearrange | Put numbers `1...n` at their correct indices (in-place) |
+| Scan      | Return the first index `i` where `nums[i] != i + 1`     |
+| Edge case | If all are in place, return `n + 1`                     |
+
+---
+
+Let me know if you'd like a visual animation or want to walk through another example!

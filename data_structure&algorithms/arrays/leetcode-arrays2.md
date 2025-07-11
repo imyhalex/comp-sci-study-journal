@@ -198,7 +198,7 @@ class Solution:
     pick a arbitrary string (choose the frist one in this example)
     itrete: ptr i in strs[0]:
         loop though every string in strs
-            need to check the i ptr is in-bound and if the s[i] is equal to strs[0][i]
+            need to check the i ptr is in-bound or if the s[i] is equal to strs[0][i]
             if i == len(s) or s[i] != strs[0][i], return result immediatly 
         increment ressult by add strs[0][i] since we pick arbitrary one
     return result
@@ -208,12 +208,11 @@ class Solution:
         res = ""
 
         for i in range(len(strs[0])):
-            for s in strs:
+            for s in strs[1:]:
                 if i == len(s) or s[i] != strs[0][i]:
                     return res
-            
+
             res += strs[0][i]
-        
         return res
 ```
 

@@ -314,3 +314,27 @@ class MyQueue:
 # param_3 = obj.peek()
 # param_4 = obj.empty()
 ```
+
+## 735. Asteroid Collision[[Link](https://leetcode.com/problems/asteroid-collision/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/asteroid-collision?list=neetcode250)]
+
+```python
+# time & space: O(n)
+class Solution:
+    def asteroidCollision(self, asteroids: List[int]) -> List[int]:
+        stack = []
+        for a in asteroids:
+            while stack and a < 0 and stack[-1] > 0:
+                diff = a + stack[-1]
+                if diff < 0:
+                    stack.pop()
+                elif diff > 0:
+                    a = 0
+                else:
+                    stack.pop()
+                    a = 0
+            if a:
+                stack.append(a)
+        return stack
+```
