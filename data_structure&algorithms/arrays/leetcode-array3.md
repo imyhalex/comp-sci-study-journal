@@ -178,7 +178,9 @@ class Solution:
             if nums[i] != i + 1:
                 return i + 1
         
-        return n + 1
+        return n + 1 # If all integers from 1 to n are present in the array, then the smallest missing positive is n + 1
+        # case: nums = [1, 2, 3]
+        # Nothing is missing in the range 1 to n, so the answer is: n + 1 = 3 + 1 = 4
 ```
 
 ---

@@ -1200,7 +1200,7 @@ class Solution:
             
         return dfs(0)
 
-# greedy
+# greedy (backward)
 # time: O(n); spcae: O(1)
 class Solution:
     def canJump(self, nums: List[int]) -> bool:
@@ -1209,6 +1209,23 @@ class Solution:
             if i + nums[i] >= goal:
                 goal = i # shift the goal post closer
         return True if goal == 0 else False
+
+# greedy: (forward) - use this more intuitive version
+class Solution:
+    def canJump(self, nums: List[int]) -> bool:
+        farthest = 0 # keep track of the farthest index can be reach
+
+        for i in range(len(nums)):
+            """ INTUITION
+            “I'm standing at position i, but I can’t even get here from any of the previous jumps — the farthest I could reach so far was farthest, and i > farthest. That means I'm stuck.”
+
+            If farthest never grows enough to reach i, it’s like we skipped all the right jumps that could have brought us here.
+            """
+            if i > farthest:
+                return False
+            farthest = max(farthest, i + nums[i])
+        
+        return True
 
 # nums = [2, 3, 1, 1, 4]
 # # goal starts at index 4
@@ -1266,6 +1283,44 @@ class Solution:
             r = farthest
             res += 1
         return res
+# more intuitive way:
+class Solution:
+    def jump(self, nums: List[int]) -> int:
+        jumps = 0
+        curr_end, farthest = 0, 0
+
+        for i in range(len(nums) - 1): # garanteed to reach len(nums) - 1, no need to process the last index
+            farthest = max(farthest, i + nums[i])
+
+            if i == curr_end:
+                jumps += 1
+                curr_end = farthest # take the jump: greedy choice at the boundary of current jump
+                """INTUITION
+                Don’t jump early (even if could): wait until we reach the end of the current jump window (curr_end)
+                """
+        
+        return jumps
+```
+
+## 1306. Jump Game III[[Link](https://leetcode.com/problems/jump-game-iii/description/)]
+- not a greedy question, it's a graph question
+
+```python
+class Solution:
+    def canReach(self, arr: List[int], start: int) -> bool:
+        n = len(arr) - 1
+        visited = set()
+        
+        def dfs(i):
+            if i < 0 or i > n or i in visited: # if i ptr not in bound (either side) or i in visted 
+                return False
+            if arr[i] == 0:
+                return True
+            
+            visited.add(i)
+            return dfs(i + arr[i]) or dfs(i - arr[i])
+        
+        return dfs(start)
 ```
 
 ### 134. Gas Station[[Link](https://leetcode.com/problems/gas-station/description/?envType=study-plan-v2&envId=top-interview-150)]
