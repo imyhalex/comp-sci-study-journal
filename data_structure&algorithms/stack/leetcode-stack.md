@@ -108,12 +108,16 @@ class Solution:
 class Solution:
     def carFleet(self, target: int, position: List[int], speed: List[int]) -> int:
         pairs = [(p, s) for p, s in zip(position, speed)]
+        # We want to simulate cars catching up, and that only makes sense if we process cars from closest to farthest from the target:
         pairs.sort(reverse=True) # This sorts the list of (position, speed) tuples in descending order, by default on the first element of the tuple — which is position.
         stack = []
 
         for p, s in pairs:
             stack.append((target - p) / s) # calculate time
             # does it overlap with other one
+            # If the current car (last one on stack) reaches sooner than the one before it,
+            # it gets absorbed into that fleet → pop it (no new fleet formed)
+            # len(stack) >= 2 means we only start doing conditon compare when it has >= cars record
             if len(stack) >= 2 and stack[-1] <= stack[-2]:
                 stack.pop()
         return len(stack)
@@ -134,7 +138,7 @@ class Solution:
             if cur == "..":
                 if stack:
                     stack.pop()
-            elif cur != "" and cur != ".":
+            elif cur and cur != ".":
                 stack.append(cur)
         
         return "/" + "/".join(stack)
@@ -337,4 +341,58 @@ class Solution:
             if a:
                 stack.append(a)
         return stack
+```
+
+## 901. Online Stock Span[[Link](https://leetcode.com/problems/online-stock-span/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/online-stock-span?list=neetcode250)]
+- monotonic stack
+
+```python
+# time & space: O(n)
+class StockSpanner:
+
+    def __init__(self):
+        self.stack = []
+
+    def next(self, price: int) -> int:
+        span = 1
+        while self.stack and self.stack[-1][0] <= price:
+            span += self.stack[-1][1]
+            self.stack.pop()
+        self.stack.append((price, span))
+        return self.stack[-1][1]
+
+
+# Your StockSpanner object will be instantiated and called as such:
+# obj = StockSpanner()
+# param_1 = obj.next(price)
+```
+
+## 394. Decode String[[Link](https://leetcode.com/problems/decode-string/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/decode-string?list=neetcode250)]
+
+```python
+# time: O(n + N); space: O(n + N)
+class Solution:
+    def decodeString(self, s: str) -> str:
+        stack = []
+
+        for i in range(len(s)):
+            if s[i] != "]":
+                stack.append(s[i])
+            else:
+                substr = ""
+                while stack and stack[-1] != "[":
+                    substr = stack.pop() + substr
+                stack.pop() # pop opening bracket
+
+                k = ""
+                while stack and stack[-1].isdigit():
+                    k = stack.pop() + k
+                
+                stack.append(int(k) * substr)
+        
+        return "".join(stack)
 ```
