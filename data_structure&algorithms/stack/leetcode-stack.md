@@ -89,14 +89,31 @@ class Solution:
 class Solution:
     def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
         res = [0] * len(temperatures)
-        stack = [] # pair: [temp, index]
+        stack = [] # pair: (temperature, index)
 
         for i, t in enumerate(temperatures):
-            while stack and t > stack[-1][0]:
-                stack_t, stack_idx = stack.pop()
-                res[stack_idx] = (i - stack_idx)
-            stack.append([t, i])
+            while stack and stack[-1][0] < t:
+                _, idx = stack.pop()
+                res[idx] = (i - idx)
+            stack.append((t, i))
+        
         return res
+
+"""
+1475. Final Prices With a Special Discount in a Shop (Easy)
+496. Next Greater Element I (Easy)
+503. Next Greater Element II (Medium)
+1019. Next Greater Node In Linked List (Medium)
+456. 132 Pattern (Medium)
+1504. Count Submatrices With All Ones (Medium)
+1673. Find the Most Competitive Subsequence (Medium)
+907. Sum of Subarray Minimums (Medium)
+1856. Maximum Subarray Min-Product (Medium)
+1124. Longest Well-Performing Interval (Medium)
+402. Remove K Digits (Medium)
+84. Largest Rectangle in Histogram (Hard)
+85. Maximal Rectangle (Hard)
+"""       
 ```
 
 ## 853. Car Fleet[[Link](https://leetcode.com/problems/car-fleet/description/)]
@@ -358,8 +375,8 @@ class StockSpanner:
     def next(self, price: int) -> int:
         span = 1
         while self.stack and self.stack[-1][0] <= price:
-            span += self.stack[-1][1]
-            self.stack.pop()
+            _, s = self.stack.pop()
+            span += s
         self.stack.append((price, span))
         return self.stack[-1][1]
 
@@ -395,4 +412,39 @@ class Solution:
                 stack.append(int(k) * substr)
         
         return "".join(stack)
+```
+
+## 895. Maximum Frequency Stack[[Link](https://leetcode.com/problems/maximum-frequency-stack/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/maximum-frequency-stack?list=neetcode250)]
+
+```python
+# time & space: O(1)
+class FreqStack:
+
+    def __init__(self):
+        self.count = {} # number -> freq
+        self.max_freq = 0
+        self.stacks = {} # freq -> stack, freq -> stack
+
+    def push(self, val: int) -> None:
+        value_count = 1 + self.count.get(val, 0)
+        self.count[val] = value_count
+        if value_count > self.max_freq:
+            self.max_freq = value_count
+            self.stacks[value_count] = []
+        self.stacks[value_count].append(val)
+
+    def pop(self) -> int:
+        number = self.stacks[self.max_freq].pop()
+        self.count[number] -= 1
+        if not self.stacks[self.max_freq]: # if the stack in the max frequncy is empty, reduce 1 to get nex stack with smaller frequency
+            self.max_freq -= 1
+        return number
+        
+
+# Your FreqStack object will be instantiated and called as such:
+# obj = FreqStack()
+# obj.push(val)
+# param_2 = obj.pop()
 ```
