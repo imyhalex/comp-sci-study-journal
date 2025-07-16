@@ -681,6 +681,46 @@ class Solution:
         return False
 ```
 
+## 240. Search a 2D Matrix II[[Link](https://leetcode.com/problems/search-a-2d-matrix-ii/description/)]
+
+```python
+# binary serach row by row
+# time: o(m log n); space: O(1)
+class Solution:
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        rows, cols = len(matrix), len(matrix[0])
+
+        for row in matrix:
+            l, r = 0, cols - 1
+            while l <= r:
+                m = l + (r - l) // 2
+                if row[m] < target:
+                    l = m + 1
+                elif row[m] > target:
+                    r = m - 1
+                else:
+                    return True
+        
+        return False
+
+# optimal way: Start from Top-Right Corner
+# time: O(m + n); space: O(1)
+class Solution:
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        rows, cols = len(matrix), len(matrix[0])
+        
+        r, c = 0, cols - 1
+        while r < rows and c >= 0:
+            if matrix[r][c] < target:
+                r += 1 # move down
+            elif matrix[r][c] > target:
+                c -= 1 # move left
+            else:
+                return True
+        
+        return False
+```
+
 ## 374. Guess Number Higher or Lower[[Link](https://leetcode.com/problems/guess-number-higher-or-lower/description/)]
 - video explaination[[Link](https://neetcode.io/problems/guess-number-higher-or-lower)]
 
