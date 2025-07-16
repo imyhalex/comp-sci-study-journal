@@ -307,3 +307,50 @@ Instead of sorting or using extra memory, we just:
 ---
 
 Let me know if you'd like a visual animation or want to walk through another example!
+
+
+## 35. Search Insert Position[[Link](https://leetcode.com/problems/search-insert-position/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/search-insert-position?list=neetcode250)]
+
+```python
+# time: O(log n); space: O(1)
+class Solution:
+    def searchInsert(self, nums: List[int], target: int) -> int:
+        l, r = 0, len(nums) - 1
+
+        while l <= r:
+            m = l + (r - l) // 2
+            if nums[m] == target:
+                return m
+            elif nums[m] < target:
+                l = m + 1
+            else:
+                r = m - 1
+        return l
+```
+
+## 69. Sqrt(x)[[Link](https://leetcode.com/problems/sqrtx/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/sqrtx?list=neetcode250)]
+
+```python
+# time: O(log n); space: O(1)
+class Solution:
+    def mySqrt(self, x: int) -> int:
+        l, r = 0, x
+        res = 0
+
+        while l <= r:
+            m = l + (r - l) // 2
+
+            if m * m < x:
+                l = m + 1
+                res = m
+            elif m * m > x:
+                r = m - 1
+            else:
+                return m
+        
+        return res
+```

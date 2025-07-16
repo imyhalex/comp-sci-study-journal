@@ -80,42 +80,6 @@ class Solution:
         return stack[0]
 ```
 
-## 739. Daily Temperatures[[Link](https://leetcode.com/problems/daily-temperatures/description/)]
-
-- video explaination[[Link](https://neetcode.io/problems/daily-temperatures)]
-
-```python
-# time & space: O(n)
-class Solution:
-    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
-        res = [0] * len(temperatures)
-        stack = [] # pair: (temperature, index)
-
-        for i, t in enumerate(temperatures):
-            while stack and stack[-1][0] < t:
-                _, idx = stack.pop()
-                res[idx] = (i - idx)
-            stack.append((t, i))
-        
-        return res
-
-"""
-1475. Final Prices With a Special Discount in a Shop (Easy)
-496. Next Greater Element I (Easy)
-503. Next Greater Element II (Medium)
-1019. Next Greater Node In Linked List (Medium)
-456. 132 Pattern (Medium)
-1504. Count Submatrices With All Ones (Medium)
-1673. Find the Most Competitive Subsequence (Medium)
-907. Sum of Subarray Minimums (Medium)
-1856. Maximum Subarray Min-Product (Medium)
-1124. Longest Well-Performing Interval (Medium)
-402. Remove K Digits (Medium)
-84. Largest Rectangle in Histogram (Hard)
-85. Maximal Rectangle (Hard)
-"""       
-```
-
 ## 853. Car Fleet[[Link](https://leetcode.com/problems/car-fleet/description/)]
 
 - video explainationp[[Link](http://neetcode.io/problems/car-fleet)]
@@ -447,4 +411,58 @@ class FreqStack:
 # obj = FreqStack()
 # obj.push(val)
 # param_2 = obj.pop()
+```
+
+## 496. Next Greater Element I[[Link](https://leetcode.com/problems/next-greater-element-i/description/)]
+
+```python
+# time: O(n + m); space: O(n)
+class Solution:
+    def nextGreaterElement(self, nums1: List[int], nums2: List[int]) -> List[int]:
+        stack = []
+        next_greater_map = {} # number -> its next greater value on the right
+
+        for num in nums2:
+            while stack and num > stack[-1]:
+                prev = stack.pop()
+                next_greater_map[prev] = num
+            stack.append(num)
+        
+        return [next_greater_map.get(n, -1) for n in nums1]
+```
+
+## 739. Daily Temperatures[[Link](https://leetcode.com/problems/daily-temperatures/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/daily-temperatures)]
+
+```python
+# time & space: O(n)
+class Solution:
+    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
+        res = [0] * len(temperatures)
+        stack = [] # pair: (temperature, index)
+
+        for i, t in enumerate(temperatures):
+            while stack and stack[-1][0] < t:
+                _, idx = stack.pop()
+                res[idx] = (i - idx)
+            stack.append((t, i))
+        
+        return res
+
+"""
+1475. Final Prices With a Special Discount in a Shop (Easy)
+496. Next Greater Element I (Easy)
+503. Next Greater Element II (Medium)
+1019. Next Greater Node In Linked List (Medium)
+456. 132 Pattern (Medium)
+1504. Count Submatrices With All Ones (Medium)
+1673. Find the Most Competitive Subsequence (Medium)
+907. Sum of Subarray Minimums (Medium)
+1856. Maximum Subarray Min-Product (Medium)
+1124. Longest Well-Performing Interval (Medium)
+402. Remove K Digits (Medium)
+84. Largest Rectangle in Histogram (Hard)
+85. Maximal Rectangle (Hard)
+"""       
 ```
