@@ -750,10 +750,29 @@ class Solution:
         l, r = 0, len(nums) - 1
         while l < r:
             mid = (l + r) // 2
-            if nums[mid] < nums[r]:
+            if nums[mid] < nums[r]: # find the pattern of window that is not in increasing order
                 r = mid
             else:
                 l = mid + 1
+        return nums[l]
+```
+
+## 154. Find Minimum in Rotated Sorted Array II[[Link](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array-ii/)]
+
+```python
+# time: O(log n); space: O(1)
+class Solution:
+    def findMin(self, nums: List[int]) -> int:
+        l, r = 0, len(nums) - 1
+
+        while l < r:
+            m = l + (r - l) // 2
+            if nums[m] < nums[r]:
+                r = m
+            elif nums[m] > nums[r]:
+                l = m + 1
+            else:
+                r -= 1
         return nums[l]
 ```
 
@@ -762,6 +781,7 @@ class Solution:
 - video explaination[[Link](https://neetcode.io/problems/find-target-in-rotated-sorted-array)]
 
 ```python
+# time: O(log n)
 class Solution:
     def search(self, nums: List[int], target: int) -> int:
         l, r = 0, len(nums) - 1
@@ -783,6 +803,38 @@ class Solution:
                 else:
                     l = mid + 1
         return -1
+```
+
+## 81. Search in Rotated Sorted Array II[[Link](https://leetcode.com/problems/search-in-rotated-sorted-array-ii/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/search-in-rotated-sorted-array-ii?list=neetcode250)]
+
+```python
+# time: O(log n); space:O(1)
+class Solution:
+    def search(self, nums: List[int], target: int) -> bool:
+        l, r = 0, len(nums) - 1
+
+        while l <= r:
+            m = l + (r - l) // 2
+            
+            if nums[m] == target:
+                return True
+            
+            if nums[l] < nums[m]:
+                if target > nums[m] or target < nums[l]:
+                    l = m + 1
+                else:
+                    r = m - 1
+            elif nums[l] > nums[m]:
+                if target < nums[m] or target > nums[r]:
+                    r = m - 1
+                else:
+                    l = m + 1
+            else: # find repeat num, skip
+                l += 1
+        
+        return False
 ```
 
 ## 875. Koko Eating Bananas[[Link](https://leetcode.com/problems/koko-eating-bananas/description/)]
