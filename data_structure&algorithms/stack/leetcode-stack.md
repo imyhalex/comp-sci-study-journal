@@ -138,16 +138,16 @@ class Solution:
         stack = [] # pair: (index, height)
 
         for i, h in enumerate(heights):
-            start_idx = i
-            while stack and stack [-1][1] > h:
+            start_idx = i # start_idx can be either current index i, or index that is anchored backeward
+            while stack and h < stack[-1][1]:
                 index, height = stack.pop()
-                max_area = max(max_area, height * (i - index))
-                start_idx = index
-            stack.append((start_idx, h))
+                max_area = max(max_area, height * (i - index)) # i means current index
+                start_idx = index # if pop, anchor the start_idx for the current single rectangle to have backward extend potential
+            stack.append((start_idx, h)) # push the anchored index and height
         
         # backward extended
         for i, h in stack:
-            max_area = max(max_area, h * (len(heights) - i))
+            max_area = max(max_area, h * (len(heights) - i)) # len(height) - i because already reacht he end, backward lookup a the way from the end
         
         return max_area
 ```
