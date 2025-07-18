@@ -376,3 +376,158 @@ class Solution:
         res = helper(x, abs(n))
         return res if n >= 0 else 1 / res # x^-n = 1/x^n
 ```
+
+## 875. Koko Eating Bananas[[Link](https://leetcode.com/problems/koko-eating-bananas/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/eating-bananas)]
+
+```python
+# time: O(n * log m); space: O(1)
+# l , r poiinter record the number of banana koko may eat per hour
+class Solution:
+    def minEatingSpeed(self, piles: List[int], h: int) -> int:
+        l, r = 1, max(piles) # l, r means the speed koko can eat per hour
+        res = r  # Worst case, she eats at max speed
+        # k: minumum eating speed
+        while l <= r:
+            k = l + (r - l) // 2
+
+            total_time = 0
+            for p in piles:
+                total_time += math.ceil(float(p) / k)
+            # we want to find the minimun value of k, so if we find total hour(total time) is less than h, 
+            # try to find one that is slowr (smaller k)
+            if total_time <= h:
+                res = k
+                r = k - 1
+            else:
+                l = k + 1
+        return res
+
+# a more intuitive style
+class Solution:
+    def minEatingSpeed(self, piles: List[int], h: int) -> int:
+        l, r = 1, max(piles) 
+        res = r
+
+        def can_finish(speed):
+            total_time = 0
+            for p in piles:
+                total_time += math.ceil(float(p) / speed)
+            return total_time <= h
+
+        while l <= r:
+            k = l + (r - l) // 2
+            if can_finish(k):
+                res = k
+                r = k - 1
+            else:
+                l = k + 1
+        
+        return res
+```
+
+## 1011. Capacity To Ship Packages Within D Days[[Link](https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/capacity-to-ship-packages-within-d-days?list=neetcode250)]
+
+```python
+class Solution:
+    def shipWithinDays(self, weights: List[int], days: int) -> int:
+        l, r = max(weights), sum(weights)
+        res = r
+
+        def can_ship(capacity):
+            days_needed, current_loads = 1, 0 # minumum 1 day anyway
+            for w in weights:
+                if current_loads + w > capacity:
+                    days_needed += 1
+                    current_loads = 0 # new day, empty the bag
+                current_loads += w
+            return days_needed <= days
+        
+        while l <= r:
+            c = l + (r - l) // 2
+            if can_ship(c):
+                res = c
+                r = c - 1
+            else:
+                l = c + 1
+        
+        return res
+```
+
+## 410. Split Array Largest Sum[[Link](https://leetcode.com/problems/split-array-largest-sum/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/split-array-largest-sum?list=neetcode250)]
+
+```python
+# time: O(n log s); space: O(1)
+class Solution:
+    def splitArray(self, nums: List[int], k: int) -> int:
+        def can_split(largest):
+            subarray, curr_sum = 0, 0
+            for n in nums:
+                curr_sum += n
+                if curr_sum > largest:
+                    subarray += 1
+                    curr_sum = n # start in new subaray
+            return subarray + 1 <= k
+        
+        l, r = max(nums), sum(nums)
+        res = r
+
+        while l <= r:
+            m = l + (r - l) // 2
+            if can_split(m):
+                res = m
+                r = m - 1
+            else:
+                l = m + 1
+        
+        return res
+```
+```python
+curr_sum = n
+```
+
+means you're **starting a new subarray**, and `n` is the **first element** in that new subarray.
+
+---
+
+### 💡 Intuition:
+
+In the `can_split(largest)` function, you’re trying to keep each subarray’s sum ≤ `largest`. So:
+
+* You add elements to `curr_sum` as long as it doesn’t exceed `largest`.
+* If `curr_sum > largest`, it means the current subarray is too big:
+
+  * You **increment the subarray count** (`subarray += 1`).
+  * Then, you **start a new subarray** beginning with `n` (the current number that caused the overflow):
+
+    ```python
+    curr_sum = n
+    ```
+
+### 🔁 Example:
+
+For `nums = [7, 2, 5, 10, 8]`, say `largest = 15`:
+
+* curr\_sum = 0
+* Add 7 → curr\_sum = 7
+* Add 2 → curr\_sum = 9
+* Add 5 → curr\_sum = 14
+* Add 10 → curr\_sum = 24 > 15 → too big:
+
+  * subarray += 1
+  * **curr\_sum = 10** (start new subarray)
+* Add 8 → curr\_sum = 18 > 15 → again too big:
+
+  * subarray += 1
+  * **curr\_sum = 8**
+
+Result: 3 subarrays.
+
+---
+
+Let me know if you want a dry run with a specific input.
