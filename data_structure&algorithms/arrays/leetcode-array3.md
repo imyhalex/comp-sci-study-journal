@@ -175,7 +175,7 @@ class Solution:
                 i += 1
         
         for i in range(n):
-            if nums[i] != i + 1:
+            if nums[i] != i + 1: # i + 1 means actual number represent in that index position
                 return i + 1
         
         return n + 1 # If all integers from 1 to n are present in the array, then the smallest missing positive is n + 1
@@ -353,4 +353,26 @@ class Solution:
                 return m
         
         return res
+```
+
+## 50. Pow(x, n)[[Link](https://leetcode.com/problems/powx-n/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/pow-x-n?list=neetcode250)]
+
+```python
+# time: O(log n); space: O(log n)
+class Solution:
+    def myPow(self, x: float, n: int) -> float:
+        def helper(x, n):
+            if x == 0:
+                return 0
+            if n == 0:
+                return 1
+
+            res = helper(x, n // 2)  # compute x^(n//2)
+            res = res * res # square it → (x^(n//2))^2
+            return x * res if n % 2 else res # n % 2 is true when exponent is odd
+        
+        res = helper(x, abs(n))
+        return res if n >= 0 else 1 / res # x^-n = 1/x^n
 ```
