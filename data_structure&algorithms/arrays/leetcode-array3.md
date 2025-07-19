@@ -531,3 +531,66 @@ Result: 3 subarrays.
 ---
 
 Let me know if you want a dry run with a specific input.
+
+
+## 1095. Find in Mountain Array[[Link](https://leetcode.com/problems/find-in-mountain-array/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/find-in-mountain-array?list=neetcode250)]
+
+```python
+# time: O(log n); space: O(1)
+# """
+# This is MountainArray's API interface.
+# You should not implement it, or speculate about its implementation
+# """
+#class MountainArray:
+#    def get(self, index: int) -> int:
+#    def length(self) -> int:
+
+class Solution:
+    def findInMountainArray(self, target: int, mountainArr: 'MountainArray') -> int:
+        length = mountainArr.length()
+
+        l, r = 0, length - 2 # TL;DR: The range is limited to avoid out-of-bounds when accessing m - 1 and m + 1
+        # Set the initial range for peak search to start at 1 and end at length - 2 so m - 1 and m + 1 are always valid:
+        # m = 0 
+        while l <= r:
+            m = l + (r - l) // 2
+            left, mid, right = mountainArr.get(m - 1), mountainArr.get(m), mountainArr.get(m + 1)
+            if left < mid < right:
+                l = m + 1
+            elif left > mid > right:
+                r = m - 1
+            else: # left < mid > right
+                break
+        
+        peak = m
+
+        # search left portion
+        l, r = 0, peak
+        while l <= r:
+            m = l + (r - l) // 2
+            val = mountainArr.get(m)
+            if val < target:
+                l = m + 1
+            elif val > target:
+                r = m - 1
+            else:
+                return m
+
+        # if not in left portion (no return m), then search right portion
+        # this part have no m - 1, m + 1 problems, so length - 1 is fine
+        l, r = peak, length - 1
+        while l <= r:
+            m = l + (r - l) // 2
+            val = mountainArr.get(m)
+            if val > target:
+                l = m + 1
+            elif val < target:
+                r = m - 1
+            else:
+                return m
+            
+        # if not returning any of contiditons
+        return -1
+```

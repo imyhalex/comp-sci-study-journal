@@ -897,36 +897,38 @@ class Solution:
 # time: O(log(min(n, m))); space: O(1)
 class Solution:
     def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
-        a, b = nums1, nums2 # assign two arrs to a, b
-        total = len(nums1) + len(nums2)
+        A, B = nums1, nums2
+        # why array a has to be shorter than b?
+        # Reason 1: Avoid Out-of-Bounds Partitioning: If A is longer than B, j could go negative (invalid), or exceed the bounds of B, which causes index errors like:
+        # Reason 2: Efficiency (log(min(m, n))): You always search the shorter array
+        if len(B) < len(A):
+            A, B = B, A  # Always binary search the smaller array
+
+        total = len(A) + len(B)
         half = total // 2
 
-        if len(b) < len(a):
-            a, b = b, a
-        
-        # run binary search on a
-        l, r = 0, len(a) - 1
-        while True:
-            i = l + (r - l) // 2 # middle value of arr a
-            j = half - i - 2 # middle value of arr b
+        l, r = 0, len(A)
+        while l <= r:
+            i = (l + r) // 2      # partition in A
+            j = half - i          # partition in B
 
-            # anchor the partitions for two arrays
-            a_left = a[i] if i >= 0 else float("-infinity")
-            a_right = a[i + 1] if (i + 1) < len(a) else float("infinity")
-            b_left = b[j] if j >= 0 else float("-infinity")
-            b_right = b[j + 1] if (j + 1) < len(b) else float("infinity")
+            A_left = A[i - 1] if i > 0 else float('-inf')
+            A_right = A[i] if i < len(A) else float('inf')
+            B_left = B[j - 1] if j > 0 else float('-inf')
+            B_right = B[j] if j < len(B) else float('inf')
 
-            if a_left <= b_right and b_left <= a_right:
-                # odd
-                if total % 2:
-                    return min(a_right, b_right)
-                # even
-                else:
-                    return (max(a_left, b_left) + min(a_right, b_right)) / 2
-            elif a_left > b_right:
-                r = i - 1
+            # Found correct partition
+            if A_left <= B_right and B_left <= A_right:
+                if total % 2 == 1:  # odd total length
+                    return min(A_right, B_right)
+                    # Median is the first element in the right half of the combined sorted array becuase of indexing in program
+                else:  # even total length
+                    return (max(A_left, B_left) + min(A_right, B_right)) / 2
+
+            elif A_left > B_right:
+                r = i - 1  # Move left in A
             else:
-                l = i + 1
+                l = i + 1  # Move right in A
         return -1
 ```
 
