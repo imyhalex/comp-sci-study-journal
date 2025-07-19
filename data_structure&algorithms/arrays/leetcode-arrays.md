@@ -909,7 +909,7 @@ class Solution:
 
         l, r = 0, len(A)
         while l <= r:
-            i = (l + r) // 2      # partition in A
+            i = l + (r - l) // 2      # partition in A
             j = half - i          # partition in B
 
             A_left = A[i - 1] if i > 0 else float('-inf')
