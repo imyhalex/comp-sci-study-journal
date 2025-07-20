@@ -171,6 +171,32 @@ class Solution:
         return slow # or fast; both are cycle start 
 ``` 
 
+
+## 287. Find the Duplicate Number[[Link](https://leetcode.com/problems/find-the-duplicate-number/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/find-duplicate-integer?list=neetcode150)]
+
+```python
+# time: O(n); space: O(1)
+class Solution:
+    def findDuplicate(self, nums: List[int]) -> int:
+        fast, slow = 0, 0
+        while True:
+            slow = nums[slow]
+            fast = nums[nums[fast]]
+            if slow == fast:
+                break
+        
+        slow = 0
+        while True:
+            slow = nums[slow]
+            fast = nums[fast]
+            if slow == fast:
+                break
+        
+        return slow
+```
+
 ## 143. Reorder List[[Link](https://leetcode.com/problems/reorder-list/description/)]
 
 - video explaination[[Link](https://neetcode.io/problems/reorder-linked-list?list=neetcode250)]
