@@ -278,3 +278,184 @@ class Solution:
         return res
 ```
 
+## 19. Remove Nth Node From End of List[[Link](https://leetcode.com/problems/remove-nth-node-from-end-of-list/description/)]
+
+- video explainationi[[Link](https://neetcode.io/problems/remove-node-from-end-of-linked-list?list=neetcode250)]
+
+```python
+# time: O(n); space: O(1)
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def removeNthFromEnd(self, head: Optional[ListNode], n: int) -> Optional[ListNode]:
+        dummy = ListNode(0, head)
+        left, right = dummy, head
+
+        while n > 0 and right:
+            right = right.next
+            n -= 1
+        
+        while right:
+            left = left.next
+            right = right.next
+        
+        # delete the node
+        left.next = left.next.next
+        return dummy.next
+```
+
+## 138. Copy List with Random Pointer[[Link](https://leetcode.com/problems/copy-list-with-random-pointer/description/)]
+
+- hash useage, two passes
+- video explaination[[Link](https://neetcode.io/problems/copy-linked-list-with-random-pointer?list=neetcode250)]
+
+```python
+# time & space: O(n)
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, x: int, next: 'Node' = None, random: 'Node' = None):
+        self.val = int(x)
+        self.next = next
+        self.random = random
+"""
+
+class Solution:
+    def copyRandomList(self, head: 'Optional[Node]') -> 'Optional[Node]':
+        old_to_copy = {None : None}
+
+        # first pass: construct hashmap, clone linkedlist
+        curr = head
+        while curr:
+            copy = Node(curr.val)
+            old_to_copy[curr] = copy
+            curr = curr.next
+        
+        # construct new linkedlist through existing hashmap
+        curr = head
+        while curr:
+            copy = old_to_copy[curr]
+            copy.next = old_to_copy[curr.next]
+            copy.random = old_to_copy[curr.random]
+            curr = curr.next
+        
+        return old_to_copy[head]
+```
+
+## *2. Add Two Numbers[[Link](https://leetcode.com/problems/add-two-numbers/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/add-two-numbers?list=neetcode250)]
+
+```python
+# time: O(n + m); space: O(1)
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+
+class Solution:
+    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
+        dummy = ListNode()
+        curr = dummy
+
+        carry = 0
+        while l1 or l2 or carry:
+            v1 = l1.val if l1 else 0
+            v2 = l2.val if l2 else 0
+
+            # compute the new digit
+            val = v1 + v2 + carry
+
+            # tens place
+            carry = val // 10
+            # extract the carray out
+            # ones place
+            val = val % 10
+            curr.next = ListNode(val)
+
+            # update ptrs
+            curr = curr.next
+            l1 = l1.next if l1 else None
+            l2 = l2.next if l2 else None
+            # 7 + 8 have carry, without adding or carry in while loop, the carry will not be executed
+        return dummy.next
+```
+
+## 445. Add Two Numbers II[[Link](https://leetcode.com/problems/add-two-numbers-ii/description/)]
+
+```python
+# method in reverse
+# time & space: O(n + m)
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
+        
+        def reverse(head):
+            prev, curr = None, head
+            while curr:
+                tmp = curr.next
+                curr.next = prev
+                prev = curr
+                curr = tmp
+            return prev
+        
+        l1, l2 = reverse(l1), reverse(l2)
+        dummy = ListNode()
+        curr = dummy
+        carry = 0
+        while l1 or l2 or carry:
+            v1 = l1.val if l1 else 0
+            v2 = l2.val if l2 else 0
+
+            val = v1 + v2 + carry
+            carry = val // 10
+            val = val % 10
+            curr.next = ListNode(val)
+
+            curr = curr.next
+            l1 = l1.next if l1 else None
+            l2 = l2.next if l2 else None
+        
+        dummy.next = reverse(dummy.next)
+        return dummy.next
+
+# without reverse 
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
+        s1, s2 = [], []
+
+        while l1:
+            s1.append(l1.val)
+            l1 = l1.next
+
+        while l2:
+            s2.append(l2.val)
+            l2 = l2.next
+
+        carry = 0
+        head = None
+
+        while s1 or s2 or carry:
+            v1 = s1.pop() if s1 else 0
+            v2 = s2.pop() if s2 else 0
+            total = v1 + v2 + carry
+            carry = total // 10
+            node = ListNode(total % 10)
+            node.next = head
+            head = node
+
+        return head
+```
