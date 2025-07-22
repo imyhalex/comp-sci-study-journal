@@ -29,7 +29,34 @@ class Solution:
 - video explaination[[Link]()]
 
 ```python
+# time: O(n); space: O(1)
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reverseBetween(self, head: Optional[ListNode], left: int, right: int) -> Optional[ListNode]:
+        dummy = ListNode(0, head)
 
+        # phase 1: reach the left ptr
+        left_prev, curr = dummy, head
+        for _ in range(left - 1):
+            left_prev = curr
+            curr = curr.next
+        
+        # phase 2: reverse the portion
+        prev = None
+        for _ in range(right - left + 1):
+            tmp = curr.next
+            curr.next = prev
+            prev = curr
+            curr = tmp
+        
+        # phase 3: repoint the ptrs
+        left_prev.next.next = curr # new tail
+        left_prev.next = prev # new head
+        return dummy.next
 ```
 
 ## 21. Merge Two Sorted Lists[[Link](https://leetcode.com/problems/merge-two-sorted-lists/description/)]
@@ -466,4 +493,69 @@ class Solution:
             head = node
 
         return head
+```
+
+## 622. Design Circular Queue[[Link](https://leetcode.com/problems/design-circular-queue/description/)]
+
+- video explaination[[Link](https://leetcode.com/problems/design-circular-queue/description/)]
+
+```python
+# time: O(n); space: O(1) for each methods
+class ListNode:
+    def __init__(self, val, next, prev):
+        self.val = val
+        self.next = next
+        self.prev = prev
+
+class MyCircularQueue:
+
+    def __init__(self, k: int):
+        self.space = k
+        self.left = ListNode(0, None, None)
+        self.right = ListNode(0, None, self.left)
+        self.left.next = self.right
+
+    def enQueue(self, value: int) -> bool:
+        if self.isFull():
+            return False
+        curr = ListNode(value, self.right, self.right.prev)
+        self.right.prev.next = curr
+        self.right.prev = curr
+        self.space -= 1
+        return True
+
+    def deQueue(self) -> bool:
+        if self.isEmpty():
+            return False
+        self.left.next = self.left.next.next
+        self.left.next.prev = self.left
+        self.space += 1
+        return True
+
+    def Front(self) -> int:
+        if self.isEmpty():
+            return -1
+        return self.left.next.val
+
+    def Rear(self) -> int:
+        if self.isEmpty():
+            return -1
+        return self.right.prev.val
+
+    def isEmpty(self) -> bool:
+        return self.left.next == self.right
+
+    def isFull(self) -> bool:
+        return self.space == 0
+        
+
+
+# Your MyCircularQueue object will be instantiated and called as such:
+# obj = MyCircularQueue(k)
+# param_1 = obj.enQueue(value)
+# param_2 = obj.deQueue()
+# param_3 = obj.Front()
+# param_4 = obj.Rear()
+# param_5 = obj.isEmpty()
+# param_6 = obj.isFull()
 ```
