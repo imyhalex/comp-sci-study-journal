@@ -24,6 +24,14 @@ class Solution:
         return prev
 ```
 
+## 92. Reverse Linked List II[[Link](https://leetcode.com/problems/reverse-linked-list-ii/description/)]
+
+- video explaination[[Link]()]
+
+```python
+
+```
+
 ## 21. Merge Two Sorted Lists[[Link](https://leetcode.com/problems/merge-two-sorted-lists/description/)]
 
 - video explaination[[Link](https://leetcode.com/problems/merge-two-sorted-lists/description/)]
@@ -180,7 +188,7 @@ class Solution:
 # time: O(n); space: O(1)
 class Solution:
     def findDuplicate(self, nums: List[int]) -> int:
-        fast, slow = 0, 0
+        slow, fast = 0, 0
         while True:
             slow = nums[slow]
             fast = nums[nums[fast]]
