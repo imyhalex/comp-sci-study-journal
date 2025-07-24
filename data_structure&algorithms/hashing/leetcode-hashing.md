@@ -158,7 +158,7 @@ class Solution:
         return list(res.values())
 ```
 
-## 128. Longest Consecutive Sequence[[Link](https://leetcode.com/problems/longest-consecutive-sequence/description/?envType=study-plan-v2&envId=top-interview-150)]
+## 128. *Longest Consecutive Sequence[[Link](https://leetcode.com/problems/longest-consecutive-sequence/description/?envType=study-plan-v2&envId=top-interview-150)]
 
 - video explaination[[Link](https://neetcode.io/problems/longest-consecutive-sequence)]
 - hint: check the left neigbor for each num in nums to determine the start, and check num + 1 for right to determine the consecutive numbers
@@ -178,6 +178,17 @@ class Solution:
                     length += 1
                 longest = max(longest, length)
         return longest
+
+# Binary Tree Longest Consecutive Sequence
+# Medium
+# Find Three Consecutive Integers That Sum to a Given Number
+# Medium
+# Maximum Consecutive Floors Without Special Floors
+# Medium
+# Length of the Longest Alphabetical Continuous Substring
+# Medium
+# Find the Maximum Number of Elements in Subset
+# Medium
 ```
 
 ## 846. Hand of Straights[[Link](https://leetcode.com/problems/hand-of-straights/description/)]
