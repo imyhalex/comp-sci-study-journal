@@ -140,7 +140,7 @@ class Solution:
         return sorted(s) == sorted(t)
 ```
 
-## 49. Group Anagrams[[Link](https://leetcode.com/problems/group-anagrams/description/?envType=study-plan-v2&envId=top-interview-150)]
+## 49. *Group Anagrams[[Link](https://leetcode.com/problems/group-anagrams/description/?envType=study-plan-v2&envId=top-interview-150)]
 
 - video explaination[[Link](https://neetcode.io/problems/anagram-groups)]
 - hint: to store the count pattern as the key in hash table
