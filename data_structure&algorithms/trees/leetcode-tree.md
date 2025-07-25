@@ -216,10 +216,44 @@ class Solution:
 #         self.right = right
 class Solution:
     def maxDepth(self, root: Optional[TreeNode]) -> int:
-        if not root:
-            return 0
+        
+        def dfs(node):
+            if not node:
+                return 0
+            
+            left = dfs(node.left)
+            right = dfs(node.right)
 
-        return 1 + max(self.maxDepth(root.left), self.maxDepth(root.right))
+            return 1 + max(left, right)
+        
+        return dfs(root)
+```
+
+## 111. Minimum Depth of Binary Tree[[Link](https://leetcode.com/problems/minimum-depth-of-binary-tree/description/)]
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def minDepth(self, root: Optional[TreeNode]) -> int:
+        
+        def dfs(node):
+            if not node:
+                return 0
+            
+            left = dfs(node.left)
+            right = dfs(node.right)
+
+            if not node.left or not node.right:
+                return 1 + max(left, right)
+
+            return 1 + min(left, right)
+        
+        return dfs(root)
 ```
 
 ## 543. Diameter of Binary Tree[[Link](https://leetcode.com/problems/diameter-of-binary-tree/description/)]
@@ -253,6 +287,8 @@ class Solution:
         dfs(root)
         return self.max_diameter
 ```
+
+
 
 ## 110. Balanced Binary Tree[[Link](https://leetcode.com/problems/balanced-binary-tree/description/)]
 - video explaination[[Link](https://neetcode.io/problems/balanced-binary-tree?list=blind75)]
@@ -364,10 +400,31 @@ class Solution:
             return self.lowestCommonAncestor(root.right, p, q)
         else:
             return root
+
+# or
+class Solution:
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        
+        def dfs(node, p, q):
+            if not node:
+                return None
+            if p == node or q == node:
+                return node
+            
+            left = dfs(node.left, p, q)
+            right = dfs(node.right, p, q)
+
+            if left and right:
+                return node
+            else:
+                return left or right
+        
+        return dfs(root, p, q)
 ```
 
 ## 236. Lowest Common Ancestor of a Binary Tree[[Link](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/description/)]
 - video explaination[[Link](https://www.youtube.com/watch?v=WO1tfq2sbsI)]
+- only deal with three cases
 
 ```python
 # Definition for a binary tree node.
@@ -581,6 +638,248 @@ class Solution:
         dfs(root)
         return self.max_sum
 ```
+
+## 112. Path Sum[[Link](https://leetcode.com/problems/path-sum/description/)]
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def hasPathSum(self, root: Optional[TreeNode], targetSum: int) -> bool:
+        if not root:
+            return False
+
+        targetSum -= root.val
+        if not root.left and not root.right:
+            return targetSum == 0
+        
+        return self.hasPathSum(root.left, targetSum) or self.hasPathSum(root.right, targetSum)
+```
+
+## 113. Path Sum II[[Link](https://leetcode.com/problems/path-sum-ii/description/)]
+
+```python
+# time: O(n); space: O(h)
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def pathSum(self, root: Optional[TreeNode], targetSum: int) -> List[List[int]]:
+        res, curr = [], []
+
+        def dfs(node, targetSum):
+            if not node:
+                return
+
+            curr.append(node.val)
+            targetSum -= node.val
+
+            if not node.left and not node.right and targetSum == 0:
+                res.append(curr.copy())
+            else:
+                dfs(node.left, targetSum)
+                dfs(node.right, targetSum)
+
+            curr.pop()
+        
+        dfs(root, targetSum)
+        return res
+                
+```
+
+## 437. Path Sum III[[Link](https://leetcode.com/problems/path-sum-iii/description/?envType=study-plan-v2&envId=leetcode-75)]
+
+- hint: prefix sum
+- related idea: subarray sum equals k
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def pathSum(self, root: Optional[TreeNode], targetSum: int) -> int:
+        prefix_sums = defaultdict(int) # prefix sum -> how many times a given prefix sum has occurred
+        prefix_sums[0] = 1 # base case: empty path sums to 0
+
+        def dfs(node, curr_sum):
+            if not node:
+                return 0
+            
+            curr_sum += node.val
+            count = prefix_sums[curr_sum - targetSum]
+
+            prefix_sums[curr_sum] += 1 # Add this path sum
+            count += dfs(node.left, curr_sum) # Explore left subtree
+            count += dfs(node.right, curr_sum) # Explore right subtree
+            prefix_sums[curr_sum] -= 1 # backtrack
+
+            return count
+        
+        return dfs(root, 0)
+```
+---
+
+### 🔧 Step 1: Visualize the Tree
+
+```plaintext
+            10
+          /    \
+        5       -3
+      /   \        \
+     3     2       11
+    / \     \
+   3  -2     1
+```
+
+---
+
+### 🔍 Goal:
+
+Count the number of **downward paths** that sum to `8`.
+
+### ✅ Valid Paths:
+
+1. `5 → 3`
+2. `5 → 2 → 1`
+3. `-3 → 11`
+
+---
+
+Now let’s trace the prefix sum logic step by step.
+
+We use:
+
+```python
+prefix_sums = defaultdict(int)
+prefix_sums[0] = 1  # Base case
+```
+
+This means: if `curr_sum - targetSum = 0`, there's a valid path from root to here.
+
+---
+
+## 🧭 Step-by-step DFS traversal
+
+### ➤ At node 10:
+
+```python
+curr_sum = 0 + 10 = 10
+prefix_sums[10] += 1 → {0:1, 10:1}
+```
+
+Check: `10 - 8 = 2 → prefix_sums[2] = 0` → no path yet.
+
+### ➤ Go left to node 5:
+
+```python
+curr_sum = 10 + 5 = 15
+prefix_sums[15] += 1 → {0:1, 10:1, 15:1}
+```
+
+Check: `15 - 8 = 7 → prefix_sums[7] = 0` → no match yet.
+
+### ➤ Go left to node 3:
+
+```python
+curr_sum = 15 + 3 = 18
+prefix_sums[18] += 1
+Check: 18 - 8 = 10 → prefix_sums[10] = 1 ✅ MATCH!
+→ count = 1 (path: 5 → 3)
+```
+
+### ➤ Go left to node 3 (leaf):
+
+```python
+curr_sum = 18 + 3 = 21
+21 - 8 = 13 → no match
+backtrack → prefix_sums[21] -= 1
+```
+
+### ➤ Go right to node -2:
+
+```python
+curr_sum = 18 + (-2) = 16
+16 - 8 = 8 → no match
+backtrack → prefix_sums[16] -= 1
+```
+
+Backtrack → prefix\_sums\[18] -= 1
+
+---
+
+### ➤ Go right to node 2:
+
+```python
+curr_sum = 15 + 2 = 17
+prefix_sums[17] += 1
+17 - 8 = 9 → no match
+```
+
+### ➤ Go right to node 1:
+
+```python
+curr_sum = 17 + 1 = 18
+18 - 8 = 10 → prefix_sums[10] = 1 ✅ MATCH!
+→ count += 1 (path: 5 → 2 → 1)
+```
+
+Backtrack → prefix\_sums\[18] -= 1
+Backtrack → prefix\_sums\[17] -= 1
+Backtrack → prefix\_sums\[15] -= 1
+Backtrack → prefix\_sums\[10] still = 1
+
+---
+
+### ➤ Go right to node -3:
+
+```python
+curr_sum = 10 + (-3) = 7
+7 - 8 = -1 → no match
+prefix_sums[7] += 1
+```
+
+### ➤ Go right to node 11:
+
+```python
+curr_sum = 7 + 11 = 18
+18 - 8 = 10 → prefix_sums[10] = 1 ✅ MATCH!
+→ count += 1 (path: -3 → 11)
+```
+
+Backtrack → prefix\_sums\[18] -= 1
+Backtrack → prefix\_sums\[7] -= 1
+Backtrack → prefix\_sums\[10] -= 1
+
+---
+
+## ✅ Final `count = 3`
+
+Paths found:
+
+1. `5 → 3`
+2. `5 → 2 → 1`
+3. `-3 → 11`
+
+---
+
+## 🧠 Key Learning:
+
+The prefix sum map helps you answer:
+**"How many previous prefix sums exist such that subtracting them gives me the target?"**
+
+And `+1`/`-1` keeps that map clean per path — so you **don’t leak state between branches**.
+
+
 
 ## *297. Serialize and Deserialize Binary Tree[[Link](https://leetcode.com/problems/serialize-and-deserialize-binary-tree/description/)]
 

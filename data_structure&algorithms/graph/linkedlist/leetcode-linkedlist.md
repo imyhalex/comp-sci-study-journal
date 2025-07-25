@@ -370,6 +370,8 @@ class Solution:
             curr = curr.next
         
         # construct new linkedlist through existing hashmap
+        # do ptrs connecting, next and random
+        # link the random
         curr = head
         while curr:
             copy = old_to_copy[curr]
@@ -558,4 +560,157 @@ class MyCircularQueue:
 # param_4 = obj.Rear()
 # param_5 = obj.isEmpty()
 # param_6 = obj.isFull()
+```
+
+
+## *146. LRU Cache[[Link](https://leetcode.com/problems/lru-cache/description/?envType=study-plan-v2&envId=top-interview-150)]
+- video explaination[[Link](https://neetcode.io/problems/lru-cache)]
+
+```python
+class Node:
+    def __init__(self, key, val):
+        self.key = key
+        self.val = val
+        self.prev = self.next = None
+
+class LRUCache:
+
+    def __init__(self, capacity: int):
+        self.cap = capacity
+        self.cache = {} # map the key to node
+
+        # left=LRU, right=most recent
+        # for next two steps: dummny nodes for initialization, 
+        # and set left and right pointer for anchor points
+        self.left, self.right = Node(0, 0), Node(0, 0)
+        self.left.next, self.right.prev = self.right, self.left
+
+    # helpers: remove, insert
+    def __remove(self, node):
+        prev, nxt = node.prev, node.next
+        prev.next = nxt
+        nxt.prev = prev
+
+    def __insert(self, node): # insert at right
+        prev, nxt = self.right.prev, self.right
+        prev.next = nxt.prev = node
+        node.next, node.prev = nxt, prev
+
+    def get(self, key: int) -> int:
+        if key in self.cache:
+            # update the node to most recent
+            self.__remove(self.cache[key])
+            self.__insert(self.cache[key])
+            return self.cache[key].val
+        return -1
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.cache:
+            self.__remove(self.cache[key])
+        self.cache[key] = Node(key, value)
+        self.__insert(self.cache[key])
+
+        if len(self.cache) > self.cap:
+            # remove from the linked list  and delete the LRU from hashmap
+            lru = self.left.next
+            self.__remove(lru)
+            del self.cache[lru.key]
+        
+
+
+# Your LRUCache object will be instantiated and called as such:
+# obj = LRUCache(capacity)
+# param_1 = obj.get(key)
+# obj.put(key,value)
+```
+
+## 460. LFU Cache[[Link](https://leetcode.com/problems/lfu-cache/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/lfu-cache?list=neetcode250)]
+
+```python
+# time: O(1); space: O(n)
+class Node:
+    def __init__(self, val):
+        self.val = val
+        self.next = self.prev = None
+
+class LinkedList:
+    def __init__(self):
+        self.left, self.right = Node(0), Node(0)
+        self.left.next = self.right
+        self.right.prev = self.left
+        self.hash_map = {} # value -> Node
+    
+    def length(self):
+        return len(self.hash_map)
+
+    def push_right(self, val):
+        node = Node(val)
+        self.hash_map[val] = node
+        prev, nxt = self.right.prev, self.right
+        prev.next = node
+        nxt.prev = node
+        node.prev, node.next = prev, nxt
+    
+    def pop(self, val):
+        if val in self.hash_map:
+            node = self.hash_map[val]
+            prev, nxt = node.prev, node.next
+            prev.next = nxt
+            nxt.prev = prev
+            self.hash_map.pop(val)
+
+    def pop_left(self):
+        val = self.left.next.val
+        self.pop(val)
+        return val
+    
+    def update(self, val):
+        self.pop(val)
+        self.push_right(val)
+
+class LFUCache:
+
+    def __init__(self, capacity: int):
+        self.cap = capacity
+        self.lfu_count = 0
+        self.val_map = {} # map key - > val
+        self.count_map = defaultdict(int)  # Map key -> count
+        self.list_map = defaultdict(LinkedList) # Map count of key -> linkedlist
+
+    def counter(self, key):
+        cnt = self.count_map[key]
+        self.count_map[key] += 1
+        self.list_map[cnt].pop(key)
+        self.list_map[cnt + 1].push_right(key)
+        
+        # case when update the lfu_count
+        if cnt == self.lfu_count and self.list_map[cnt].length() == 0:
+            self.lfu_count += 1
+    
+    def get(self, key: int) -> int:
+        if key not in self.val_map:
+            return -1
+        self.counter(key)
+        return self.val_map[key]
+
+    def put(self, key: int, value: int) -> None:
+        if self.cap == 0:
+            return
+        
+        if key not in self.val_map and len(self.val_map) == self.cap:
+            res = self.list_map[self.lfu_count].pop_left()
+            self.val_map.pop(res)
+            self.count_map.pop(res)
+            
+        self.val_map[key]= value
+        self.counter(key)
+        self.lfu_count = min(self.lfu_count, self.count_map[key])
+
+
+# Your LFUCache object will be instantiated and called as such:
+# obj = LFUCache(capacity)
+# param_1 = obj.get(key)
+# obj.put(key,value)
 ```
