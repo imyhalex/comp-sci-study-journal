@@ -1378,3 +1378,79 @@ class Solution:
 ```python
 
 ```
+
+## 427. Construct Quad Tree[[Link](https://leetcode.com/problems/construct-quad-tree/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/construct-quad-tree?list=neetcode250)]
+
+```python
+# time: O(n^2 log n); space: O(log n)
+"""
+# Definition for a QuadTree node.
+class Node:
+    def __init__(self, val, isLeaf, topLeft, topRight, bottomLeft, bottomRight):
+        self.val = val
+        self.isLeaf = isLeaf
+        self.topLeft = topLeft
+        self.topRight = topRight
+        self.bottomLeft = bottomLeft
+        self.bottomRight = bottomRight
+"""
+
+class Solution:
+    def construct(self, grid: List[List[int]]) -> 'Node':
+        
+        def dfs(n, r, c):
+            all_same = True
+            for i in range(n):
+                for j in range(n):
+                    if grid[r][c] != grid[r + i][c + j]:
+                        all_same = False
+                        break
+            # base case
+            if all_same:
+                return Node(grid[r][c], True)
+            
+            # construct quad node subtree
+            n = n // 2
+            topleft = dfs(n, r, c)
+            topright = dfs(n, r, c + n)
+            bottomleft = dfs(n, r + n, c)
+            bottomright = dfs(n, r + n, c + n)
+
+            return Node(0, False, topleft, topright, bottomleft, bottomright)
+        
+        return dfs(len(grid), 0, 0)
+
+```
+
+337. ## House Robber III[[Link](https://leetcode.com/problems/house-robber-iii/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/house-robber-iii?list=neetcode250)]
+
+```python
+# time & space: O(n)
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def rob(self, root: Optional[TreeNode]) -> int:
+        
+        def dfs(node):
+            if not node:
+                return [0, 0]
+            
+            left_pair = dfs(node.left)
+            right_pair = dfs(node.right)
+
+            with_root = node.val + left_pair[1] + right_pair[1]
+            without_root = max(left_pair) + max(right_pair)
+
+            return [with_root, without_root]
+        
+        return max(dfs(root))
+
+```
