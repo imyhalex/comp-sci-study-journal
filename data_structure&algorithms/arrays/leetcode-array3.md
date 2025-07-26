@@ -41,6 +41,14 @@ class Solution:
 # Medium
 ```
 
+## 1062. Longest Repeating Substring[[Link](https://leetcode.com/problems/longest-repeating-substring/description/)]
+
+- video explaination[[Link]()]
+
+```python
+
+```
+
 ## 159. Longest Substring with At Most Two Distinct Characters[[Link](https://leetcode.com/problems/longest-substring-with-at-most-two-distinct-characters/description/)]
 
 ```python
