@@ -41,14 +41,6 @@ class Solution:
 # Medium
 ```
 
-## 1062. Longest Repeating Substring[[Link](https://leetcode.com/problems/longest-repeating-substring/description/)]
-
-- video explaination[[Link]()]
-
-```python
-
-```
-
 ## 159. Longest Substring with At Most Two Distinct Characters[[Link](https://leetcode.com/problems/longest-substring-with-at-most-two-distinct-characters/description/)]
 
 ```python
@@ -462,6 +454,36 @@ class Solution:
             else:
                 l = c + 1
         
+        return res
+```
+
+## *1062. Longest Repeating Substring[[Link](https://leetcode.com/problems/longest-repeating-substring/description/)]
+
+- hint: binary search with set
+
+```python
+# time: O(n^2 log n); time: O(n)
+class Solution:
+    def longestRepeatingSubstring(self, s: str) -> int:
+        
+        def has_duplicate(L):
+            visited = set()
+            for i in range(len(s) - L + 1):
+                substr = s[i: i + L]
+                if substr in visited:
+                    return True
+                visited.add(substr)
+            return False
+
+        res = 0
+        l, r = 1, len(s)
+        while l <= r:
+            m = l + (r - l) // 2
+            if has_duplicate(m):
+                res = m
+                l = m + 1
+            else:
+                r = m - 1
         return res
 ```
 
