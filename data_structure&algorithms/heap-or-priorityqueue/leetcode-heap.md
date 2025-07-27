@@ -246,3 +246,34 @@ class Solution:
             w += -heapq.heappop(max_profit)
         return w
 ```
+
+## 1834. Single-Threaded CPU[[Link](https://leetcode.com/problems/single-threaded-cpu/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/single-threaded-cpu?list=neetcode250)]
+
+```python
+# time: O(n log n); space: O(n)
+class Solution:
+    def getOrder(self, tasks: List[List[int]]) -> List[int]:
+        for i, t in enumerate(tasks):
+            t.append(i)
+        tasks.sort(key=lambda t : t[0])
+
+        res, min_heap = [], []
+        i, time = 0, tasks[0][0]
+
+        while min_heap or i < len(tasks):
+            # add tasks to queue
+            while i < len(tasks) and time >= tasks[i][0]:
+                heapq.heappush(min_heap, [tasks[i][1], tasks[i][2]])
+                i += 1
+            
+            if not min_heap:
+                time = tasks[i][0]
+            else:
+                process_time, index = heapq.heappop(min_heap)
+                time += process_time
+                res.append(index)
+        
+        return res
+```
