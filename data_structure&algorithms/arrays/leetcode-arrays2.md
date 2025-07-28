@@ -139,6 +139,8 @@ Medium
 """
 ```
 
+## 21. Merge Two Sorted Lists[[Link](https://leetcode.com/problems/merge-two-sorted-lists/description/)]
+
 ## 189. Rotate Array[[Link](https://leetcode.com/problems/rotate-array/description/)]
 
 - video explaination[[Link](https://neetcode.io/problems/rotate-array?list=neetcode250)]
