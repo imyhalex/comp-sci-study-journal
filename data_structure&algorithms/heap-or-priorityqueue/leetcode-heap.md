@@ -277,3 +277,74 @@ class Solution:
         
         return res
 ```
+
+## 767. Reorganize String[[Link](https://leetcode.com/problems/reorganize-string/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/reorganize-string?list=neetcode250)]
+
+```python
+class Solution:
+    def reorganizeString(self, s: str) -> str:
+        count = Counter(s) # hash_map, count each char
+        max_heap = [[-cnt, char] for char, cnt in count.items()]
+        heapq.heapify(max_heap) # O(n)
+
+        prev = None
+        res = ""
+        while max_heap or prev:
+            # a -> 2, b -> 0: means max_heap is empty and the prev it not empty
+            if not max_heap and prev:
+                return ""
+
+            # most frequent char except prev
+            cnt, char = heapq.heappop(max_heap)
+            res += char
+            cnt += 1
+
+            # if prev is not null, push back to heap and set prev as null for next iteration
+            if prev:
+                heapq.heappush(max_heap, prev)
+                prev = None
+
+            # for the pair just popped
+            if cnt != 0:
+                prev = [cnt, char]
+        
+        return res
+```
+
+## 1405. Longest Happy String[[Link](https://leetcode.com/problems/longest-happy-string/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/longest-happy-string?list=neetcode250)]
+
+```python
+class Solution:
+    def longestDiverseString(self, a: int, b: int, c: int) -> str:
+        max_heap = []
+        for cnt, char in [(-a, 'a'), (-b, 'b'), (-c, 'c')]:
+            if cnt != 0:
+                heapq.heappush(max_heap, (cnt, char))
+        
+        res = ""
+        while max_heap:
+            cnt, char = heapq.heappop(max_heap)
+            # when cannot add the most common charater
+            if len(res) > 1 and res[-1] == res[-2] == char:
+                if not max_heap:
+                    break
+
+                cnt2, char2 = heapq.heappop(max_heap)
+                res += char2
+                cnt2 += 1
+
+                if cnt2 != 0:
+                    heapq.heappush(max_heap, (cnt2, char2))
+            else:
+                res += char
+                cnt += 1
+                
+            if cnt != 0:
+                heapq.heappush(max_heap, (cnt, char))
+
+        return res
+```
