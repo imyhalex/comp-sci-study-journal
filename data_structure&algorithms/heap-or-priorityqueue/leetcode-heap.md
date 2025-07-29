@@ -283,6 +283,7 @@ class Solution:
 - video explaination[[Link](https://neetcode.io/problems/reorganize-string?list=neetcode250)]
 
 ```python
+# time: O(n); space: O(1) or O(n)
 class Solution:
     def reorganizeString(self, s: str) -> str:
         count = Counter(s) # hash_map, count each char
@@ -318,6 +319,7 @@ class Solution:
 - video explaination[[Link](https://neetcode.io/problems/longest-happy-string?list=neetcode250)]
 
 ```python
+# time: O(n); space: O(1) or O(n)
 class Solution:
     def longestDiverseString(self, a: int, b: int, c: int) -> str:
         max_heap = []
@@ -347,4 +349,32 @@ class Solution:
                 heapq.heappush(max_heap, (cnt, char))
 
         return res
+```
+
+## 1094. Car Pooling[[Link](https://leetcode.com/problems/car-pooling/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/car-pooling?list=neetcode250)]
+
+```python
+# time: O(n log n); space: (n)
+class Solution:
+    def carPooling(self, trips: List[List[int]], capacity: int) -> bool:
+        trips.sort(key=lambda t : t[1])
+        min_heap = [] # pair of [end, num_passengers]
+
+        curr_passengers = 0
+        for t in trips:
+            num_passengers, start, end = t # at this time, this value has not pushed into heap yet
+            while min_heap and min_heap[0][0] <= start:
+                curr_passengers -= min_heap[0][1]
+                heapq.heappop(min_heap)
+
+            curr_passengers += num_passengers
+
+            if curr_passengers > capacity:
+                return False
+            
+            heapq.heappush(min_heap, [end, num_passengers])
+        
+        return True
 ```
