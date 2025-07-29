@@ -119,3 +119,23 @@ class Solution:
         l, r = res # this is the shortes length pointers
         return s[l: r + 1] if res_len != float('inf') else ""
 ```
+
+## 209. Minimum Size Subarray Sum[[Link](https://leetcode.com/problems/minimum-size-subarray-sum/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- video explaination[[Link](https://neetcode.io/problems/minimum-size-subarray-sum)]
+
+```python
+class Solution:
+    def minSubArrayLen(self, target: int, nums: List[int]) -> int:
+        l, total = 0, 0
+        length = float("inf")
+
+        for r in range(len(nums)):
+            total += nums[r]
+            while total >= target:
+                length = min(length, r - l + 1)
+                total -= nums[l]
+                l += 1
+        
+       return length if length != float('inf') else 0
+```
