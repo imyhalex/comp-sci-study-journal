@@ -378,3 +378,30 @@ class Solution:
         
         return True
 ```
+
+## *659. Split Array into Consecutive Subsequences[[Link](https://leetcode.com/problems/split-array-into-consecutive-subsequences/description/)]
+
+- not a bukect sort problem, but similar pattern
+- video explaination[[Link]]
+
+```python
+# time: O(n log n); space: O(n)
+class Solution:
+    def isPossible(self, nums: List[int]) -> bool:
+        ends = defaultdict(list) # edns[num] -> min_heap of lengths of subsequences ending at num
+        
+        for num in nums:
+            if ends[num - 1]:
+                # Extend the shortest subsequence ending at num - 1
+                min_len = heapq.heappop(ends[num - 1])
+                heapq.heappush(ends[num], min_len + 1)
+            else:
+                # Start a new subsequence of length 1
+                heapq.heappush(ends[num], 1)
+        
+        # At the end, all subsequences must have length >= 3
+        for min_heap in ends.values():
+            if min_heap and min_heap[0] < 3:
+                return False
+        return True
+```
