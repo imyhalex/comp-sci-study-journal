@@ -581,20 +581,30 @@ class Solution:
     def findInMountainArray(self, target: int, mountainArr: 'MountainArray') -> int:
         length = mountainArr.length()
 
-        l, r = 0, length - 2 # TL;DR: The range is limited to avoid out-of-bounds when accessing m - 1 and m + 1
+        # l, r = 0, length - 2 # TL;DR: The range is limited to avoid out-of-bounds when accessing m - 1 and m + 1
         # Set the initial range for peak search to start at 1 and end at length - 2 so m - 1 and m + 1 are always valid:
         # m = 0 
-        while l <= r:
-            m = l + (r - l) // 2
-            left, mid, right = mountainArr.get(m - 1), mountainArr.get(m), mountainArr.get(m + 1)
-            if left < mid < right:
-                l = m + 1
-            elif left > mid > right:
-                r = m - 1
-            else: # left < mid > right
-                break
+        # while l <= r:
+        #     m = l + (r - l) // 2
+        #     left, mid, right = mountainArr.get(m - 1), mountainArr.get(m), mountainArr.get(m + 1)
+        #     if left < mid < right:
+        #         l = m + 1
+        #     elif left > mid > right:
+        #         r = m - 1
+        #     else: # left < mid > right
+        #         break
         
-        peak = m
+        # peak = m
+
+        l, r = 0, length - 1
+        while l < r:
+            m = l + (r - l) // 2
+            if mountainArr.get(m) < mountainArr.get(m + 1):
+                l = m + 1
+            else:
+                r = m
+        
+        peak = l
 
         # search left portion
         l, r = 0, peak
