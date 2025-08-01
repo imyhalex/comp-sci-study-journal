@@ -624,3 +624,58 @@ class Solution:
         # if not returning any of contiditons
         return -1
 ```
+
+## 57. Insert Interval[[Link](https://leetcode.com/problems/insert-interval/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/insert-new-interval?list=neetcode250)]
+
+```python
+# time: O(n); space: O(1) extra space, O(n) space for output list 
+class Solution:
+    def insert(self, intervals: List[List[int]], newInterval: List[int]) -> List[List[int]]:
+        # Step 1: Binary search to find correct insertion point for newInterval
+        target = newInterval[0]
+        l, r = 0, len(intervals) - 1
+
+        while l <= r:
+            m = l + (r - l) // 2
+            if intervals[m][0] < target:
+                l = m + 1
+            else:
+                r = m - 1
+
+        # Insert newInterval at the correct position to keep intervals sorted
+        intervals.insert(l, newInterval)
+
+        # Step 2: Merge overlapping intervals
+        res = []
+        for interval in intervals:
+            # If res is empty or no overlap with the last interval in res
+            if not res or res[-1][1] < interval[0]:
+                res.append(interval)
+            else:
+                # Overlap detected; merge current interval with last one in res
+                res[-1][1] = max(res[-1][1], interval[1])
+        
+        return res
+```
+
+## 56. Merge Intervals[[Link](https://leetcode.com/problems/merge-intervals/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/merge-intervals?list=neetcode250)]
+
+```python
+# time: O(n)
+class Solution:
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        intervals.sort(key=lambda x : x[0])
+        res = []
+
+        for interval in intervals:
+            if not res or res[-1][1] < interval[0]:
+                res.append(interval)
+            else:
+                res[-1][1] = max(res[-1][1], interval[1])
+        
+        return res
+```

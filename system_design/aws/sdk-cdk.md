@@ -1,0 +1,1 @@
+- [Link](https://www.google.com/search?q=diff+between+cdk+and+sdk&rlz=1C1ONGR_enUS1033US1033&oq=di&gs_lcrp=EgZjaHJvbWUqBggAEEUYOzIGCAAQRRg7MhMIARAuGIMBGMcBGLEDGNEDGIAEMgYIAhBFGDsyBggDEEUYOTIGCAQQRRg8MgYIBRBFGDwyBggGEEUYPDIGCAcQRRg80gEIMzI5NmowajeoAgCwAgA&sourceid=chrome&ie=UTF-8)
