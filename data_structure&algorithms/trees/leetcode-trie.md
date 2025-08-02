@@ -1,10 +1,10 @@
-# Tries[[Link](https://neetcode.io/courses/advanced-algorithms/6)]
+# Tries (Preifix Tree)[[Link](https://neetcode.io/courses/advanced-algorithms/6)]
 
 ```python
 class TrieNode:
     def __init__(self):
         self.children = {}
-        self.word = False
+        self.word = False # end of word
 
 class Trie:
     def __init__(self):
@@ -130,9 +130,9 @@ class Trie:
         curr = self.root
         track = []
         for c in word:
-            if c not in curr.children:
+            if c not in curr.children: # means word not exist in prefix tree
                 return
-            track.append((curr, c))
+            track.append((curr, c)) # curr node, character pair
             curr = curr.children[c]
         
         if curr.count > 0:
