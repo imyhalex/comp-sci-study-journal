@@ -157,7 +157,7 @@ class Trie:
 - video explaination[[Link](https://neetcode.io/problems/design-word-search-data-structure?list=blind75)]
 
 ```python
-# time: O(n); space: O(n) for both two methods
+# time: O(n) for both two methods; space: O(t + n)
 class TrieNode:
     def __init__(self):
         self.children = {}
@@ -191,7 +191,7 @@ class WordDictionary:
                 else:
                     if c not in curr.children:
                         return False
-                    curr = curr.children[c]
+                    curr = curr.children[c] # case: if the character does exsit, shift to next
             return curr.word
 
         return dfs(0, self.root)
@@ -250,4 +250,32 @@ class Solution:
                 dfs(r, c, root, "")
 
         return list(res)
+```
+
+## *2707. Extra Characters in a String[[Link](https://leetcode.com/problems/extra-characters-in-a-string/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/extra-characters-in-a-string?list=neetcode250)]
+
+```python
+# time: O(n ^ 3 + m * K); space: O(m + m * k)
+class Solution:
+    def minExtraChar(self, s: str, dictionary: List[str]) -> int:
+        words = set(dictionary)
+        dp = {}
+
+        def dfs(i):
+            if i == len(s):
+                return 0
+            if i in dp:
+                return dp[i]
+
+            # res = 1 + dfs(i + 1) # skip curr char + initial value
+            res = 1 + dfs(i + 1)
+            for j in range(i, len(s)):
+                if s[i: j + 1] in words:
+                    res = min(res, dfs(j + 1))
+            dp[i] = res # store result in cache
+            return res
+        
+        return dfs(0)
 ```

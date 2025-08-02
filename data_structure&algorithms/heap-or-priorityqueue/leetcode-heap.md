@@ -405,3 +405,28 @@ class Solution:
                 return False
         return True
 ```
+
+## 253. Meeting Rooms II[[Link](https://leetcode.com/problems/meeting-rooms-ii/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/meeting-schedule-ii?list=neetcode250)]
+
+```python
+# time: O(n log n); space: O(n)
+class Solution:
+    def minMeetingRooms(self, intervals: List[List[int]]) -> int:
+        intervals.sort()
+        
+        # min-heap of end times
+        min_heap = []
+        heapq.heappush(min_heap, intervals[0][1])
+        
+        # for each meeting, reuse room if possible
+        for start, end in intervals[1:]:
+            # if the room that frees up the earliest is free before this starts
+            if min_heap[0] <= start:
+                heapq.heappop(min_heap)
+            # allocate a room (new or just-freed)
+            heapq.heappush(min_heap, end)
+        # #rooms = #simultaneous end-times we're tracking
+        return len(min_heap)
+```
