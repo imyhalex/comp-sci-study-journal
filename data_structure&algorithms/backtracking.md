@@ -534,3 +534,62 @@ class Solution:
         dfs(0)
         return self.res
 ```
+
+## *2707. Extra Characters in a String[[Link](https://leetcode.com/problems/extra-characters-in-a-string/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/extra-characters-in-a-string?list=neetcode250)]
+
+```python
+# time: O(n ^ 3 + m * K); space: O(m + m * k)
+class Solution:
+    def minExtraChar(self, s: str, dictionary: List[str]) -> int:
+        words = set(dictionary)
+        dp = {}
+
+        def dfs(i):
+            if i == len(s):
+                return 0
+            if i in dp:
+                return dp[i]
+
+            # res = 1 + dfs(i + 1) # skip curr char + initial value
+            res = 1 + dfs(i + 1)
+            for j in range(i, len(s)):
+                if s[i: j + 1] in words:
+                    res = min(res, dfs(j + 1))
+            dp[i] = res # store result in cache
+            return res
+        
+        return dfs(0)
+```
+
+## 473. Matchsticks to Square[[Link](https://leetcode.com /problems/matchsticks-to-square/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/matchsticks-to-square?list=neetcode250)]
+
+```python
+# time: O(4 ^ n); space: O(n)
+class Solution:
+    def makesquare(self, matchsticks: List[int]) -> bool:
+        if sum(matchsticks) % 4 != 0:
+            return False
+        
+        length = sum(matchsticks) // 4
+        sides = [0] * 4
+        matchsticks.sort(reverse=True) # optimized trick
+
+        def dfs(i):
+            if i == len(matchsticks):
+                return True
+            
+            for j in range(4):
+                if sides[j] + matchsticks[i] <= length:
+                    sides[j] += matchsticks[i]
+                    if dfs(i + 1):
+                        return True
+                    # backtrack decision, like else (becasue the condition dfs(i + 1) is not true)
+                    sides[j] -= matchsticks[i]
+            return False
+        
+        return dfs(0)
+```
