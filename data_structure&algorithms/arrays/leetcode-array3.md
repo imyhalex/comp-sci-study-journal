@@ -140,6 +140,22 @@ class Solution:
                 r = m
         
         return arr[l: l + k]
+
+# solution 2: max_heap
+# time: O(n log k), O(k log k) for final sort
+class Solution:
+    def findClosestElements(self, arr: List[int], k: int, x: int) -> List[int]:
+        max_heap = [] # (abs val, num)
+
+        for num in arr:
+            heapq.heappush(max_heap, (-abs(num - x), -num))
+
+            if len(max_heap) > k:
+                heapq.heappop(max_heap)
+        
+        result = [-num for _, num in max_heap]
+        result.sort()
+        return result
 ```
 
 ## 41. First Missing Positive[[Link](https://leetcode.com/problems/first-missing-positive/description/)]
