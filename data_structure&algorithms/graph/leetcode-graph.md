@@ -135,6 +135,48 @@ class Solution:
                     return dfs(r, c)
 ```
 
+## 953. Verifying an Alien Dictionary[[Link](https://leetcode.com/problems/verifying-an-alien-dictionary/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/verifying-an-alien-dictionary?list=neetcode250)]
+
+```python
+# time: O(n * m log n); space: O(n * m)
+class Solution:
+    def isAlienSorted(self, words: List[str], order: str) -> bool:
+        order_index = {c: i for i, c in enumerate(order)}
+
+        def compare(word):
+            return [order_index[c] for c in word]
+        
+        return words == sorted(words, key=compare)
+
+# time: O(n * m); space: O(1) since 26 different characters
+class Solution:
+    def isAlienSorted(self, words: List[str], order: str) -> bool:
+        order_index = {c: i for i, c in enumerate(order)}
+
+        """
+        w1 = "app"
+        w2 = "apple"
+
+        list(zip(w1, w2)) → [('a', 'a'), ('p', 'p'), ('p', 'p')]
+        """
+        def compare(w1, w2):
+            for c1, c2 in zip(w1, w2):
+                if order_index[c1] < order_index[c2]:
+                    return True
+                if order_index[c1] > order_index[c2]:
+                    return False
+            # if all characters matched; now shorter word should come first
+            return len(w1) <= len(w2)
+        
+        for i in range(len(words) - 1):
+            if not compare(words[i], words[i + 1]):
+                return False
+        
+        return True
+```
+
 ## 1091. Shortest Path in Binary Matrix[[Link](https://leetcode.com/problems/shortest-path-in-binary-matrix/)]
 
 - video explaination[[Link](https://neetcode.io/solutions/shortest-path-in-binary-matrix)]

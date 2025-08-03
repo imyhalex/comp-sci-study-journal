@@ -745,6 +745,41 @@ class Solution:
         return nums[l]
 ```
 
+## 443. String Compression[[Link](https://leetcode.com/problems/string-compression/description/?envType=study-plan-v2&envId=leetcode-75)]
+
+```python
+# time: O(n)
+class Solution:
+    def compress(self, chars: List[str]) -> int:
+        n = len(chars)
+        l, write_idx = 0, 0
+
+        while l < n:
+            # initialize r same as l
+            r = l
+
+            # expand right
+            while r < n and chars[l] == chars[r]:
+                r += 1
+            
+            # group length
+            count = r - l
+
+            # write character
+            chars[write_idx] = chars[l]
+            write_idx += 1
+
+            # write the count if count > 1
+            if count > 1:
+                for digit in str(count):
+                    chars[write_idx] = digit
+                    write_idx += 1
+
+            l = r # start the next group
+
+        return write_idx 
+```
+
 ## *33. Search in Rotated Sorted Array[[Link](https://leetcode.com/problems/search-in-rotated-sorted-array/description/?envType=study-plan-v2&envId=top-interview-150)]
 
 - video explaination[[Link](https://neetcode.io/problems/find-target-in-rotated-sorted-array)]
