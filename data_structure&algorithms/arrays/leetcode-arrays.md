@@ -708,6 +708,77 @@ class Solution:
         return -1
 ```
 
+## 443. String Compression[[Link](https://leetcode.com/problems/string-compression/description/?envType=study-plan-v2&envId=leetcode-75)]
+
+```python
+# time: O(n)
+class Solution:
+    def compress(self, chars: List[str]) -> int:
+        n = len(chars)
+        l, write_idx = 0, 0
+
+        while l < n:
+            # initialize r same as l
+            r = l
+
+            # expand right
+            while r < n and chars[l] == chars[r]:
+                r += 1
+            
+            # group length
+            count = r - l
+
+            # write character
+            chars[write_idx] = chars[l]
+            write_idx += 1
+
+            # write the count if count > 1
+            if count > 1:
+                for digit in str(count):
+                    chars[write_idx] = digit
+                    write_idx += 1
+
+            l = r # start the next group
+
+        return write_idx 
+```
+
+## 334. Increasing Triplet Subsequence[[Link](https://leetcode.com/problems/increasing-triplet-subsequence/description/?envType=study-plan-v2&envId=leetcode-75)]
+
+- hint: greedy
+```python
+# brute-force
+# time: O(n ^ 3); space: O(1)
+class Solution:
+    def increasingTriplet(self, nums: List[int]) -> bool:
+        n = len(nums)
+
+        for i in range(n):
+            for j in range(i + 1, n):
+                if nums[i] < nums[j]:
+                    for k in range(j + 1, n):
+                        if nums[j] < nums[k]:
+                            return True
+        return False
+
+# time: O(n); space: O(1)
+class Solution:
+    def increasingTriplet(self, nums: List[int]) -> bool:
+        first = float('inf')
+        second = float('inf')
+
+        for num in nums:
+            if num <= first: # smallest so far
+                first = num
+            elif num <= second:
+                second = num # second smallest
+            else:
+                # found num > first and num > second
+                return True
+        
+        return False
+```
+
 ## 153. Find Minimum in Rotated Sorted Array[[Link](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/description/?envType=study-plan-v2&envId=top-interview-150)]
 - video explaination[[Link](https://neetcode.io/problems/find-minimum-in-rotated-sorted-array)]
 
@@ -745,40 +816,6 @@ class Solution:
         return nums[l]
 ```
 
-## 443. String Compression[[Link](https://leetcode.com/problems/string-compression/description/?envType=study-plan-v2&envId=leetcode-75)]
-
-```python
-# time: O(n)
-class Solution:
-    def compress(self, chars: List[str]) -> int:
-        n = len(chars)
-        l, write_idx = 0, 0
-
-        while l < n:
-            # initialize r same as l
-            r = l
-
-            # expand right
-            while r < n and chars[l] == chars[r]:
-                r += 1
-            
-            # group length
-            count = r - l
-
-            # write character
-            chars[write_idx] = chars[l]
-            write_idx += 1
-
-            # write the count if count > 1
-            if count > 1:
-                for digit in str(count):
-                    chars[write_idx] = digit
-                    write_idx += 1
-
-            l = r # start the next group
-
-        return write_idx 
-```
 
 ## *33. Search in Rotated Sorted Array[[Link](https://leetcode.com/problems/search-in-rotated-sorted-array/description/?envType=study-plan-v2&envId=top-interview-150)]
 
