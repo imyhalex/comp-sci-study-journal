@@ -468,33 +468,35 @@ class Solution:
 class Solution:
     def solveNQueens(self, n: int) -> List[List[str]]:
         col = set()
-        postive_diag = set() # -> (r + c)
         negative_diag = set() # -> (r - c)
+        positive_diag = set() # -> (r + c)
 
         res = []
-        board = [["."] * n for _ in range(n)]
+        grid = [["."] * n for _ in range(n)]
 
         def dfs(r):
             if r == n:
-                copy = ["".join(row) for row in board]
+                copy = ["".join(row) for row in grid]
                 res.append(copy)
                 return
-            
-            for c in range(n):
-                if c in col or (r + c) in postive_diag or (r - c) in negative_diag:
-                    continue
-                col.add(c)
-                postive_diag.add(r + c)
-                negative_diag.add(r - c)
-                board[r][c] = "Q"
-                dfs(r + 1)
 
+            for c in range(n):
+                if c in col or (r - c) in negative_diag or (r + c) in positive_diag:
+                    continue
+                
+                col.add(c)
+                negative_diag.add(r - c)
+                positive_diag.add(r + c)
+                grid[r][c] = "Q"
+
+                dfs(r + 1)
+                
                 # do the cleanup for the next iteration of the loop
                 col.remove(c)
-                postive_diag.remove(r + c)
                 negative_diag.remove(r - c)
-                board[r][c] = "."
-            
+                positive_diag.remove(r + c)
+                grid[r][c] = "."
+        
         dfs(0)
         return res
 ```
@@ -592,4 +594,60 @@ class Solution:
             return False
         
         return dfs(0)
+```
+
+## 1863. Sum of All Subset XOR Totals[[Link](https://leetcode.com/problems/sum-of-all-subset-xor-totals/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/sum-of-all-subset-xor-totals?list=neetcode250)]
+
+```python
+# time: O(2 ^ n); space: O(n)
+class Solution:
+    def subsetXORSum(self, nums: List[int]) -> int:
+        
+        def dfs(i, total):
+            if i == len(nums):
+                return total
+            
+            return dfs(i + 1, total ^ nums[i]) + dfs(i + 1, total)
+        
+        return dfs(0, 0)
+```
+
+## 698. Partition to K Equal Sum Subsets[[Link](https://leetcode.com/problems/partition-to-k-equal-sum-subsets/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/partition-to-k-equal-sum-subsets?list=neetcode250)]
+
+```python
+# time: O(k * 2 ^ n); space: O(n)
+class Solution:
+    def canPartitionKSubsets(self, nums: List[int], k: int) -> bool:
+        if sum(nums) % k != 0:
+            return False
+        
+        target = sum(nums) // k
+        used = [False] * len(nums)
+        nums.sort(reverse=True)
+
+        def dfs(i, k, sub_sum):
+            if k == 0:
+                return True
+            
+            if sub_sum == target:
+                return dfs(0, k - 1, 0) # reset the i to 0
+            
+            for j in range(i, len(nums)):
+                if used[j] or nums[j] + sub_sum > target:
+                    continue
+                
+                used[j] = True
+                if dfs(j + 1, k, sub_sum + nums[j]): 
+                    return True
+                used[j] = False
+
+                # if sub_sum == 0: # add this for pruning
+                #     return False
+            return False
+        
+        return dfs(0, k, 0)
 ```
