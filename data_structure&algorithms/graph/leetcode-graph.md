@@ -103,6 +103,38 @@ class Solution:
         return max_count
 ```
 
+## 463. Island Perimeter[[Link](https://leetcode.com/problems/island-perimeter/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/island-perimeter?list=neetcode250)]
+
+```python
+# time: O(m * n); space: o(m * n)
+class Solution:
+    def islandPerimeter(self, grid: List[List[int]]) -> int:
+        rows, cols = len(grid), len(grid[0])
+        visited = set()
+
+        def dfs(r, c):
+            if r < 0 or c < 0 or r >= rows or c >= cols or grid[r][c] == 0:
+                return 1
+            
+            if (r, c) in visited:
+                return 0
+            
+            visited.add((r, c))
+            perimeter = dfs(r + 1, c)
+            perimeter += dfs(r - 1, c)
+            perimeter += dfs(r, c + 1)
+            perimeter += dfs(r, c - 1)
+
+            return perimeter
+        
+        for r in range(rows):
+            for c in range(cols):
+                if grid[r][c] != 0:
+                    return dfs(r, c)
+```
+
 ## 1091. Shortest Path in Binary Matrix[[Link](https://leetcode.com/problems/shortest-path-in-binary-matrix/)]
 
 - video explaination[[Link](https://neetcode.io/solutions/shortest-path-in-binary-matrix)]
