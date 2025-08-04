@@ -1262,3 +1262,37 @@ class Solution:
         return max(dfs(root))
 
 ```
+
+## 1485. Clone Binary Tree With Random Pointer[[Link](https://leetcode.com/problems/clone-binary-tree-with-random-pointer/description/)]
+
+```python
+# time & space: O(n)
+# Definition for Node.
+# class Node:
+#     def __init__(self, val=0, left=None, right=None, random=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+#         self.random = random
+
+class Solution:
+    def copyRandomBinaryTree(self, root: 'Optional[Node]') -> 'Optional[NodeCopy]':
+        old_to_new = {}
+
+        def dfs(node):
+            if not node:
+                return None
+            if node in old_to_new:
+                return old_to_new[node]
+                
+            clone = NodeCopy(node.val)
+            old_to_new[node] = clone
+
+            clone.left = dfs(node.left)
+            clone.right = dfs(node.right)
+            clone.random = dfs(node.random)
+
+            return clone
+        
+        return dfs(root)
+```
