@@ -1,5 +1,7 @@
 ## 283. Move Zeroes[[Link](https://leetcode.com/problems/move-zeroes/description/?envType=study-plan-v2&envId=leetcode-75)]
 
+- video explaination[[Link](https://neetcode.io/problems/move-zeroes?list=allNC)]
+
 ```python
 # time: O(n); space: O(1)
 class Solution:
