@@ -108,3 +108,35 @@ class Solution:
         
         return dfs(root)
 ```
+
+## 1490. Clone N-ary Tree[[Link](https://leetcode.com/problems/clone-n-ary-tree/description/)]
+
+```python
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val: Optional[int] = None, children: Optional[List['Node']] = None):
+        self.val = val
+        self.children = children if children is not None else []
+"""
+
+class Solution:
+    def cloneTree(self, root: 'Node') -> 'Node':
+        old_to_new = {}
+
+        def dfs(node):
+            if not node:
+                return None
+            if node in old_to_new:
+                return old_to_new[node]
+            
+            clone = Node(node.val)
+            old_to_new[node] = clone
+        
+            for child in node.children:
+                clone.children.append(dfs(child))
+
+            return clone
+        
+        return dfs(root)
+```
