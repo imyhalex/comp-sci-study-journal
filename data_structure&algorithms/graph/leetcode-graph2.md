@@ -145,3 +145,76 @@ class Solution:
                 add_room(r, c - 1)
             distance += 1
 ```
+
+## 417. Pacific Atlantic Water Flow[[Link](https://leetcode.com/problems/pacific-atlantic-water-flow/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/pacific-atlantic-water-flow?list=neetcode250)]
+
+```python
+# time: O(m * n); space: O(m * n)
+class Solution:
+    def pacificAtlantic(self, heights: List[List[int]]) -> List[List[int]]:
+        rows, cols = len(heights), len(heights[0])  # Dimensions of the grid
+        pacific, atlantic = set(), set()  # Cells reachable by each ocean
+
+        def dfs(r, c, visited, prev_height):
+            """
+            Reverse DFS: starting from the ocean, go inland to all cells 
+            that are the same height or higher than the current cell.
+            visited: set to track cells already processed for a given ocean
+            prev_height: height of the cell we came from
+            """
+            if (r < 0 or c < 0 or r == rows or c == cols  # Out of bounds
+                or (r, c) in visited                      # Already visited
+                or heights[r][c] < prev_height):          # Can't flow uphill
+                return 
+            
+            visited.add((r, c))  # Mark cell as reachable
+            # Explore all four directions
+            dfs(r + 1, c, visited, heights[r][c])
+            dfs(r - 1, c, visited, heights[r][c])
+            dfs(r, c + 1, visited, heights[r][c])
+            dfs(r, c - 1, visited, heights[r][c])
+        
+        # Start DFS from the Pacific's edges (top row + left col)
+        for c in range(cols):
+            dfs(0, c, pacific, heights[0][c])             # Top row
+            dfs(rows - 1, c, atlantic, heights[rows - 1][c]) # Bottom row
+        
+        for r in range(rows):
+            dfs(r, 0, pacific, heights[r][0])              # Left column
+            dfs(r, cols - 1, atlantic, heights[r][cols - 1]) # Right column
+        
+        # Intersection: cells reachable by both oceans
+        res = []
+        for r in range(rows):
+            for c in range(cols):
+                # so this postiion appear in both lookup table, then append to result
+                if (r, c) in pacific and (r, c) in atlantic:
+                    res.append([r, c])
+        
+        return res
+"""
+What is the Brute Force Approach?
+Brute Force Idea:
+For each cell in the grid:
+    Run a DFS/BFS to check if it can reach the Pacific.
+    Run another DFS/BFS to check if it can reach the Atlantic.
+    If both are true, add it to the result. 
+Why it’s bad:
+    Each DFS can take O(m * n) time in the worst case.
+    Doing it for every cell means O((m * n) * (m * n)) = O(m² * n²) complexity.
+
+Key Idea: 
+Instead of simulating water flow from every cell, you reverse the problem —
+    Start from the oceans and work inwards, marking all cells that can reach that ocean.
+    One starting from the Pacific’s borders.
+    One starting from the Atlantic’s borders.
+    In the end, the intersection of reachable cells from both traversals is your answer.
+
+Time complexity:
+    Each cell is visited at most once per ocean → O(m * n) total.
+    Space complexity:
+    Two visited sets → O(m * n) space.
+"""
+```
