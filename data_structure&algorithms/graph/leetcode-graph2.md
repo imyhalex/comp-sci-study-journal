@@ -218,3 +218,257 @@ Time complexity:
     Two visited sets → O(m * n) space.
 """
 ```
+
+## 752. Open the Lock[[Link](https://leetcode.com/problems/open-the-lock/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/open-the-lock?list=neetcode250)]
+
+```python
+# time: O(d ^ n + m); space: O(d ^ n)
+class Solution:
+    def openLock(self, deadends: List[str], target: str) -> int:
+        q = deque()
+        q.append(("0000", 0)) # [lock, num of turns]
+        visited = set()
+        deadends = set(deadends)
+
+        if "0000" in deadends:
+            return -1
+        
+        # helper function: doing actual spin for the 4-circular wheels lock
+        def children(lock):
+            res = []
+            for i in range(4):
+                digit = str((int(lock[i]) + 1) % 10)
+                res.append(lock[:i] + digit + lock[i+1:])
+                digit = str((int(lock[i]) - 1 + 10) % 10)
+                res.append(lock[:i] + digit + lock[i+1:])
+            return res
+
+        while q:
+            lock, turns = q.popleft()
+            if lock == target:
+                return turns
+            for child in children(lock):
+                if child not in visited and child not in deadends:
+                    visited.add(child)
+                    q.append((child, turns + 1))
+        return -1
+
+```
+
+## 463. Island Perimeter[[Link](https://leetcode.com/problems/island-perimeter/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/island-perimeter?list=neetcode250)]
+
+```python
+# time: O(m * n); space: o(m * n)
+class Solution:
+    def islandPerimeter(self, grid: List[List[int]]) -> int:
+        rows, cols = len(grid), len(grid[0])
+        visited = set()
+
+        def dfs(r, c):
+            if r < 0 or c < 0 or r >= rows or c >= cols or grid[r][c] == 0:
+                return 1
+            
+            if (r, c) in visited:
+                return 0
+            
+            visited.add((r, c))
+            perimeter = dfs(r + 1, c)
+            perimeter += dfs(r - 1, c)
+            perimeter += dfs(r, c + 1)
+            perimeter += dfs(r, c - 1)
+
+            return perimeter
+        
+        for r in range(rows):
+            for c in range(cols):
+                if grid[r][c] != 0:
+                    return dfs(r, c)
+```
+
+## 953. Verifying an Alien Dictionary[[Link](https://leetcode.com/problems/verifying-an-alien-dictionary/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/verifying-an-alien-dictionary?list=neetcode250)]
+
+```python
+# time: O(n * m log n); space: O(n * m)
+class Solution:
+    def isAlienSorted(self, words: List[str], order: str) -> bool:
+        order_index = {c: i for i, c in enumerate(order)}
+
+        def compare(word):
+            return [order_index[c] for c in word]
+        
+        return words == sorted(words, key=compare)
+
+# time: O(n * m); space: O(1) since 26 different characters
+class Solution:
+    def isAlienSorted(self, words: List[str], order: str) -> bool:
+        order_index = {c: i for i, c in enumerate(order)}
+
+        """
+        w1 = "app"
+        w2 = "apple"
+
+        list(zip(w1, w2)) → [('a', 'a'), ('p', 'p'), ('p', 'p')]
+        """
+        def compare(w1, w2):
+            for c1, c2 in zip(w1, w2):
+                if order_index[c1] < order_index[c2]:
+                    return True
+                if order_index[c1] > order_index[c2]:
+                    return False
+            # if all characters matched; now shorter word should come first
+            return len(w1) <= len(w2)
+        
+        for i in range(len(words) - 1):
+            if not compare(words[i], words[i + 1]):
+                return False
+        
+        return True
+```
+
+## 130. Surrounded Regions[[Link](https://leetcode.com/problems/surrounded-regions/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+```text
+You are given an m x n matrix board containing letters 'X' and 'O', capture regions that are surrounded:
+
+- Connect: A cell is connected to adjacent cells horizontally or vertically.
+- Region: To form a region connect every 'O' cell.
+- Surround: The region is surrounded with 'X' cells if you can connect the region with 'X' cells and none of the region cells are on the edge of the board.
+- To capture a surrounded region, replace all 'O's with 'X's in-place within the original board. You do not need to return anything.
+
+Example 1:
+
+Input: board = [["X","X","X","X"],["X","O","O","X"],["X","X","O","X"],["X","O","X","X"]]
+
+Output: [["X","X","X","X"],["X","X","X","X"],["X","X","X","X"],["X","O","X","X"]]
+
+```
+__Hints to solve this problem__
+```text
+Approach:
+Identify the 'O' regions that should not be flipped:
+
+Any 'O' cell that is connected to the border must remain 'O'.
+We will use DFS or BFS to mark all 'O' cells connected to the border.
+Change all the unmarked 'O's to 'X':
+
+If an 'O' is not connected to the border, it must be surrounded, so we flip it to 'X'.
+Restore the temporarily marked 'O's back to 'O':
+
+Border-connected 'O's were temporarily marked (e.g., as 'T'), so we change them back to 'O'.
+```
+
+__Answer__
+```python
+# time: O(m * n); space: O(m * n)
+class Solution:
+    def solve(self, board: List[List[str]]) -> None:
+        """
+        Do not return anything, modify board in-place instead.
+        """
+        if not board or not board[0]:
+            return
+        
+        rows, cols = len(board), len(board[0])
+
+        def dfs(r, c):
+            if r < 0 or c < 0 or r >= rows or c >= cols or board[r][c] != 'O':
+                return
+            board[r][c] = 'T'  # Temporarily mark as safe -> same functionality as visited
+            dfs(r + 1, c)
+            dfs(r - 1, c)
+            dfs(r, c + 1)
+            dfs(r, c - 1)
+
+        # caputer the surrounded region
+        # statement: capture everything except unsurrounded region
+        # Step 1: Mark all 'O's connected to the border as visited
+        for r in range(rows):
+            for c in [0, cols - 1]:
+                if board[r][c] == 'O':
+                    dfs(r, c)
+        for c in range(cols):
+            for r in [0, rows - 1]:
+                if board[r][c] == 'O':
+                    dfs(r, c)
+
+        # Step 2: Convert all remaining 'O's to 'X' and keep visited as 'O'
+        for r in range(rows):
+            for c in range(cols):
+                if board[r][c] == 'O':
+                    board[r][c] = 'X'
+                elif board[r][c] == 'T':
+                    board[r][c] = 'O'
+```
+
+## 261. Graph Valid Tree[[Link](https://leetcode.com/problems/graph-valid-tree/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/valid-tree?list=neetcode250)]
+
+```python
+# time: O(V + E); space: O(V + E)
+class Solution:
+    def validTree(self, n: int, edges: List[List[int]]) -> bool:
+        if len(edges) != n - 1: # two fews or too many
+            return False
+
+        adj = {i:[] for i in range(n)}
+        for u, v in edges:
+            adj[u].append(v)
+            adj[v].append(u)
+        
+        visited = set() # how many nodes are connect
+        def dfs(node, parent):
+            if node in visited:
+                return False
+            
+            visited.add(node):
+            for nei in adj[node]:
+                if node == parent:
+                    continue
+                if not dfs(nei, node):
+                    return False
+            
+            return True
+        
+        # finally, if len(visited) == number of node, then they are all connected, which means is valid tree
+        # set par for head -1
+        return dfs(0, -1) and n == len(visited)
+```
+
+## 399. Evaluate Division[[Link](https://leetcode.com/problems/evaluate-division/description/?envType=study-plan-v2&envId=top-interview-150)]
+
+- Vide Explaination[[Link](https://www.youtube.com/watch?v=Uei1fwDoyKk)]
+
+```python
+class Solution:
+    def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
+        adj = collections.defaultdict(list) # Map a -> list of [b, a/b]
+        for i, eq in enumerate(equations):
+            a, b = eq
+            adj[a].append([b, values[i]])
+            adj[b].append([a, 1 / values[i]])
+        
+        def bfs(src, target):
+            if src not in adj or target not in adj:
+                return -1
+            q, visit = deque(), set()
+            q.append([src, 1])
+            visit.add(src)
+            while q:
+                n, w = q.popleft()
+                if n == target:
+                    return w
+                for nei, weight in adj[n]:
+                    if nei not in visit:
+                        q.append([nei, w * weight])
+                        visit.add(nei)
+            return - 1
+
+        return [bfs(q[0], q[1]) for q in queries]
+```
