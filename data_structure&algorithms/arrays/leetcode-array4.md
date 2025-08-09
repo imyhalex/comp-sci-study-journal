@@ -195,3 +195,78 @@ def solution(n):
 ```
 
 ## No.6
+```python
+def solution(alpha2beta, beta2alpha, missions):
+    """
+    alpha2beta = [109, 200, 500]
+    beta2alpha = [99, 210, 600]
+    missions = 2
+    mission1 = 310
+
+    ret -> 700
+    """
+    TRAVEL = 100
+    t = 0
+    i, j = 0, 0
+
+    for _ in range(missions):
+        # go from alpha to beta
+        while i < len(alpha2beta) and alpha2beta < t:
+            i += 1
+        t = alpha2beta[i] + TRAVEL
+        i += 1
+    
+        while j < len(beta2alpha) and beta2alpha < t:
+            j += 1
+        t = beta2alpha[j] + TRAVEL
+        j += 1
+    
+    return t
+```
+
+## No.7
+```python
+def solution(paragraphs, width):
+    res = []
+    borders = "*" * width
+    res.append(borders)
+
+    for p in paragraphs:
+        line = " ".join(p)
+        total_spaces = width - 2 - len(line)  # space available for padding
+        left_pad = total_spaces // 2
+        right_pad = total_spaces - left_pad
+        s = "*" + " " * left_pad + line + " " * right_pad + "*"
+        res.append(s)
+    res.append(borders)
+
+    return res
+```
+
+## No.8
+```python
+from collections import defautdict
+def solution(fruits, k):
+    n = len(fruits)
+    if k == 0:
+        return n * (n + 1) // 2
+    
+    freq = defaultdict(int)
+
+    res = 0
+    l = 0
+    pairs = 0
+    for r, x in enumerate(fruits):
+        freq[x] += 1
+        if freq[x] % 2 == 0: # formed a new pair of x
+            pairs += 1
+        
+        while pairs >= k:
+            res += n - r
+            y = fruits[l]
+            if freq[y] % 2 == 0:
+                pairs -= 1
+            freq[y] -= 1
+            l += 1
+    return res
+```
