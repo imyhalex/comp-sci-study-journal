@@ -25,5 +25,23 @@ class Solution:
 - video explaination[[Link](https://neetcode.io/problems/valid-word-abbreviation?list=allNC)]
 
 ```python
+# time: O(n + m); space: O(1)
+class Solution:
+    def validWordAbbreviation(self, word: str, abbr: str) -> bool:
+        i, j = 0, 0
+        n, m = len(word), len(abbr)
 
+        while i < n and j < m:
+            if word[i] == abbr[j]:
+                i, j = i + 1, j + 1
+            elif abbr[j].isalpha() or abbr[j] == '0':
+                return False
+            else:
+                sub_len = 0
+                while j < m and abbr[j].isdigit():
+                    sub_len = sub_len * 10 + int(abbr[j])
+                    j += 1
+                i += sub_len
+        
+        return i == n and j == m
 ```
