@@ -59,37 +59,6 @@ class Solution:
         return dummy.next
 ```
 
-## 21. Merge Two Sorted Lists[[Link](https://leetcode.com/problems/merge-two-sorted-lists/description/)]
-
-- video explaination[[Link](https://leetcode.com/problems/merge-two-sorted-lists/description/)]
-
-```python
-# time: o(n + m); space: O(1)
-# Definition for singly-linked list.
-# class ListNode:
-#     def __init__(self, val=0, next=None):
-#         self.val = val
-#         self.next = next
-class Solution:
-    def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
-        dummy = node = ListNode()
-
-        # think list1, list2, node as i, j, k in merge sort
-        while list1 and list2:
-            if list1.val < list2.val:
-                node.next = list1
-                list1 = list1.next
-            else:
-                node.next = list2
-                list2 = list2.next
-            node = node.next
-        
-        node.next = list1 or list2
-
-        return dummy.next
-
-```
-
 ## 876. Middle of the Linked List[[Link](https://leetcode.com/problems/middle-of-the-linked-list/description/)]
 
 ```python
@@ -275,6 +244,92 @@ class Solution:
             first = tmp1
             second = tmp2
         
+```
+
+## 21. Merge Two Sorted Lists[[Link](https://leetcode.com/problems/merge-two-sorted-lists/description/)]
+
+- video explaination[[Link](https://leetcode.com/problems/merge-two-sorted-lists/description/)]
+
+```python
+# time: o(n + m); space: O(1)
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
+        dummy = node = ListNode()
+
+        # think list1, list2, node as i, j, k in merge sort
+        while list1 and list2:
+            if list1.val < list2.val:
+                node.next = list1
+                list1 = list1.next
+            else:
+                node.next = list2
+                list2 = list2.next
+            node = node.next
+        
+        node.next = list1 or list2
+
+        return dummy.next
+
+```
+
+## 148. Sort List[[Link](https://leetcode.com/problems/sort-list/description/?envType=problem-list-v2&envId=two-pointers)]
+
+- video explaination[[Link](https://neetcode.io/solutions/sort-list)]
+
+```python
+# time: O(n log n); space: O(log n)
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def sortList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        """
+        [-1,5,3,4,0]
+        # sort linked list using sorting algos
+        recursive merge sort
+        """
+        if not head or not head.next:
+            return head
+
+        def get_mid(node):
+            slow, fast = node, node.next
+            while fast and fast.next:
+                slow = slow.next
+                fast = fast.next.next
+            return slow
+
+        def merge(list1, list2):
+            dummy = curr = ListNode()
+
+            while list1 and list2:
+                if list1.val < list2.val:
+                    curr.next = list1
+                    list1 = list1.next
+                else:
+                    curr.next = list2
+                    list2 = list2.next
+                curr = curr.next
+            
+            curr.next = list1 or list2
+            return dummy.next
+
+        # split the list into two half
+        left = head
+        right = get_mid(left)
+        tmp = right.next # get the middle fo the LL, which is the end of the first half
+        right.next = None
+        right = tmp # now the right ptr is truly point to the head of the LL
+
+        left = self.sortList(left)
+        right = self.sortList(right)
+        return merge(left, right)
 ```
 
 ## 2130. Maximum Twin Sum of a Linked List[[Link](https://leetcode.com/problems/maximum-twin-sum-of-a-linked-list/description/)]
