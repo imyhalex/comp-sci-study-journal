@@ -206,3 +206,54 @@ class Solution:
 
         return res
 ```
+
+## 904. Fruit Into Baskets[[Link](https://leetcode.com/problems/fruit-into-baskets/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/fruit-into-baskets)]
+
+```python
+# time: O(n); spcae: O(1)
+class Solution:
+    def totalFruit(self, fruits: List[int]) -> int:
+        count = defaultdict(int) # type -> freq
+        l, res = 0, 0
+
+        for r in range(len(fruits)):
+            count[fruits[r]] += 1
+
+            while len(count) > 2:
+                f = fruits[l]
+                count[f] -= 1
+                if count[f] == 0:
+                    del count[f]
+                l += 1
+
+            res = max(res, r - l + 1)
+        return res
+                
+```
+
+## 1456. Maximum Number of Vowels in a Substring of Given Length[[Link](https://leetcode.com/problems/maximum-number-of-vowels-in-a-substring-of-given-length/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/maximum-number-of-vowels-in-a-substring-of-given-length)]
+
+```python
+# time: O(n); space: O(1)
+class Solution:
+    def maxVowels(self, s: str, k: int) -> int:
+        vowels = set(['a', 'e', 'i', 'o', 'u'])
+        l, res = 0, 0
+        curr = 0
+
+        for r in range(len(s)):
+            if s[r] in vowels:
+                curr += 1
+
+            while r - l + 1 > k:
+                if s[l] in vowels:
+                    curr -= 1
+                l += 1
+
+            res = max(res, curr)
+        return res
+```

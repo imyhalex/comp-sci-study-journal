@@ -19,3 +19,11 @@ class Solution:
         
         return res
 ```
+
+## 408. Valid Word Abbreviation[[Link](https://leetcode.com/problems/valid-word-abbreviation/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/valid-word-abbreviation?list=allNC)]
+
+```python
+
+```
