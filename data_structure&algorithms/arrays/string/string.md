@@ -45,3 +45,39 @@ class Solution:
         
         return i == n and j == m
 ```
+
+## 3110. Score of a String[[Link](https://leetcode.com/problems/score-of-a-string/description/)]
+
+```python
+class Solution:
+    def scoreOfString(self, s: str) -> int:
+        """
+        build hash table char -> ord(char)
+        iterate through the hash table and compute the abs values
+        """
+        table = {i: ord(c) for i, c in enumerate(s)}
+
+        res = 0
+        prev = None
+        for v in table.values():
+            if prev:
+                res += abs(v - prev)
+            prev = v
+        
+        return res
+```
+
+## 1299. Replace Elements with Greatest Element on Right Side[[Link](https://leetcode.com/problems/replace-elements-with-greatest-element-on-right-side/description/)]
+
+```python
+class Solution:
+    def replaceElements(self, arr: List[int]) -> List[int]:
+        n = len(arr)
+        res = [0] * n
+        right_max = -1
+
+        for i in range(n - 1, -1, -1):
+            res[i] = right_max
+            right_max = max(right_max, arr[i])
+        return res
+```

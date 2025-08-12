@@ -257,3 +257,86 @@ class Solution:
             res = max(res, curr)
         return res
 ```
+
+## 1052. Grumpy Bookstore Owner[[Link](https://leetcode.com/problems/grumpy-bookstore-owner/description/)]
+
+- video explaination[[Link](https://www.youtube.com/watch?v=pXFbNuEIn8Q)]
+
+```python
+class Solution:
+    def maxSatisfied(self, customers: List[int], grumpy: List[int], minutes: int) -> int:
+        """
+        customers = [1,0,1,2,1,1,7,5]
+        grumpy =    [0,1,0,1,0,1,0,1]
+        minutes = 3
+        ret = 16
+        fix window size of two
+
+        customers = [4, 10, 2, 3, 4, 5]
+        grumpy =    [1, 0, 1, 0, 1, 0]
+        minutes = 2
+        ret = 4 + 10 + 2 + 4 = 20
+        fix window size of two
+        """
+        l = 0
+        window, max_window = 0, 0
+        satisfied = 0 # maintain a base score
+        n = len(customers)
+        for r in range(n):
+            if grumpy[r]:
+                window += customers[r]
+            else:
+                satisfied += customers[r]
+
+            if r - l + 1 > minutes:
+                if grumpy[l]:
+                    window -= customers[l]
+                l += 1
+            max_window = max(max_window, window)
+        return satisfied + max_window
+```
+
+## 2379. Minimum Recolors to Get K Consecutive Black Blocks[[Link](https://leetcode.com/problems/minimum-recolors-to-get-k-consecutive-black-blocks/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/minimum-recolors-to-get-k-consecutive-black-blocks?list=allNC)]
+
+```python
+# time: O(n); space: O(1)
+class Solution:
+    def minimumRecolors(self, blocks: str, k: int) -> int:
+        n = len(blocks)
+        nums, min_nums = 0, float('inf')
+        l = 0
+        for r in range(n):
+            if blocks[r] == "W":
+                nums += 1
+
+            if r - l + 1 == k:
+                min_nums = min(min_nums, nums)
+                if blocks[l] == "W":
+                    nums -= 1
+                l += 1
+
+        return min_nums
+```
+
+## 1984. Minimum Difference Between Highest and Lowest of K Scores[[Link](https://leetcode.com/problems/minimum-difference-between-highest-and-lowest-of-k-scores/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/minimum-difference-between-highest-and-lowest-of-k-scores?list=allNC)]
+
+```python
+# time: O(n); space: O(1) or O(n)
+class Solution:
+    def minimumDifference(self, nums: List[int], k: int) -> int:
+        nums.sort()
+        l = 0
+        min_diff = float('inf')
+        diff = 0
+        
+        for r in range(len(nums)):
+            if r - l + 1 == k:
+                diff = nums[r] - nums[l]
+                min_diff = min(min_diff, diff)
+                l += 1
+        return min_diff
+```

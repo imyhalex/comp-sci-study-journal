@@ -409,6 +409,86 @@ class Solution:
         return nums
 ```
 
+## 2570. Merge Two 2D Arrays by Summing Values[[Link](https://leetcode.com/problems/merge-two-2d-arrays-by-summing-values/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/merge-two-2d-arrays-by-summing-values)]
+
+```python
+class Solution:
+    def mergeArrays(self, nums1: List[List[int]], nums2: List[List[int]]) -> List[List[int]]:
+        i, j = 0, 0
+        n, m = len(nums1), len(nums2)
+        res = []
+
+        while i < n and j < m:
+            if nums1[i][0] < nums2[j][0]:
+                res.append(nums1[i])
+                i += 1
+            elif nums1[i][0] > nums2[j][0]:
+                res.append(nums2[j])
+                j += 1
+            else:
+                res.append([nums1[i][0], nums1[i][1] + nums2[j][1]])
+                i += 1
+                j += 1
+        
+        while i < n:
+            res.append(nums1[i])
+            i += 1
+        
+        while j < m:
+            res.append(nums2[j])
+            j += 1
+        
+        return res
+```
+
+## 977. Squares of a Sorted Array[[Link](https://leetcode.com/problems/squares-of-a-sorted-array/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/squares-of-a-sorted-array?list=allNC)]
+
+```python
+# time: O(n); space: O(n)
+class Solution:
+    def sortedSquares(self, nums: List[int]) -> List[int]:
+        l, r = 0, len(nums) - 1
+        res = []
+
+        while l <= r:
+            if (nums[l] * nums[l]) > (nums[r] * nums[r]):
+                res.append(nums[l] * nums[l])
+                l += 1
+            else:
+                res.append(nums[r] * nums[r])
+                r -= 1
+        
+        return res[::-1]
+```
+
+## 455. Assign Cookies[[Link](https://leetcode.com/problems/assign-cookies/description/)]
+
+- video explaination[[Link](https://leetcode.com/problems/assign-cookies/description/)]
+
+```python
+time: O(n); space: O(1)
+class Solution:
+    def findContentChildren(self, g: List[int], s: List[int]) -> int:
+        i, j = 0, 0
+        n , m = len(g), len(s)
+        s.sort()
+        g.sort()
+        res = 0
+        while i < n and j < m:
+            if g[i] <= s[j]:
+                res += 1
+                i += 1
+                j += 1
+            else:
+                j += 1
+        return res
+
+```
+
 ## 75. Sort Colors[[Link](https://leetcode.com/problems/sort-colors/description/)]
 - video explaination[[Link](https://neetcode.io/problems/sort-colors?list=neetcode250)]
 - Dutch national flag problem[[Link](https://en.wikipedia.org/wiki/Dutch_national_flag_problem)]

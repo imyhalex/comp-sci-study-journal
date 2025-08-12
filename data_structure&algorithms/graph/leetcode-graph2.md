@@ -472,3 +472,28 @@ class Solution:
 
         return [bfs(q[0], q[1]) for q in queries]
 ```
+
+## 733. Flood Fill[[Link](https://leetcode.com/problems/flood-fill/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/flood-fill?list=allNC)]
+
+```python
+class Solution:
+    def floodFill(self, image: List[List[int]], sr: int, sc: int, color: int) -> List[List[int]]:
+        rows, cols = len(image), len(image[0])
+        start = image[sr][sc]
+        visited = set()
+        def dfs(r, c):
+            if (r < 0 or c < 0 or r == rows or c == cols
+                or (r, c) in visited or image[r][c] != start):
+                return
+            image[r][c] = color
+            visited.add((r, c))
+            dfs(r + 1, c)
+            dfs(r - 1, c)
+            dfs(r, c + 1)
+            dfs(r, c - 1)
+        
+        dfs(sr, sc)
+        return image
+```
