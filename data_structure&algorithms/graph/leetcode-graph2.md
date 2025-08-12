@@ -1,25 +1,3 @@
-## 997. Find the Town Judge[[Link](https://leetcode.com/problems/find-the-town-judge/description/)]
-
-- video explaination[[Link](https://neetcode.io/problems/find-the-town-judge?list=neetcode250)]
-
-```python
-# time: O(V + E); space: O(V)
-class Solution:
-    def findJudge(self, n: int, trust: List[List[int]]) -> int:
-        incoming = defaultdict(int)
-        outgoing = defaultdict(int)
-
-        for src, dst in trust:
-            incoming[dst] += 1
-            outgoing[src] += 1
-        
-        for i in range(1, n + 1):
-            if incoming[i] == n - 1 and outgoing[i] == 0:
-                return i
-        
-        return -1
-```
-
 ## 286. Walls and Gates[[Link](https://leetcode.com/problems/walls-and-gates/description/)]
 
 - video explaination[[Link](https://neetcode.io/problems/islands-and-treasure?list=neetcode250)]
@@ -496,4 +474,203 @@ class Solution:
         
         dfs(sr, sc)
         return image
+```
+
+## 1267. Count Servers that Communicate[[Link](https://leetcode.com/problems/count-servers-that-communicate/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/count-servers-that-communicate)]
+
+```python
+# time: O(n * m)
+class Solution:
+    def countServers(self, grid: List[List[int]]) -> int:
+        rows, cols = len(grid), len(grid[0])
+        # precalcuation of number of servers in rows & cols
+        row_count = [0] * rows # row -> count
+        col_count = [0] * cols # col -> count
+        res = 0
+
+        # first pass: count servers in each row and column
+        for r in range(rows):
+            for c in range(cols):
+                if grid[r][c] == 1:
+                    row_count[r] += 1
+                    col_count[c] += 1
+        
+        # second pass: count servers that can communicate
+        for r in range(rows):
+            for c in range(cols):
+                if grid[r][c] and (row_count[r] > 1 or col_count[c] > 1):
+                    res += 1
+
+        return res
+
+"""
+Leetcode 1572. Matrix Diagonal Sum
+
+Leetcode 566. Reshape the Matrix
+
+Leetcode 54. Spiral Matrix (counting grid positions)
+
+Leetcode 1582. Special Positions in a Binary Matrix
+"""
+```
+
+
+## 997. Find the Town Judge[[Link](https://leetcode.com/problems/find-the-town-judge/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/find-the-town-judge?list=neetcode250)]
+
+```python
+# time: O(V + E); space: O(V)
+class Solution:
+    def findJudge(self, n: int, trust: List[List[int]]) -> int:
+        incoming = defaultdict(int)
+        outgoing = defaultdict(int)
+
+        for src, dst in trust:
+            incoming[dst] += 1
+            outgoing[src] += 1
+        
+        for i in range(1, n + 1):
+            if incoming[i] == n - 1 and outgoing[i] == 0:
+                return i
+        
+        return -1
+```
+
+## 2924. Find Champion II[[Link](https://leetcode.com/problems/find-champion-ii/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/find-champion-ii)]
+
+```python
+# time: O(n + E); space: O(n)
+class Solution:
+    def findChampion(self, n: int, edges: List[List[int]]) -> int:
+        # count the number of incomming edges
+        incoming = [0] * n
+
+        for src, dst in edges:
+            incoming[dst] += 1
+        
+        champions = []
+        for i, incoming_cnt in enumerate(incoming):
+            if not incoming_cnt:
+                champions.append(i)
+        
+        return -1 if len(champions) > 1 else champions[0]
+```
+
+## 2658. Maximum Number of Fish in a Grid[[Link](https://leetcode.com/problems/maximum-number-of-fish-in-a-grid/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/maximum-number-of-fish-in-a-grid)]
+
+```python
+# time & space: O(m * n)
+class Solution:
+    def findMaxFish(self, grid: List[List[int]]) -> int:
+        """
+        Approach:
+        1. traverse all cells in a grid
+        2. when find the cell is > 0 , do dfs to explore all the whole connected area
+        3. sum all values within this component
+        4. keep track of maximum fish count among all component
+        """
+        rows, cols = len(grid), len(grid[0])
+        visited = set()
+
+        def dfs(r, c):
+            if (r < 0 or c < 0 or r == rows or c == cols
+                or (r, c) in visited or grid[r][c] == 0):
+                return 0
+            
+            visited.add((r, c))
+            total = grid[r][c]
+            total += dfs(r + 1, c)
+            total += dfs(r - 1, c)
+            total += dfs(r, c + 1)
+            total += dfs(r, c - 1)
+
+            return total
+        
+        max_fish = 0
+        for r in range(rows):
+            for c in range(cols):
+                if grid[r][c] > 0 and (r, c) not in visited:
+                    max_fish = max(max_fish, dfs(r, c))
+        return max_fish
+```
+
+## 1905. Count Sub Islands[[Link](https://leetcode.com/problems/count-sub-islands/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/count-sub-islands)]
+
+```python
+# time: O(m * n); space: O(m * n)
+class Solution:
+    def countSubIslands(self, grid1: List[List[int]], grid2: List[List[int]]) -> int:
+        rows, cols = len(grid1), len(grid1[0])
+        visited = set()
+
+        def dfs(r, c) -> bool:
+            if (r < 0 or c < 0 or r == rows or c == cols
+                or (r, c) in visited or grid2[r][c] == 0):
+                return True
+
+            visited.add((r, c))
+            res = True
+            if grid1[r][c] == 0: # case that definitly not a sub island
+                res = False
+            res = dfs(r + 1, c) and res
+            res = dfs(r - 1, c) and res
+            res = dfs(r, c + 1) and res
+            res = dfs(r, c - 1) and res
+            return res
+
+        count = 0
+        for r in range(rows):
+            for c in range(cols):
+                if grid2[r][c] and (r, c) not in visited and dfs(r, c):
+                    count += 1
+        return count
+```
+
+## 1466. Reorder Routes to Make All Paths Lead to the City Zero[[Link](https://leetcode.com/problems/reorder-routes-to-make-all-paths-lead-to-the-city-zero/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/reorder-routes-to-make-all-paths-lead-to-the-city-zero)]
+```python
+# time: O(n); space: O(n)
+class Solution:
+    def minReorder(self, n: int, connections: List[List[int]]) -> int:
+        """
+        start af city 0, this means things such as even u->v 4->0 has flag = 1 does not get count
+        becasue the starting point is city 0 so this is follows the v->u correct order with flag = 0
+        recursively check its neigbors
+        count outgoing edges
+        """
+        adj_list = defaultdict(list)
+        visited = set()
+
+        for u, v in connections:
+            # only the shape in u -> v have possiblility to reverse, so we mark it as 1
+            adj_list[u].append((v, 1)) # original edges u -> v
+            adj_list[v].append((u, 0)) # reverse edge, does not need change
+        
+        """
+        When we traverse from node 0, we’ll go to all neighbors.
+
+        If the edge we traverse has a flag 1, it was originally u → v, which is away from 0 → needs to be reversed.
+
+        If the flag is 0, it’s already pointing toward 0 → no change needed.
+        """
+        def dfs(node):
+            visited.add(node)
+            changes = 0
+            for nei, needs_change in adj_list[node]:
+                if nei not in visited:
+                    changes += needs_change + dfs(nei)
+            return changes
+        
+        return dfs(0)
+
 ```
