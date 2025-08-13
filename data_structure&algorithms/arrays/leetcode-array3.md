@@ -650,3 +650,37 @@ class Solution:
         # if not returning any of contiditons
         return -1
 ```
+
+## 845. Longest Mountain in Array[[Link](https://leetcode.com/problems/longest-mountain-in-array/description/)]
+
+```python
+# time: o(n); space: O(1)
+class Solution:
+    def longestMountain(self, arr: List[int]) -> int:
+        """
+        general idea: two pointer?
+        i = 1
+        n = len(arr)
+        res = 0
+        """
+        n = len(arr)
+        i = 1
+        res = 0
+
+        while i < n - 1:
+            # find the peak
+            if arr[i - 1] < arr[i] > arr[i + 1]:
+                l, r = i, i
+                # expand to the left
+                while l > 0 and arr[l - 1] < arr[l]:
+                    l -= 1
+                # expand to the right
+                while r < n - 1 and arr[r + 1] < arr[r]:
+                    r += 1
+                
+                res = max(res, r - l + 1)
+                i = r # jump to the r ptr to have a new starting point fiding next peak arr position
+            else:
+                i += 1
+        return res
+```
