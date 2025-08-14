@@ -340,3 +340,30 @@ class Solution:
                 l += 1
         return min_diff
 ```
+
+## 1652. Defuse the Bomb[[Link](https://leetcode.com/problems/defuse-the-bomb/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/defuse-the-bomb)]
+
+```python
+class Solution:
+    def decrypt(self, code: List[int], k: int) -> List[int]:
+        n = len(code)
+        res = [0] * n
+
+        l = 0
+        curr_sum = 0
+        for r in range(n + abs(k)):
+            curr_sum += code[r % n]
+
+            if r - l + 1 > abs(k):
+                curr_sum -= code[l % n]
+                l = (l + 1) % n
+            
+            if r - l + 1 == abs(k):
+                if k > 0:
+                    res[(l - 1) % n] = curr_sum
+                elif k < 0:
+                    res[(r + 1) % n] = curr_sum
+        return res
+```
