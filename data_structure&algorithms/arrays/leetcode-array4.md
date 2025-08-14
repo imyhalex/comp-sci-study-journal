@@ -283,3 +283,12 @@ i == -1, j == -1 → ✅ both finished
 | `i >= 0 and j >= 0`         | Ensures we compare valid characters         |
 | Final return                | True if all matched, False otherwise        |
 
+
+
+## *1888. Minimum Number of Flips to Make the Binary String Alternating[[Link](https://leetcode.com/problems/minimum-number-of-flips-to-make-the-binary-string-alternating/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/minimum-number-of-flips-to-make-the-binary-string-alternating)]
+
+```python
+# time: O(n)
+```

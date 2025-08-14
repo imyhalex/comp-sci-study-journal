@@ -466,3 +466,20 @@ class Solution:
 85. Maximal Rectangle (Hard)
 """       
 ```
+
+## 2390. Removing Stars From a String[[Link](https://leetcode.com/problems/removing-stars-from-a-string/description/)]
+
+```python
+# time & space: O(n)
+class Solution:
+    def removeStars(self, s: str) -> str:
+        stack = []
+
+        for ch in s:
+            if stack and ch == '*':
+                stack.pop()
+            if ch != '*':
+                stack.append(ch)
+
+        return ''.join(stack)
+```
