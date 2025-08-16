@@ -292,3 +292,30 @@ i == -1, j == -1 → ✅ both finished
 ```python
 # time: O(n)
 ```
+
+## 2486. Append Characters to String to Make Subsequence [[Link](https://leetcode.com/problems/append-characters-to-string-to-make-subsequence/description/)]
+```py
+# time: O(n); space: O(1)
+class Solution:
+    def appendCharacters(self, s: str, t: str) -> int:
+        """
+        Two pointer approach:
+        - i points to s
+        - j points to t
+        - If s[i] == t[j], move both pointers
+        - Otherwise, move i only
+        - When i reaches the end of s, the number of characters left in t (from j to end)
+          are the ones we need to append to make t a subsequence of s.
+        """
+        i, j = 0, 0
+        n, m = len(s), len(t)
+        
+        while i < n and j < m:
+            if s[i] == t[j]:
+                i += 1
+                j += 1
+            else:
+                i += 1
+        
+        return len(t) - j
+```
