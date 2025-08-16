@@ -483,3 +483,43 @@ class Solution:
 
         return ''.join(stack)
 ```
+
+## 1475. Final Prices With a Special Discount in a Shop[[Link](https://leetcode.com/problems/final-prices-with-a-special-discount-in-a-shop/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/final-prices-with-a-special-discount-in-a-shop)]
+
+```python
+# time & space: o(n)
+class Solution:
+    def finalPrices(self, prices: List[int]) -> List[int]:
+        """
+        intuition: monotonic stack in decreasing order, store (price, index) pair
+        """
+        stack = []
+        res = prices[:]
+        for i, p in enumerate(prices):
+            while stack and stack[-1][0] >= p:
+                price, idx = stack.pop()
+                res[idx] = price - p
+            stack.append((p, i))
+        return res
+```
+
+## 1544. Make The String Great[[Link](https://leetcode.com/problems/make-the-string-great/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/make-the-string-great)]
+
+```python
+# time & space: O(n) 
+class Solution:
+    def makeGood(self, s: str) -> str:
+        stack = []
+        i = 0
+        while i < len(s):
+            if stack and stack[-1] != s[i] and stack[-1].lower() == s[i].lower():
+                stack.pop()
+            else:
+                stack.append(s[i])
+            i += 1
+        return ''.join(stack)
+```

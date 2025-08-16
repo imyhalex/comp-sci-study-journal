@@ -361,6 +361,54 @@ class Solution:
         return res
 ```
 
+## 1079. Letter Tile Possibilities[[Link](https://leetcode.com/problems/letter-tile-possibilities/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/letter-tile-possibilities)]
+
+```python
+# time: O(2^n)
+class Solution:
+    def numTilePossibilities(self, tiles: str) -> int:
+        count = Counter(tiles) # char -> avaible count
+
+        def dfs():
+            res = 0
+            
+            for c in count:
+                if count[c] > 0:
+                    count[c] -= 1
+                    res += 1
+                    res += dfs()
+                    count[c] += 1
+            return res
+            
+        return dfs()
+
+# or 
+class Solution:
+    def numTilePossibilities(self, tiles: str) -> int:
+        tiles = sorted(tiles)
+        used = [False] * len(tiles)
+        self.count = 0
+
+        def dfs(path):
+            for i in range(len(tiles)):
+                if used[i]:
+                    continue
+                # skips over duplicate choices on the same recursive level.
+                # and previous not used in this path
+                if i > 0 and tiles[i] == tiles[i - 1] and not used[i - 1]:
+                    continue
+
+                used[i] = True
+                self.count += 1
+                dfs(path + tiles[i])
+                used[i] = False
+        
+        dfs("")
+        return self.count
+```
+
 ### *79. Word Search[[Link](https://leetcode.com/problems/word-search/description/?envType=study-plan-v2&envId=top-interview-150)]
 
 - video explaination[[Link](https://www.youtube.com/watch?v=pfiQ_PS1g8E&t=18s)]
