@@ -338,3 +338,113 @@ class Solution:
             res.append(row)
         return res
 ```
+
+## 929. Unique Email Addresses[[Link](https://leetcode.com/problems/unique-email-addresses/description/)]
+
+```py
+"""
+Question Understanding:
+    - Input a list of emails, 
+        - Emails format : local_name@domain_name.com
+    - Output: Interger, that count the unique number of emails under the given normalization rules
+        - the local part can contain '.' and '+'
+            - '.': remove it and trea the format like "a.bc" as "abc"
+            - '+': ignore everything after the first '+' in the local part such as "a+bc" becomes "a"
+
+Assumputions:
+Let's assume:
+    - the input list emails is not infinty, it has cap: 0 <= emails.length <= 10^4
+    - each email.length <= 100
+    - each eamil only contains valid ASCII characters
+    - all inputs are syntactially valid emails
+    - emails only conatians lowercase letters
+
+Brute Froce Approach:
+    - Compare every normalized email to all others -> O(n^2), which is slow for large n
+    
+My Approach : let the n = len(emails) and L = average length of emial -> time: O(n * L), space: O(n)
+    - Maintatin a set to store normalized emails
+    - For each emails, split the string at '@' into `local` and `domain` variable
+        - local
+            1. remove everything after the first '+'
+            2. remove all '.'char
+        - Join the normalized local and domain with '@'
+        - Add it to the set
+    - Ret: the size of the set
+"""
+class Solution:
+    def numUniqueEmails(self, emails: List[str]) -> int:
+        res = set()
+
+        for e in emails:
+            local, domain = e.split('@')
+            local = local.split('+')[0].replace('.', '')
+            normalized = local + '@' + domain
+            res.add(normalized)
+        return len(res)
+
+```
+
+
+## 2460. Apply Operations to an Array[[Link](https://leetcode.com/problems/apply-operations-to-an-array/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/apply-operations-to-an-array)]
+
+```py
+"""
+Question Understanding:
+- Input: A list of integers `nums`
+    - For each index i (from 0 to len(nums) - 2):
+        - If nums[i] == nums[i + 1]:
+            - Set nums[i] = nums[i] * 2
+            - Set nums[i + 1] = 0
+- After processing all elements:
+    - Shift all 0s in the list to the end (relative order of non-zero elements should be preserved)
+
+- Output: Return the resulting list after these operations.
+
+Assumptions:
+- 1 <= len(nums) <= 10^5
+- nums[i] is an integer in a valid range (e.g., within 32-bit signed int)
+- The input list is mutable (we can modify it in-place or return a new list)
+
+Edge Cases:
+- All elements are 0
+- All elements are unique (no merging)
+- All elements are equal (maximum number of merges)
+- Already merged result followed by zero (e.g., [2, 2, 0, 2])
+- Only one element — should return as-is
+
+Approach:
+Let n = len(nums)
+
+1. First pass — Merge equal adjacent elements:
+    - Iterate from i = 0 to n - 2
+    - If nums[i] == nums[i + 1]:
+        - nums[i] *= 2
+        - nums[i + 1] = 0
+
+2. Second pass — Move all non-zero numbers to the front, then fill the rest with 0s:
+    - Use a write pointer to shift all non-zero values forward
+    - Fill the rest of the array with 0s
+
+Time Complexity:
+- O(n) for merging pass
+- O(n) for shifting pass
+- Total: O(n), Space: O(1) if done in-place
+"""
+# time: o(n); space: O(1)
+class Solution:
+    def applyOperations(self, nums: List[int]) -> List[int]:
+        for i in range(len(nums) - 1):
+            if nums[i] == nums[i + 1]:
+                nums[i] *= 2
+                nums[i + 1] = 0
+        
+        l = 0
+        for i in range(len(nums)):
+            if nums[i]:
+                nums[i], nums[l] = nums[l], nums[i]
+                l += 1
+        return nums
+```
