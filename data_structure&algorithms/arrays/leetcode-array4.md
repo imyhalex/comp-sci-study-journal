@@ -319,3 +319,22 @@ class Solution:
         
         return len(t) - j
 ```
+
+## 118. Pascal's Triangle[[Link](https://leetcode.com/problems/pascals-triangle/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/pascals-triangle?list=allNC)]
+
+```py
+# tims: O(n ^ 2); space: O(n ^ 2)
+class Solution:
+    def generate(self, numRows: int) -> List[List[int]]:
+        res = [[1]]
+
+        for i in range(numRows - 1): # n - 1 because already do one row [1] above
+            tmp = [0] + res[-1] + [0]
+            row = []
+            for j in range(len(res[-1]) + 1):
+                row.append(tmp[j] + tmp[j + 1])
+            res.append(row)
+        return res
+```
