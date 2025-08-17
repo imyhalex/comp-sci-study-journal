@@ -448,3 +448,71 @@ class Solution:
                 l += 1
         return nums
 ```
+
+## 2109. Adding Spaces to a String[[Link](https://leetcode.com/problems/adding-spaces-to-a-string/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/adding-spaces-to-a-string)]
+
+```py
+"""
+Question Understanding:
+- Input:
+    - a string `s` with length n
+    - a list of interger `spaces`; each value represents an index in `s`;
+        - property: `spaces` follows 0 < spaces[i] <= len(s): which means stricky in increasing order
+- Objective:
+    - based on the index value in `space`, anchor the index within the `s`, and add space before that anchored char
+- Output:
+    - return a string 
+
+Clarifying Questions:
+- Can `spaces` contains duplicate indices? (Assume NO)
+- Does the arr `spaces` contains invalid indices, such as indces that is out of range? (Assume no, all vallid)
+
+Assumptions:
+Can I assume:
+- 0 <= s.length <= 10^5 ? (Yes)
+- 0 <= spaces.length <= s.length - 1 ?
+- All chars in `s` are lower case ?
+- elements in `spaces` are sorted ?
+- `spaces` are not emtpy? 
+
+Brute Force Approach:
+- For each index in `spaces`, perform string insertion at that position
+- Problem: String insertion performs in O(n), so total time will becomes O(k * n)
+
+Approach:
+- Algo analysis: Time O(n), Space: O(n)
+- Let i be the pointer over string s, starting at 0
+- Let j be the pointer over spaces, also starting at 0
+- Initialize res = [] to store characters and inserted spaces
+- Loop:
+    - While i < len(s) and j < len(spaces):
+        - If i == spaces[j], this means we have reached a location where a space must be inserted before s[i]. So:
+            - Append ' ' to res
+            - Increment j to move to the next space position
+        - Now, append s[i] to res (whether or not we inserted a space before it)
+        - Increment i to move forward in the string
+- After the loop:
+    - If any characters are left in s (i.e., i < len(s)), we append the rest to res
+- Finally, return "".join(res) as the result string.
+"""
+class Solution:
+    def addSpaces(self, s: str, spaces: List[int]) -> str:
+        i, j = 0, 0
+        res = []
+        n, m = len(s), len(spaces)
+
+        while i < n and j < m:
+            if i < spaces[j]:
+                res.append(s[i])
+                i += 1
+            else:
+                res.append(' ')
+                j += 1
+        
+        if i < len(s):
+            res.append(s[i:])
+        
+        return ''.join(res)
+```
