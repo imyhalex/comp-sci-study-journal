@@ -523,3 +523,63 @@ class Solution:
             i += 1
         return ''.join(stack)
 ```
+
+## 946. Validate Stack Sequences[[Link](https://leetcode.com/problems/validate-stack-sequences/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/validate-stack-sequences)]
+
+```py
+# time: O(n); space:O(n)
+class Solution:
+    def validateStackSequences(self, pushed: List[int], popped: List[int]) -> bool:
+        stack = []
+        i, j = 0, 0
+        n, m = len(pushed), len(popped)
+
+        while i < n and j < m:
+            stack.append(pushed[i])
+            while stack and stack[-1] == popped[j]:
+                stack.pop()
+                j += 1
+            i += 1
+
+        return len(stack) == 0
+```
+
+## 441. Arranging Coins[[Link](http://leetcode.com/problems/arranging-coins/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/arranging-coins?list=allNC)]
+
+```py
+class Solution:
+    def arrangeCoins(self, n: int) -> int:
+        row = 1
+        res = 0
+
+        while n >= row:
+            n -= row
+            row += 1
+            res += 1
+
+        return res
+```
+
+## 367. Valid Perfect Square[[Link](https://leetcode.com/problems/valid-perfect-square/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/valid-perfect-square?list=allNC)]
+
+```py
+class Solution:
+    def isPerfectSquare(self, num: int) -> bool:
+        l, r = 0, num
+
+        while l <= r:
+            m = l + (r - l) // 2
+            if m * m < num:
+                l = m + 1
+            elif m * m > num:
+                r = m - 1
+            else:
+                return True
+        return False
+```

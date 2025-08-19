@@ -769,3 +769,37 @@ class LFUCache:
 # param_1 = obj.get(key)
 # obj.put(key,value)
 ```
+
+## 234. Palindrome Linked List[[Link](https://leetcode.com/problems/palindrome-linked-list/description/)]
+
+- video explaination[[Link](https://neetcode.io/problems/palindrome-linked-list?list=allNC)]
+
+```py
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def isPalindrome(self, head: Optional[ListNode]) -> bool:
+        slow, fast = head, head
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+        
+        prev = None
+        curr = slow
+        while curr:
+            tmp = curr.next
+            curr.next = prev
+            prev = curr
+            curr = tmp
+        
+        curr = head
+        while prev:
+            if curr.val != prev.val:
+                return False
+            curr = curr.next
+            prev = prev.next
+        return True
+```

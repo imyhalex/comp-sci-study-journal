@@ -516,3 +516,62 @@ class Solution:
         
         return ''.join(res)
 ```
+
+## 2161. Partition Array According to Given Pivot[[Link](https://leetcode.com/problems/partition-array-according-to-given-pivot/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/partition-array-according-to-given-pivot)]
+
+```py
+class Solution:
+    def pivotArray(self, nums: List[int], pivot: int) -> List[int]:
+        less, equal, greater = [], [], []
+
+        for n in nums:
+            if n < pivot:
+                less.append(n)
+            elif n > pivot:
+                greater.append(n)
+            else:
+                equal.append(n)
+        return less + equal + greater
+```
+
+## 1658. Minimum Operations to Reduce X to Zero[[link](https://leetcode.com/problems/minimum-operations-to-reduce-x-to-zero/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/minimum-operations-to-reduce-x-to-zero)]
+
+```py
+"""
+Question Undestanding:
+- Given:
+    - list of integer arr `nums`
+    - a number `x`
+- Opertions: 
+    - each time can either take leftmost or rightmost element index `i`
+    - perform `x - nums[i]`
+- Output:
+    - find the minum number of aboved mentioned operations to let `x` becomes zero
+    - or: return -1 if no such pairs
+
+Approach(Sliding Windows):
+
+"""
+class Solution:
+    def minOperations(self, nums: List[int], x: int) -> int:
+        target = sum(nums) - x
+        curr_sum = 0
+        max_window = -1
+
+        l = 0
+        for r in range(len(nums)):
+            curr_sum += nums[r]
+
+            while l <= r and curr_sum > target:
+                curr_sum -= nums[l]
+                l += 1
+
+            if curr_sum == target:
+                max_window = max(max_window, r - l + 1)
+
+        return -1 if max_window == -1 else len(nums) - max_window
+```
