@@ -674,3 +674,17 @@ class Solution:
         return dfs(0)
 
 ```
+
+## 909. Snakes and Ladders[[Link](https://leetcode.com/problems/snakes-and-ladders/description/)]
+
+```py
+
+```
+
+## 802. Find Eventual Safe States[[Link](https://leetcode.com/problems/find-eventual-safe-states/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/find-eventual-safe-states)]
+
+```py
+
+```
