@@ -686,5 +686,78 @@ class Solution:
 - video explaination[[Link](https://neetcode.io/solutions/find-eventual-safe-states)]
 
 ```py
+"""
+Question Understanding:
+- Input: a adjancency list `graph` represents a directed graph, 
+    - each index `i` represents node `i`
+    - graph[i] represents node's neighbors from node `i` (outgoing edges)
+- Operations:
+    - A node is safe if:
+        - every path starting from it evetntually leads to a terminal node
+        - a terminal node is a node with no outgoing edges
+        - a safe nodes can include terminal nodes themselve
+        - any node that can reach a cycle or is part of one is not safe
+- Output:
+    - list of safe nodes and sorted them in ascending order
 
+Clarifications:
+- Is the graph guaranteed to be finite and valid?
+- Contains any clcyle? What is the
+
+Cases:
+- Empty `graph` -> return []
+- Node with no edges -> return all nodes in acending order
+- Entire graph forms a cycle -> return []
+- Multiple disconnected parts -> include them all with a for loop and return 
+
+Simple Operations:
+- DFS/BFS edges traversal
+- Detect cycles
+- Track visited nodes
+- Categorize nodes as safe or not safe
+- Collect the results and sort
+
+Approach:
+- Maintain `color`:
+    - `color[i]`: status of node
+        - `0`: unvisited
+        - `1`: visiting
+        - `2`: safe
+- Steps:
+    - Define DFS function `dfs(node)`
+        - If `color[node]` == 1: cycle -> return False
+        - If `color`[node]` == 2: already safe -> return True
+        - Mark `color[node] = 1` as visiting
+        - For each neighbor:
+            - If not safe -> return False
+        - Mark `color[node] = 2` as safe
+        - Return True
+    - Traverse through all node in `graph`
+        - If safe -> add to the result
+    - Finally, sort the result and return
+"""
+
+class Solution:
+    def eventualSafeNodes(self, graph: List[List[int]]) -> List[int]:
+        n = len(graph)
+        color = [0] * n # 0 = unvisited, 1 = visiting, 2 = safe
+        res = []
+
+        def dfs(node):
+            if color[node] != 0:
+                return color[node] == 2
+            
+            color[node] = 1
+            for nei in graph[node]:
+                if not dfs(nei):
+                    return False
+            color[node] = 2
+            return True
+        
+        for node in range(n):
+            if dfs(node):
+                res.append(node)
+        
+        res.sort()
+        return res
 ```
