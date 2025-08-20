@@ -803,3 +803,38 @@ class Solution:
             prev = prev.next
         return True
 ```
+
+## 2487. Remove Nodes From Linked List[[Link](https://leetcode.com/problems/remove-nodes-from-linked-list/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/remove-nodes-from-linked-list)]
+
+```py
+# time: O(n); space: O(1)
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def removeNodes(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        def reverse(head):
+            prev, curr = None, head
+            while curr:
+                tmp = curr.next
+                curr.next = prev
+                prev = curr
+                curr = tmp
+            return prev
+        
+        head = reverse(head)
+        curr = head
+        curr_max = curr.val
+
+        while curr and curr.next:
+            if curr.next.val < curr_max:
+                curr.next = curr.next.next
+            else:
+                curr_max = curr.next.val
+                curr = curr.next
+        return reverse(head)
+```

@@ -699,3 +699,75 @@ class Solution:
         
         return dfs(0, k, 0)
 ```
+
+## *93. Restore IP Addresses[[Link](https://leetcode.com/problems/restore-ip-addresses/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/restore-ip-addresses)]
+
+```py
+"""
+Question Understanding:
+- Input: 
+    - a string `s` contains only digits
+- Operations:
+    - Add '.' to between the digits in `s` to make it valid IP address
+    - Valid IP format:
+        - Max : `255.255.255.255
+        - Min : `0.0.0.0
+        - all combinations between Min and Max are valid
+- Ouput:
+    - a list of all possible valid IP addresses
+    - combination of IP address based on above mentioned operations
+
+Clarifications:
+- Can the input s.length > MAX.length where MAX is 255255255255?
+
+Assumpution:
+- 1 <= s.length <= 20
+- `s` consist of digits only
+
+Approach (Brute Force Backtracking):
+- Algo analysis: Time: O(3^4); Space: O(n * m)
+- Since as valid ip address is exactly 4 segment, we are try to insert 3 dots to dvide an ip address into 4 valid parts
+- Case immedietaly return: s.length > 12, means input `s` is too long to be a valid ip address
+- Construct a DFS/Backtracking method to explore all possible segements
+    - Maintain:
+        - A ptr `i` that anchor the current index of `s`
+        - a variable `dots` to keep track of number '.' we have inserted
+        - a `curr_ip`: str, to represent the partial ip address we have built so far
+    - Base case
+        - dots == 4 and i == s.length -> append the `curr_ip[:-1]` into result; ret
+        - dots > 4 -> ret, not a valid combinations
+    - Actual recursive step
+        - try taking next 3 chars as a segment (s[i : j + 1])
+        - check validity 
+            - segment <= 255
+            - segement does not contains any leading '0' unless segment == '0'
+        - if a above mentioned validity check conditions are both satsified, recrsive call the updated `j + 1` index, `dots + 1`, and `curr_ip + segment (s[i : j + 1]) + '.'`
+    - return the finaly result
+
+"""
+
+class Solution:
+    def restoreIpAddresses(self, s: str) -> List[str]:
+        res = []
+
+        if len(s) > 12:
+            # immediatly return empty res
+            return res
+        
+        def dfs(i, dots, curr_ip):
+            if dots == 4 and i == len(s):
+                res.append(curr_ip[:-1])
+                return 
+            
+            if dots > 4:
+                return
+            
+            for j in range(i, min(i + 3, len(s))):
+                if int(s[i : j + 1]) < 256 and (i == j or int(s[i]) != 0):
+                    dfs(j + 1, dots + 1, curr_ip + s[i : j + 1] + '.')
+        
+        dfs(0, 0, "")
+        return res
+```
