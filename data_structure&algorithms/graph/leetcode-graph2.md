@@ -761,3 +761,100 @@ class Solution:
         res.sort()
         return res
 ```
+
+## 1958. Check if Move is Legal[[Link](https://leetcode.com/problems/check-if-move-is-legal/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/check-if-move-is-legal)]
+
+```py
+"""
+Question Understanding:
+- Input:
+    - 8 * 8 `board`
+    - `rMove` and `cMove`: cell coordinate
+    - `color` (either 'W' or 'B')
+- Operations:
+    - each coordinate (r, c)
+        - '.': free cell
+        - 'W': white cell
+        - 'B': black cell
+    - get a free cell and either change it to white or black
+    - evaluate the line after doing aboved metioned operation (..change it to white or black).
+- Rules to be a good line:
+    - three or more cells
+    - two endpoints are in same color
+    - remianing cells are opposite to endpoints
+    - good line can be horizontal, vertical, and diagnoal
+    - the input `rMove`, `cMove` must be the endpoint of a good line after the operations
+- Output:
+    - return true if (rMove, cMove) to `color` makes line valid else return false
+
+Assumption:
+- borad[rMove][cMove] == '.'
+- 0 <= rMove, cMove < 8
+
+Edge Cases
+- Immediate neighbor in direction is same color → length = 2 → invalid
+- Long sequence of opposite color, then same color → valid
+
+Simple Operations:
+- perform BFS on source `board[rMove][cMove]`
+- explore all 8 directions from source, such as
+    - [1, 0]
+    - [-1, 0]
+    - [0, 1]
+    - [0, -1]
+    - [1, 1]
+    - [1, -1]
+    - ...
+    - exc
+- Intialize a `length` variable to keep track length of the line
+- While keep doing BFS traverse, check if the `length` >= 3 if meet the same `color` again
+
+Approach:
+- Algo Analysis: Time: O(1); Space: O(1)
+- Maintain:
+    - A 2d array represent `directions` in 8 directions
+- A BFS method `bfs(r, c, direction)`
+    - Parameters:
+        - `r`: row for the source point
+        - `c`: col for the source point
+        - direction: arr in arr.length = 2 represents direction for `r + direction[0]` (nr) and `c + direction[1]` (nc)
+    - While `nr` and `nc` is in boud (within the board):
+        - increment `length` by 1
+        - check:
+            - if board[nr][nc] == color:
+                - return true if length >= 3 else return false
+            - if board[nr][nc] == '.':
+                - return false
+        - update `nr` and `nc` to a explore in same direction
+    - Iterate through each direction within each directions
+        - Call the BFS method bfs(rMove, cMove, direction)
+        - return True if BFS evaluted true else return false
+"""
+class Solution:
+    def checkMove(self, board: List[List[str]], rMove: int, cMove: int, color: str) -> bool:
+        rows, cols = len(board), len(board[0])
+        directions = [[1, 0], [-1, 0], [0, 1], [0, -1],
+                        [1, 1], [-1, -1], [1, -1], [-1, 1]]
+
+        board[rMove][cMove] = color
+        def bfs(r, c, direction):
+            dr, dc = direction
+            nr, nc = r + dr, c + dc
+
+            length = 1
+            while (0 <= nr < rows and 0 <= nc < cols):
+                length += 1
+                if board[nr][nc] == '.':
+                    return False
+                if board[nr][nc] == color:
+                    return length >= 3
+                nr, nc = nr + dr, nc + dc
+            return False
+        
+        for direction in directions:
+            if bfs(rMove, cMove, direction):
+                return True
+        return False
+```
