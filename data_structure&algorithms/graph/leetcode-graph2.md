@@ -793,10 +793,6 @@ Assumption:
 - borad[rMove][cMove] == '.'
 - 0 <= rMove, cMove < 8
 
-Edge Cases
-- Immediate neighbor in direction is same color → length = 2 → invalid
-- Long sequence of opposite color, then same color → valid
-
 Simple Operations:
 - perform BFS on source `board[rMove][cMove]`
 - explore all 8 directions from source, such as
@@ -810,6 +806,10 @@ Simple Operations:
     - exc
 - Intialize a `length` variable to keep track length of the line
 - While keep doing BFS traverse, check if the `length` >= 3 if meet the same `color` again
+
+Edge Cases
+- Immediate neighbor in direction is same color → length = 2 → invalid
+- Long sequence of opposite color, then same color → valid
 
 Approach:
 - Algo Analysis: Time: O(1); Space: O(1)
