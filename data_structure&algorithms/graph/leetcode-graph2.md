@@ -858,3 +858,99 @@ class Solution:
                 return True
         return False
 ```
+
+## 934. Shortest Bridge[[Link](https://leetcode.com/problems/shortest-bridge/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/shortest-bridge)]
+
+```py
+"""
+Question Understanding:
+- Input:
+    - a n * n `grid`, where
+        - `0`: water
+        - `1`: land
+- Rules:
+    - each `grid[r][c]` can be explored in 4 directions
+    - input `grid` contains two island
+- Operations:
+    - flip the `grid[r][c]` from water to land to connect two island into one
+- Output:
+    - return int: smallest number of flip operations 
+
+Assumptions:
+- 2 <= n <= 100
+- input `grid` contains two islands
+
+Cases:
+- grid = [[1,1,1,1,1],
+          [1,0,0,0,1],
+          [1,0,1,0,1],
+          [1,0,0,0,1],
+          [1,1,1,1,1]]
+          
+Simple Oeprations:
+- perform BFS operations from two islands
+- a `count` variable to keep track the number of flips
+- when traverse through each `grid[r][c]`
+    - set it as `visited`
+    - explore all 4 directions to check the validity
+- keep distance counter to track flips
+
+Approach:
+- Algo Analysis: Time: O(n^2); Space: O(n^2)
+- Maintain:
+    - visited set
+    - queue for BFS expansion
+    - directions array [[1,0], [-1,0], [0,1], [0,-1]]
+- Steps:
+    1. Find first island via DFS
+       - Reasoning: need a starting point for BFS expansion
+       - Mark all its cells as visited
+       - Add its coordinates into BFS queue
+    2. Perform BFS expansion
+       - Reasoning: expand outward layer by layer until hitting second island
+    3. For each BFS layer, increment distance
+       - Reasoning: number of layers expanded = number of flips
+    4. If a BFS step reaches a cell in the second island, return distance
+       - Reasoning: minimal flips found due to BFS property
+"""
+
+class Solution:
+    def shortestBridge(self, grid: List[List[int]]) -> int:
+        n = len(grid)
+        directions = [[1, 0], [-1, 0], [0, 1], [0, -1]]
+        visited = set()
+
+        def dfs(r, c):
+            if (r < 0 or c < 0 or r == n or c == n
+                or (r, c) in visited or grid[r][c] == 0):
+                return
+            visited.add((r, c))
+            for dr, dc in directions:
+                dfs(r + dr, c + dc)
+        
+        def bfs():
+            res = 0
+            q = deque(visited)
+            while q:
+                for _ in range(len(q)):
+                    r, c = q.popleft()
+                    for dr, dc in directions:
+                        nr, nc = r + dr, c + dc
+                        if (nr < 0 or nc < 0 or nr == n or nc == n or
+                            (nr, nc) in visited):
+                            continue
+                        if grid[nr][nc]:
+                            return res
+                        q.append((nr, nc))
+                        visited.add((nr, nc))
+                res += 1
+        
+        for r in range(n):
+            for c in range(n):
+                if grid[r][c]:
+                    dfs(r, c)
+                    return bfs()
+
+```
