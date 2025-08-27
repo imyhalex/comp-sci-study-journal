@@ -575,3 +575,155 @@ class Solution:
 
         return -1 if max_window == -1 else len(nums) - max_window
 ```
+
+## 540. Single Element in a Sorted Array[[Link](https://leetcode.com/problems/single-element-in-a-sorted-array/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/single-element-in-a-sorted-array)]
+
+```py
+"""
+Question Understanding:
+- Input:
+    - sorted interger arry
+    - one element in the array appears one time
+    - the rest of elements appear exactly two times
+- Ouput:
+    - an element appear only one time
+- Constraints
+    - only time O(log n) and space O(1) is acceptable
+
+Clarifications:
+- Can input array be empty?
+- Can input array contains excatly one element, nums.length == 1?
+- Ascending order?
+
+Assumpution:
+- 1 <= nums.length <= 10^5
+- 0 <= nums[i] <= 10^5
+
+Cases:
+- nums = [1,1,2,3,3,4,4,8,8], ret = 2
+- nums = [3,3,7,7,10,11,11], ret = 10
+- nums = [0], ret = 0
+
+Simple Operations:
+- Binary Search
+- Index parity check (even/odd index)
+- Compare nums[m] with its neigbhor
+- Shrink search space based on pattern of duplicaion
+
+Approach:
+- Maintain:
+    - `l` ptr assign value 0, nums[0]
+    - `r` ptr assign value `nums.length - 1` indicates the last element in the posision
+- Steps:
+    - Constrctut a loop that evaluetas `l < r`
+    - Keep comupting the mid point m = l + (r - l) // 2
+    - If the `m` is even
+        - Check if nums=[m] == num[m + 1]
+            - If true -> the unique element must be after the `m` -> l = m + 2
+            - Else -> the unique element is before `m` ->  r = m
+    - If the `m` is odd
+        - Check of the nums[m] == nums[m - 1]
+            - If true -> unique element must be after m -> l = m + 1
+            - If false -> unique is nefore m -> r = m
+    - When loop ends, reutrn the nums[l]
+"""
+
+class Solution:
+    def singleNonDuplicate(self, nums: List[int]) -> int:
+        l, r = 0, len(nums) - 1
+
+        while l < r:
+            m = l + (r - l) // 2
+
+            if m % 2 == 0:
+                if nums[m] == nums[m + 1]:
+                    l = m + 2
+                else:
+                    r = m
+            else:
+                if nums[m] == nums[m - 1]:
+                    l = m + 1
+                else:
+                    r = m
+        return nums[l]
+```
+
+## 1498. Number of Subsequences That Satisfy the Given Sum Condition[[Link](https://leetcode.com/problems/number-of-subsequences-that-satisfy-the-given-sum-condition/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/number-of-subsequences-that-satisfy-the-given-sum-condition)]
+
+```py
+"""
+Question Understanding
+- Input:
+    - integer array `nums`
+    - integr `target`
+- Output:
+    - a integer
+    - count the number of subsequences, which
+        - the sum of min and max is <= `target`
+- Constraint:
+    - output % 10^9 + 7
+
+Clarification:
+- Does the arr sorted such that nums[i - 1] < nums[i] < nums[i + 1] ?
+- Can input arr empty?
+- Can input arr contains duplicates?
+
+Assumpution:
+- 1 <= nums.length <= 10^5
+- 0 <= nums[i] <= 10^5
+- 0 <= target <= 10^5
+
+Cases:
+- nums = [0], target = 0 -> ret = 0
+- nums = [1, 3, 3, 2], target = 3 
+    -> [1], [1, 2]
+    ret = 2
+
+Simple Operations:
+- Sort input array in ascending order
+- Two ptrs operations (l, r)
+    - one start from the first element
+    - one start from the last element
+- Compare the sum of two ptrs elemtent with `target`
+
+Approach:
+- Maintain:
+    - `l` ptr -> l = 0
+    - `r` ptr -> r = nums.length - 1
+    - `res` = 0 to keep track the number of subsequences
+- Steps:
+    - Sort the arr -> nums.sort()
+    - Precompute pow2[i] for i in [0, n]
+    - Construct a loop keep evalutate l <= r
+        - if nums[l] + nums[r] <= target
+            - res += pow2[r - l]
+            - increment `l` = l + 1
+        - else
+            - decrement `r` = r - 1
+    - return res % 10^9 + 7 
+"""
+
+class Solution:
+    def numSubseq(self, nums: List[int], target: int) -> int:
+        nums.sort()
+        res = 0
+        MOD = 10**9 + 7
+        n = len(nums)
+
+        pow2 = [1] * (n + 1)
+        for i in range(1, n + 1):
+            pow2[i] = (pow2[i - 1] * 2) % MOD
+        
+        l, r = 0, n - 1
+        while l <= r:
+            if nums[l] + nums[r] <= target:
+                res = (res + pow2[r - l]) % MOD
+                l += 1
+            else:
+                r -= 1
+        return res
+```
