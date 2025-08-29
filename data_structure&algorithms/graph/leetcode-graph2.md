@@ -2,6 +2,73 @@
 
 - video explaination[[Link](https://neetcode.io/problems/islands-and-treasure?list=neetcode250)]
 
+```py
+# time: O(n * m); space: O(n * m)
+class Solution:
+    def wallsAndGates(self, rooms: List[List[int]]) -> None:
+        """
+        Do not return anything, modify rooms in-place instead.
+        """
+        rows, cols = len(rooms), len(rooms[0])
+        q = deque()
+        visited = set()
+
+        for r in range(rows):
+            for c in range(cols):
+                if rooms[r][c] == 0:
+                    q.append((r, c))
+                    visited.add((r, c))
+        
+        distance = 1
+        directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+        while q:
+            for _ in range(len(q)):
+                r, c = q.popleft()
+                for dr, dc in directions:
+                    nr, nc = r + dr, c + dc
+                    if (nr < 0 or nc < 0 or nr == rows or nc == cols
+                        or (nr, nc) in visited or rooms[nr][nc] == -1):
+                        continue
+                    q.append((nr, nc))
+                    visited.add((nr, nc))
+                    rooms[nr][nc] = distance
+            distance += 1
+
+# or
+class Solution:
+    def orangesRotting(self, grid: List[List[int]]) -> int:
+        rows, cols = len(grid), len(grid[0])
+        q = deque()
+        visited = set()
+
+        fresh = 0
+        for r in range(rows):
+            for c in range(cols):
+                if grid[r][c] == 1:
+                    fresh += 1
+                elif grid[r][c] == 2:
+                    q.append((r, c))
+                    visited.add((r, c))
+        
+        minutes = 0
+        directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+        while q:
+            for _ in range(len(q)):
+                r, c = q.popleft()
+                for dr, dc in directions:
+                    nr, nc = r + dr, c + dc
+                    if (nr < 0 or nc < 0 or nr == rows or nc == cols
+                        or (nr, nc) in visited or grid[nr][nc] == 0):
+                        continue
+                    grid[nr][nc] = 2
+                    q.append((nr, nc))
+                    visited.add((nr, nc))
+                    fresh -= 1
+            if q:
+                minutes += 1
+        
+        return minutes if fresh == 0 else -1
+```
 
 ## 1091. Shortest Path in Binary Matrix[[Link](https://leetcode.com/problems/shortest-path-in-binary-matrix/)]
 
@@ -953,4 +1020,210 @@ class Solution:
                     dfs(r, c)
                     return bfs()
 
+```
+
+
+## 2359. Find Closest Node to Given Two Nodes[[Link](https://leetcode.com/problems/find-closest-node-to-given-two-nodes/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/find-closest-node-to-given-two-nodes)]
+
+```py
+"""
+Question Understanding:
+- Input:
+    - `edges`: int arr
+        - each index i -> current node, edges[i] -> node that current node connects
+        - if node i have no connected node, edges[i] == -1
+    - `node1`
+    - `node2`
+- Operatins:
+    - start from `node1` and `node2`, find the common reachable node
+- Output:
+    - find the closest node (index) from node1 and node2 that is common reachable
+    - if multiple answer return the one with smallest index else -1
+
+Clarification
+- Can input edges be empty?
+- Can node1 == node2?
+- Is n always >= 1?
+
+Assmputions:
+- n = edges.length
+- 2 <= n <= 10^5
+- -1 <= edges[i] < n
+- 0 <= node1, node2 < n
+
+Cases:
+- node1 == node2 -> return node1 index
+- both nodes cannnot reach any common node -> return -1
+- n == 1
+
+Simple Operations:
+- Traverse graph following single outgoing edges untile stop
+- Record distance
+- Compare the distances for common nodes
+- find the min of the max(dist1, dist2)
+
+Approach:
+- Algo Analysis: Time O(n), Space O(n)
+- Maintain:
+    - `dist1`: array in size n, store distances from node1 to every node
+    - `dist2`: array in siez n
+    - `res_node`: best candicate node index
+    - `min_dist`: best minimized maximum distance so far
+- Steps:
+    1. Define helper traverse(start):
+        - Initialize dist = [-1]*n
+        - curr = start, d = 0
+        - While curr != -1 and not visited:
+            - dist[curr] = d
+            - visited.add(curr)
+            - curr = edges[curr], d += 1
+        - Return dist
+        - Reasoning: Each node has at most one outgoing edge, so traversal is linear and safe with visited.
+    2. Compute dist1 = traverse(node1)
+        - Reasoning: get all distances from node1.
+    3. Compute dist2 = traverse(node2)
+        - Reasoning: get all distances from node2.
+    4. Iterate i from 0 to n-1:
+        - If dist1[i] != -1 and dist2[i] != -1:
+            - candidate = max(dist1[i], dist2[i])
+            - Track minVal and minIndex
+        - Reasoning: Only consider nodes reachable from both.
+    5. Return minIndex if found, else -1.
+        - Reasoning: ensures minimal max distance, tie broken by index.
+"""
+
+class Solution:
+    def closestMeetingNode(self, edges: List[int], node1: int, node2: int) -> int:
+        
+        def bfs(start):
+            n = len(edges)
+            dist = [-1] * n
+            curr = start
+            d = 0
+            while curr != -1 and dist[curr] == -1:
+                dist[curr] = d
+                d += 1
+                curr = edges[curr]
+            return dist
+
+        dist1 = bfs(node1)
+        dist2 = bfs(node2)
+
+        res, min_dist = -1, float("inf")
+        for i in range(len(edges)):
+            if dist1[i] != -1 and dist2[i] != -1:
+                candidate = max(dist1[i], dist2[i])
+                if candidate < min_dist:
+                    min_dist = candidate
+                    res = i
+        return res
+```
+
+## 1162. As Far from Land as Possible[[Link](https://leetcode.com/problems/as-far-from-land-as-possible/description/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/as-far-from-land-as-possible)]
+
+```py
+"""
+Question Understanding:
+- Input:
+    - n * n `grid` contains only 0 and 1
+        - `0`: water
+        - `1`: land
+- Output:
+    - The maximum distance of any water cell to its nearest land cell
+    - If no land or no water exists, return -1
+- Distance: Manhattan distance (|x0 - x1| + |y0 - y1|)
+
+Clarifications:
+- Can grid be empty?
+- Is `n` guaranteed to be small? (1 <= n <- 100)?
+
+Cases:
+- All lands -> ret: -1
+- All water -> ret: -1
+- Single cell (n == 1) -> ret: -1
+
+Simple Operations:
+- BFS traversal to find the path
+- Exapnd 4 directions when traversing each cell
+- Marking visited cells
+- Expanding to 4 directions (up, down, left, right)
+- Tracking distance layer by layer
+
+Approach:
+- Algo Analysis: Time: O(n^2); Space: O(n^2)
+- Maintain:
+    - `q`: a queue for BFS fronteir containing all land cells
+    - `directions: 4 direction moves
+    - `distances`: tarck the BFS level
+- Steps:
+    - Push all land cells to the queue
+    - Start BFS expansion from all land simultaneously
+        - pop cell from queue
+        - For each neighbor (up, dowm, left, right)
+            - if in bound and water not visited
+                - mark visited
+                - set thje distance = curr distance + 1
+                - Push into queue
+    - Track maximum distance reached
+    - Return maximum distance
+"""
+
+class Solution:
+    def maxDistance(self, grid: List[List[int]]) -> int:
+        n = len(grid)
+        q = deque()
+
+        for r in range(n):
+            for c in range(n):
+                if grid[r][c] == 1:
+                    q.append((r, c))
+        
+        if len(q) == 0 or len(q) == n * n:
+            return -1
+        
+        res = -1
+        directions = [[1, 0], [-1, 0], [0, 1], [0, -1]]
+        while q:
+            r, c = q.popleft()
+            for dr, dc in directions:
+                nr, nc = r + dr, c + dc
+                if (nr < 0 or nc < 0 or nr == n or nc == n or grid[nr][nc] != 0):
+                    continue
+                grid[nr][nc] = grid[r][c] + 1
+                res = max(res, grid[nr][nc] - 1)
+                q.append((nr, nc))
+        return res
+```
+
+## 419. Battleships in a Board[[Link](https://leetcode.com/problems/battleships-in-a-board/description/)]
+
+```py
+# O(M∗N) time & space
+class Solution:
+    def countBattleships(self, board: List[List[str]]) -> int:
+        rows, cols = len(board), len(board[0])
+        visited = set()
+
+        def dfs(r, c):
+            if (r < 0 or c < 0 or r == rows or c == cols or
+                (r, c) in visited or board[r][c] == '.'):
+                return
+            
+            visited.add((r, c))
+            dfs(r + 1, c)
+            dfs(r - 1, c)
+            dfs(r, c + 1)
+            dfs(r, c - 1)
+
+        count = 0
+        for r in range(rows):
+            for c in range(cols):
+                if board[r][c] == 'X' and (r, c) not in visited:
+                    dfs(r, c)
+                    count += 1
+        return count
 ```

@@ -41,6 +41,7 @@ class Solution:
 
         return islands
 
+# O(M × N) time & space
 # or
 class Solution:
     def numIslands(self, grid: List[List[str]]) -> int:

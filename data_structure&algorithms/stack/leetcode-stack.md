@@ -416,11 +416,66 @@ class FreqStack:
 ## 496. Next Greater Element I[[Link](https://leetcode.com/problems/next-greater-element-i/description/)]
 
 ```python
-# time: O(n + m); space: O(n)
+"""
+Question Understanding:
+- Input:
+    - `nums1` : int arr
+    - `nums2` : int arr
+    - properties:
+        - `nums1` is a subset of `nums2`
+        - both arrays contain distinct elements
+- Operations:
+    - in range 0 <= i < nums1.length, find the `j`, where:
+        - when `i` in nums1[i], find the same value in n`nums2` where nums[i] == nums[j]
+        - determin if the value have next greater element in `nums2` starts at current position `j`
+- Output:
+    - an integer arr where arr.length == nums1.length
+    - contains values of next greater element
+
+Clarifications:
+- Can input arrays be empty?
+
+Cases:
+- nums1 = [4,1,2], nums2 = [1,3,4,2]; ret: [-1,3,-1]
+- nums1 = [2,4], nums2 = [1,2,3,4]; ret: [3, -1]
+- nums1 = [], nums2 = []; ret: []
+- nums1 = [2, 4], nums2 = [2, 1, 4, 3, 5]; ret: [4, 5]
+
+Assumpution:
+- every elements in nums1 must appear in nums2 (based on the property metioned above)
+- 0 <= nums1[i], nums2[j] <= 10^5
+- 1 <= nums1.length, nums2.length <= 10^5
+- both input arrays contain distinct elements
+
+Brute Force:
+- For each num in nums1:
+    - Locate index j of num in nums2
+    - Traverse nums2[j+1:] to find first greater element
+    - If found, store it; else store -1
+- Time Complexity: O(len(nums1) * len(nums2))
+- Space Complexity: O(len(nums1))
+
+Approach:
+- Algo Analysis: Time: O(n + m); Spcae: O(m)
+- Maintain Variables:
+    - `stack`: monotonic decreasing stack (store: nums2 element waiting for next greater)
+    - `next_greater_map`: dict mapping with key->value pair in {val in num2 -> next greater element}
+- Steps:
+    - Traverse nums2 from left to right
+        - while stack not empty and currnt num > stack[-1]
+            - pop top = prev
+            - next_greater_map[prev] = current num
+    - Push current num into the stack
+    - After traversal, all remaining stack elements have no greater element
+        - Map them to -1
+    - Build result by iterating num1
+    - Return result array `res`
+"""
+
 class Solution:
     def nextGreaterElement(self, nums1: List[int], nums2: List[int]) -> List[int]:
         stack = []
-        next_greater_map = {} # number -> its next greater value on the right
+        next_greater_map = {}
 
         for num in nums2:
             while stack and num > stack[-1]:
@@ -428,7 +483,11 @@ class Solution:
                 next_greater_map[prev] = num
             stack.append(num)
         
-        return [next_greater_map.get(n, -1) for n in nums1]
+        for num in stack:
+            next_greater_map[num] = -1
+        
+        res = [next_greater_map[num] for num in nums1]
+        return res
 ```
 
 ## 739. Daily Temperatures[[Link](https://leetcode.com/problems/daily-temperatures/description/)]
