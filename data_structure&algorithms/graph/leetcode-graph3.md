@@ -333,7 +333,7 @@ class Solution:
 
         def dfs(r, c):
             if (r < 0 or c < 0 or r == rows or c == cols
-                or (r, c) in visited or grid[r][c] == 1):
+                or (r, c) in visited or grid[r][c]):
                 return
             visited.add((r, c))
             dfs(r + 1, c)
