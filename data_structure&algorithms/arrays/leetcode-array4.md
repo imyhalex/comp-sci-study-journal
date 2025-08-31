@@ -727,3 +727,74 @@ class Solution:
                 r -= 1
         return res
 ```
+
+## 3105. Longest Strictly Increasing or Strictly Decreasing Subarray[[Link](https://leetcode.com/problems/longest-strictly-increasing-or-strictly-decreasing-subarray/description/)]
+```py
+"""
+Question Understanding:
+- Input:
+    - int arr `nums`
+- Operations:
+    - find subarray in either increasing or decraseing
+    - record the length of each subarray
+- Output:
+    - int: longest length of the subarray after above mentioned operations
+
+Cases:
+- nums = [1, 3, 2, 1], ret: 2
+- nums = [1], ret: 1
+- nums = [1, 2, 3, 4, 5], ret: 5
+
+Assumptions:
+- 1 <= nums.length <= 50
+- 1 <= nums[i] <= 50
+
+Simple Operations:
+- Compare the nums[i] with nums[i - 1]
+    - nums[i] == nums[i - 1]
+    - nums[i] < nums[i - 1]
+    - nums[i] > nums[i - 1]
+- Maintain counter for consecutive and decreasing runs
+- Take maximum length seen
+
+Approach:
+- Algo Analysis: Time: O(n); Spcae: O(1)
+- Maintain:
+    - `inc_len`: current increasing length
+    - `dec_len`: current decreasing length
+    - `res` : record the maximum length have seen
+- Steps:
+    - Initialie inc_len = dec_len = 1, res = 1
+    - Iterate i = 1 to n -1
+        - If nums[i] > nums[i - 1]
+            - inc_len += 1
+            - dec_len = 1
+        - Else if nums[i] < nums[i - 1]
+            - inc_len = 1
+            - dec_len += 1
+        - Else: (nums[i] == nums[i - 1])
+            - inc_len = 1
+            - dec_len = 1
+        - Finally: keep track of the most up-to-date length to `res`: res = max(res, inc_len, dec_len)
+"""
+
+class Solution:
+    def longestMonotonicSubarray(self, nums: List[int]) -> int:
+        n = len(nums)
+        res = 1
+        inc_len, dec_len = 1, 1
+
+        for i in range(1, n):
+            if nums[i] > nums[i - 1]:
+                inc_len += 1
+                dec_len = 1
+            elif nums[i] < nums[i - 1]:
+                inc_len = 1
+                dec_len += 1
+            else:
+                inc_len = dec_len = 1
+
+            res = max(res, inc_len, dec_len)
+        
+        return res
+```
