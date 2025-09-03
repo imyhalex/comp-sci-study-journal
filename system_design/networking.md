@@ -350,3 +350,12 @@
                 - Requires state synchronization or DNS tricks
                 - Needs more monitoring and maintenance
             ```
+## What does stateless mean?
+A `stateless server` does not remember anything about past requests.
+- Each request from a client must contain all the information needed for the server to process it.
+    - The server treats every request as independent, like meeting a stranger everytime
+    - There is no stored "session" on the server side between requests
+- This is important for scalability and fault tolerant (easy to add/remove servers, no stricky sessions needed)
+
+A `stateful server` remembers information about the client between requests
+- 

@@ -1296,3 +1296,91 @@ class Solution:
         
         return dfs(root)
 ```
+
+## 108. Convert Sorted Array to Binary Search Tree[[Link](https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree/description/)]
+
+```py
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def sortedArrayToBST(self, nums: List[int]) -> Optional[TreeNode]:
+        
+        def dfs(l, r):
+            if l > r:
+                return None
+            
+            m = l + (r - l) // 2
+            root = TreeNode(nums[m])
+            root.left = dfs(l, m - 1)
+            root.right = dfs(m + 1, r)
+            return root
+        
+        return dfs(0, len(nums) - 1)
+```
+
+## 109. Convert Sorted List to Binary Search Tree[[Link](https://leetcode.com/problems/convert-sorted-list-to-binary-search-tree/description/)]
+
+```py
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def sortedListToBST(self, head: Optional[ListNode]) -> Optional[TreeNode]:
+        
+        def dfs(node):
+            if not node:
+                return None
+            
+            prev = None
+            slow, fast = node, node
+            while fast and fast.next:
+                prev = slow
+                slow = slow.next
+                fast = fast.next.next
+            
+            if prev:
+                prev.next = None
+
+            root = TreeNode(slow.val)
+            if node != slow:
+                root.left = dfs(node)
+            root.right = dfs(slow.next)
+            return root
+        
+        return dfs(head)
+```
+
+## 617. Merge Two Binary Trees[[Link](https://leetcode.com/problems/merge-two-binary-trees/description/)]
+
+```py
+# Time: O(min(n, m)); Spcae: O(min(n, m))
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def mergeTrees(self, root1: Optional[TreeNode], root2: Optional[TreeNode]) -> Optional[TreeNode]:
+        if not root1:
+            return root2
+        if not root2:
+            return root1
+        
+        root1.val += root2.val
+        root1.left = self.mergeTrees(root1.left, root2.left)
+        root1.right = self.mergeTrees(root1.right, root2.right)
+        return root1
+```

@@ -367,3 +367,160 @@ class Solution:
                     res[(r + 1) % n] = curr_sum
         return res
 ```
+
+## 1888. Minimum Number of Flips to Make the Binary String Alternating[[Link](https://leetcode.com/problems/minimum-number-of-flips-to-make-the-binary-string-alternating/description/)]
+
+```py
+"""
+Qustion Understanding:
+- Input:
+    - binary str `s`
+- Operations:
+    - remove the s[0] and append s[0] to the end of the `s`
+    - flip s[i] (1 -> 0 or 0 -> 1)
+- Objective:
+    - make the result alternating (such as 101010)\
+- Output:
+    - int: min number of flips to perform
+
+Clarifications:
+- Do we need to check to validate if input is correct binary form?
+- 
+
+Edge Cases:
+- s length = 1 → always alternating, answer = 0.
+- s is already alternating → answer = 0.
+- All characters same (e.g., "00000" or "11111") → flips needed = n/2 (rounded up).
+- Very large input → solution must avoid recomputation.
+
+Brute Force Approach:
+- Generate all n rotations of `s`.
+- For each rotation, compute mismatches against "0101..." and "1010...".
+- Track minimum mismatch count.
+- Time: O(n^2), too slow for n=10^5.
+- Space: O(n) for storing rotations, or O(1) if computed on the fly.
+
+Approach:
+- Algo Analysis: Time O(n), Space O(n)
+- Simple Operations:
+    - Compare character with expected alternating pattern.
+    - Rotate string virtually by shifting the "window".
+    - Count mismatches (flips) against pattern "0101..." and "1010...".
+    - Maintain a sliding window mismatch count efficiently.
+- Maintain:
+    - `alt1` = infinite string "010101..."
+    - `alt2` = infinite string "101010..."
+    - `s2` = `s + s` (double string to simulate rotations)
+    - Two mismatch counts `mis1`, `mis2` for each window of size n.
+- Steps:
+    1. Build `s2 = s + s` → Reasoning: This allows us to check all rotations with a fixed-length sliding window.
+    2. For each index i in [0, 2n):
+        - Compare s2[i] with alt1[i] and alt2[i].
+        - If not equal, increment mismatch counts.
+    3. Once window length > n:
+        - Subtract mismatch contribution from left side (i-n).
+        - Reasoning: Maintain exactly n-length window mismatch count.
+    4. Track min mismatch across all windows.
+    5. Answer = min mismatch encountered.
+
+Assumptions:
+- 1 <= s.length <= 10^5
+"""
+
+class Solution:
+    def minFlips(self, s: str) -> int:
+        n = len(s)
+        s2 = s + s
+        alt1 = ''.join(["01"[(i % 2)] for i in range(2 * n)])
+        alt2 = ''.join(["10"[(i % 2)] for i in range(2 * n)])
+
+        res = n # maximum flips needed <= n
+        diff1 = diff2 = 0
+        l = 0
+        for r in range(2 * n):
+            if s2[r] != alt1[r]:
+                diff1 += 1
+            if s2[r] != alt2[r]:
+                diff2 += 1
+            
+            if r - l + 1 > n:
+                if s2[l] != alt1[l]:
+                    diff1 -= 1
+                if s2[l] != alt2[l]:
+                    diff2 -= 1
+                l += 1
+            if r - l + 1 == n:
+                res = min(res, diff1, diff2)
+        
+        return res
+```
+
+## 1208. Get Equal Substrings Within Budget[[Link](https://leetcode.com/problems/get-equal-substrings-within-budget/description/)]
+
+```py
+"""
+Question Understanding:
+- Input:
+    - str: `s`
+    - str: `t`
+    - int: `maxCost`
+- Operations:
+    - change s to t
+        - s[i] -> t[i], the cost = abs(s[i] - t[i]) by ascii value
+- Output:
+    - int: maximum length of substring, where the sum of the abs value substring cost change fron s to t <= maxCost
+    - condition: no such substring, return 0
+
+Clarifications:
+- Does the inputs ensure s.length == t.length?
+- Does the input only contains english letter in lower cases ascii chars?
+- Can maxCost be 0 while s.length, t.length != 0?
+
+Case:
+- maxCost = 0 → return max length of identical substring
+- s == t → full length is the answer
+- Large maxCost → whole string is valid
+- s and t differ completely with maxCost too small → return 0
+
+Assumptions:
+- 1 ≤ len(s) = len(t) ≤ 10^5
+- Only lowercase letters
+- maxCost ≥ 0
+
+Approach:
+- Algo Analysis: Time: O(n); Space: O(1)
+- Simple Operations:
+    - Compute char dif cost with abs(ord(s[i]) - ord(t[i]))
+    - maintain running sum of costs
+    - Adjust window when sum > maxCost
+    - Track the max window length
+- Maintain:
+    - `l` = left pointer
+    - `r` = right pointer
+    - `curr_val` = current window cost
+    - `res` = max length found
+- Steps
+    - Iterate r from 0 to n - 1
+        - add cost abs val of s[r] - t[r]
+        - Keep validating if `curr_val > maxCost`:
+            - subtract cost at left pointer
+            - move l forward by 1
+        - compare the `res` with current window length r - l + 1 and find the maximum
+    - Ret: `res`
+"""
+class Solution:
+    def equalSubstring(self, s: str, t: str, maxCost: int) -> int:
+        l = 0
+        n = len(s)
+        res, curr_val = 0, 0
+
+        for r in range(n):
+            curr_val += abs(ord(s[r]) - ord(t[r]))
+
+            while curr_val > maxCost:
+                curr_val -= abs(ord(s[l]) - ord(t[l]))
+                l += 1
+
+            res = max(res, r - l + 1)
+        return res
+```
