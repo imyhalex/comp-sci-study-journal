@@ -457,3 +457,74 @@ class Solution:
         
         return len(max_heap)
 ```
+
+## 3264. Final Array State After K Multiplication Operations I[[Link](https://leetcode.com/problems/final-array-state-after-k-multiplication-operations-i/submissions/1757750657/)]
+
+```py
+"""
+Question Understanding:
+- Input:
+    - int arr: `nums`
+    - int: `k`
+    - int: `multiplier`
+- Oprations:
+    - select min val x in nums
+    - replace x in nums[i] = x * multiplier
+- Output:
+    - int arr: `nums` after k operations
+
+Clafirications
+- Can input `nums.length` != 0 and k == 0?
+
+Cases:
+- nums = [1, 2, 4, 6], k = 2, multiplier = 3 
+    - [2, 2, 4, 6]
+    - [6, 2, 4, 6] <- ret
+- nums = [1], k = 1, multiplier = 2 -> ret: [2]
+- nums = [1, 1, 1, 1], k = 3, multiplier = 2 -> ret: [2, 2, 2, 1]
+
+Assumptions:
+- 1 <= nums.length <= 100
+- 1 <= nums[i] <= 100
+- 1 <= k <= 10
+- 1 <= multiplier <= 5
+
+Approach:
+- Algo Analysis: O((n + k) log n); Space: O(n)
+- Simple Operations:
+    - Constrtuct a min heap, 
+        - each in element a pair in (num[i], i)
+    - get the top of the heap (min), multiply with multiplier and push back to heap
+    - construct result arr using `i` to acnhor the origin position of nums[i] in origin `nums` arr
+- Maintain
+    - `res`: a return arr with length == nums.length
+    - `min_heap`: priority queue to ensure minimum is at the top of queue
+- Steps:
+    - Feed priority queue min_heap with nums[i], i pair 
+    - Iterate 0 to k:
+        - get the top of the min_heap with store in `num` and `idx`
+        - multiply num by `multiplier`
+        - push back to the min_heap
+    - Feed min_heap (each pair in num, idx) to `res` with correct position -> res[idx] = num
+    - Return the final result
+"""
+
+class Solution:
+    def getFinalState(self, nums: List[int], k: int, multiplier: int) -> List[int]:
+        res = [0] * len(nums)
+        min_heap = []
+        for i in range(len(nums)):
+            heapq.heappush(min_heap, (nums[i], i))
+        
+        cnt = 0
+        while cnt != k:
+            num, idx = heapq.heappop(min_heap)
+            num *= multiplier
+            heapq.heappush(min_heap, (num, idx))
+            cnt += 1
+        
+        for num, idx in min_heap:
+            res[idx] = num
+        
+        return res
+```

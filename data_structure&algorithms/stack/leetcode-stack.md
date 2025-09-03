@@ -642,3 +642,67 @@ class Solution:
                 return True
         return False
 ```
+
+## 1209. Remove All Adjacent Duplicates in String II[[Link](https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string-ii/description/)]
+
+```py
+"""
+Question Understanding
+- Input:
+    - str `s`: 
+    - int `k`: number of duplicate removal, choose k adjancent and equal letters
+- Opreation
+    - keep removing k duplicates untils no more k adjancent and equal letters
+- Output:
+    - str that has removed k duplciates
+- Rule:
+    -  answer is unique
+
+Clarifications:
+- Can k = 0 while `s` contains duplicates such as "abba"?
+- Can `s` contains duplicates but the num of duplicates != k?
+
+Cases:
+- s = "accba", k = 3 -> ret: "accba"
+- s = "acccdaaace", k = 3 -> ret: "adce"
+- s = "", k = 0 -> ret: ""
+- s = "abbccddeeffa", k = 2 -> ret : ""
+- s = "abbccddeeffga" k = 2 -> ret : "aga"
+
+Assumptions:
+- 1 <= s.length <= 10^5
+- `s` contains only valid acii characters, and only contains lowercase english letters
+- 2 <= k <= 10^5
+
+Approach:
+- Algo Analysis: Time: O(n); Space: O(n)
+- Genral Ideas:
+    - Stack for record current pattern and pop duplicates at the same time
+    - Each stack element store pair in [char, freq]
+    - Keep track of freq for every iteration (every iteartions of char, compare it with the top of the stack)
+- Maintain:
+    - `stack`: record current pattern for the final result pattern
+        - each element, a pair of [char, freq] to record current number of char have met
+- Steps:
+    - Iterate char in s
+        - If the top of the stack[-1][0] == char, increment freq by 1
+        - Else append a new [char, 1] in stack
+        - When the top of the stack[-1][1] == k, pop this element out of the stack
+    - Construct the final pattern within the stack and return 
+"""
+
+class Solution:
+    def removeDuplicates(self, s: str, k: int) -> str:
+        stack = []
+
+        for ch in s:
+            if stack and stack[-1][0] == ch:
+                stack[-1][1] += 1
+            else:
+                stack.append([ch, 1])
+            
+            if stack[-1][1] == k:
+                stack.pop()
+        
+        return ''.join([ch * cnt for ch, cnt in stack])
+```

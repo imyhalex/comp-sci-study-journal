@@ -798,3 +798,253 @@ class Solution:
         
         return res
 ```
+
+## 1968. Array With Elements Not Equal to Average of Neighbors[[Link](https://leetcode.com/problems/array-with-elements-not-equal-to-average-of-neighbors/description/)]
+
+```py
+"""
+Question Understanding:
+- Input:
+    - int arr `nums`
+        - 0-indexed
+        - contains distinct integers
+- Operations:
+    - Rearrange array in any order, as long as:
+        - (nums[i - 1] + nums[i + 1]) / 2 != nums[i]
+- Output:
+    - int arr: any order of `nums` that meets the aboved mentioned requirements
+
+Cases:
+- nums = [1, 2, 3, 4, 5]
+    - [1, 2, 4, 3, 5]
+    - []
+
+Assumptions:
+- 0 <= nums[i] <= 10^5
+- 3 <= nums.length <= 10^5
+
+Underlying Simple Operations
+- Sorting the array
+- Picking elements from both ends (largest/smallest)
+- Alternating placement to avoid middle-value conflicts
+- Simple comparisons between triplets
+
+Approach:
+- Algo Analysis: Time O(n log n) (due to sorting), Space O(n)
+- Clarify variables needed:
+  - l = left pointer
+  - r = right pointer
+  - res = result array
+- Maintain:
+  - `nums` sorted in ascending order
+  - Alternate picking from left and right
+- Steps:
+  - Step 1: Sort the array
+    - Reasoning: Ensures smallest and largest are far apart to break "average" patterns
+  - Step 2: Initialize two pointers (l=0, r=n-1)
+    - Reasoning: Needed to access smallest and largest efficiently
+  - Step 3: While res not full:
+    - Append nums[l], then increment l
+      - Reasoning: Place smallest remaining element
+    - Append nums[r], then decrement r
+      - Reasoning: Place largest remaining element
+  - Step 4: Return res
+    - Reasoning: Result guaranteed to avoid average condition since extremes are alternated
+"""
+
+class Solution:
+    def rearrangeArray(self, nums: List[int]) -> List[int]:
+        nums.sort()
+
+        l, r = 0, len(nums) - 1
+        res = []
+        while len(res) != len(nums):
+            res.append(nums[l])
+            l += 1
+            
+            if l <= r:
+                res.append(nums[r])
+                r -= 1
+        
+        return res
+```
+
+## 2491. Divide Players Into Teams of Equal Skill[[Link](https://leetcode.com/problems/divide-players-into-teams-of-equal-skill/description/)]
+
+```py
+"""
+Question Understanding:
+- Input:
+    - int arr `skill`
+        - even length
+- Opration:
+    - Divide the players into n / 2 teams in size 2
+    - sum of the skill of each teams are equal
+    - calculate `chemistry` -> product of assigned two member in each team
+- Output:
+    - int: sum of `chemistry` (from all teams)
+    - return -1 if no way to divide player
+
+Assumptions:
+- 2 <= skill.length <= 10^5
+- 1 <= skill[i] <= 1000
+
+Approach:
+- Maintain:
+    - `total` = sum of the `skill
+    - `tatget` -> target skill sum per pair
+    - `count` -> a hashmap for skill freq
+    - res -> accumulated chemistry sum
+- Logic:
+    - count[s] to know if a skill is avaible
+    - check for complement  `diff` = target - s
+- Steps:
+    - Compute the total sum
+    - Compute target = total / (n / 2)
+    - Feed the hashmap `count` in (num -> freq) pair
+    - Iterate the `skill`
+        - 
+"""
+
+class Solution:
+    def dividePlayers(self, skill: List[int]) -> int:
+        total = sum(skill)
+
+        if total % (len(skill) // 2):
+            return -1
+        
+        count = Counter(skill)
+        target = total // (len(skill) // 2)
+        res = 0
+
+        for s in skill:
+            if not count[s]:
+                continue
+
+            diff = target - s
+            if not count[diff]:
+                return -1
+            
+            res += s * diff
+            count[s] -= 1
+            count[diff] -= 1
+
+        return res
+```
+
+## 162. Find Peak Element[[Link](https://leetcode.com/problems/find-peak-element/description/)]
+
+```py
+"""
+Question Understanding:
+- Input:
+    - int arr `nums`
+- Objective:
+    - Try to find the pattern nums[i - 1] < nums[i] > nums[i + 1]
+- Output:
+    - retgurn any index i that safisty nums[i - 1] < nums[i] > nums[i + 1] pattern
+
+Approach:
+- Algo Analysis: Time O(log n), Space O(1)
+- Clarify variables needed:
+    - l = left boundary
+    - r = right boundary
+    - m = mid index
+- Maintain:
+    - l starts at 0
+    - r starts at n - 1
+- Steps:
+    - While l < r:
+        - Compute m = l + (r - l) // 2
+        - Compare nums[m] with nums[m+1]
+        - If nums[m] < nums[m+1]:
+            - Reasoning: peak must lie on the right side because slope is rising
+            - Move l = m + 1
+        - Else:
+            - Reasoning: peak is at m or to the left because slope is falling
+            - Move r = m
+    - When loop ends, l == r
+    - Return l as the peak index
+- Reasoning:
+    - Each decision halves the search space
+    - Guarantees finding a peak because slopes guarantee a peak somewhere
+""" 
+
+class Solution:
+    def findPeakElement(self, nums: List[int]) -> int:
+        l, r = 0, len(nums) - 1
+        
+        while l < r:
+            m = l + (r - l) // 2
+
+            if nums[m] < nums[m + 1]:
+                l = m + 1
+            else:
+                r = m
+        return l
+```
+
+## 2300. Successful Pairs of Spells and Potions[[Link](https://leetcode.com/problems/successful-pairs-of-spells-and-potions/description/)]
+
+```py
+"""
+Qustion Understanding:
+- Inputs:
+    - `spells`: int arr
+    - `potions`: int arr
+    - `success`: int
+- Operations:
+    - for each spells[i] * each elements in potions[j]
+    - count the number of products >= `success`
+- Output:
+    - int arr: the count of number of successful spell and potion products
+
+Clarfications:
+- Can input `success` be 0?
+- Does the input spells and potions sorted in ascending order?
+
+Cases:
+- spells = [1, 2, 3], potions = [1, 2, 3, 4], success = 5; ret -> [0, 2, 6]
+
+Assumptions:
+- 1 <= spells.length <= 10^5
+- 1 <= potions.length <= 10^5
+- 1 <= spells[i], potions[j] <= 10^5
+- 1 <= success <= 10^5
+
+Approach:
+- Algo Analysis: Time: O(n log m + m log m), Space: O(n)
+- Simple operations:
+    - sort potions to ascending order
+    - two ptrs l and r from start and the end of arr simultaniously
+    - compute mid point m, for each spell, check spell * potions[m] >= sucess
+    - append to res potions.length - l 
+- Maintain:
+    - l , r = 0, potions.length - 1
+- Steps:
+    - sort the potions
+    - For each spell:
+        - Binary search on potitions fo find first spell * potions[m] >= sucess
+        - Compute the count = potion.length - 1
+        - Store in output
+"""
+
+class Solution:
+    def successfulPairs(self, spells: List[int], potions: List[int], success: int) -> List[int]:
+        potions.sort()
+        res = []
+
+        for spell in spells:
+            l, r = 0, len(potions) - 1
+            idx = len(potions)
+
+            while l <= r:
+                m = l + (r - l) // 2
+                if spell * potions[m] >= success:
+                    r = m - 1
+                    idx = m
+                else:
+                    l = m + 1
+            res.append(len(potions) - idx)
+        return res
+```
