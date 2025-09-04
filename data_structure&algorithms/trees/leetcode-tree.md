@@ -1457,3 +1457,108 @@ class Solution:
         
         return dfs(root)
 ```
+
+## 2331. Evaluate Boolean Binary Tree[[Link](https://leetcode.com/problems/evaluate-boolean-binary-tree/description/)]
+
+```py
+# Time: O(n)
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def evaluateTree(self, root: Optional[TreeNode]) -> bool:
+        OR = 2
+        AND = 3
+        
+        def dfs(node):
+            if not node.left and not node.right:
+                return node.val == 1
+            
+            left_val = dfs(node.left)
+            right_val = dfs(node.right)
+
+            if node.val == OR:
+                return left_val or right_val
+            if node.val == AND:
+                return left_val and right_val
+        
+        return dfs(root)
+```
+
+## 2196. Create Binary Tree From Descriptions[[Link](https://leetcode.com/problems/create-binary-tree-from-descriptions/description/)]
+
+```py
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+"""
+Problem Understanding:
+- Input:
+    - A 2D array `descriptions`, where each element is `[parent, child, isLeft]`
+    - Each row describes one parent-child relationship
+        - If `isLeft == 1`: child is left child of parent
+        - If `isLeft == 0`: child is right child of parent
+- Output:
+    - The root of the constructed binary tree
+- Constraints:
+    - All values are unique
+    - The binary tree is valid
+    - Number of descriptions = number of edges = nodes - 1 (tree property)
+
+My Approach & Design:
+Approach:
+- Algo Analysis: Time O(n), Space O(n)
+- Clarify variables needed:
+    - `nodes` dictionary: value -> TreeNode
+    - `children` set: track all child values
+- Maintain:
+    - `nodes`: ensures we reuse existing TreeNodes
+    - `children`: ensures we can later find root
+- Steps:
+    1. Initialize empty `nodes` dictionary and `children` set
+       - Reasoning: we need to dynamically create/reuse nodes
+    2. For each `[p, c, isLeft]` in descriptions:
+       - If p not in `nodes`, create TreeNode(p)
+         - Reasoning: ensures node exists
+       - If c not in `nodes`, create TreeNode(c)
+         - Reasoning: ensures child node exists
+       - If isLeft == 1 → assign nodes[p].left = nodes[c]
+         - Reasoning: correctly sets left child
+       - Else → assign nodes[p].right = nodes[c]
+         - Reasoning: correctly sets right child
+       - Add c into `children` set
+         - Reasoning: root cannot be child
+    3. After loop, find root:
+       - root = (set(nodes.keys()) - children).pop()
+         - Reasoning: root is node never seen as child
+    4. Return nodes[root]
+"""
+class Solution:
+    def createBinaryTree(self, descriptions: List[List[int]]) -> Optional[TreeNode]:
+        nodes = {} # value -> TreeNode pair
+        children = set()
+
+        for p, c, is_left in descriptions:
+            if p not in nodes:
+                nodes[p] = TreeNode(p)
+            if c not in nodes:
+                nodes[c] = TreeNode(c)
+            
+            if is_left:
+                nodes[p].left = nodes[c]
+            else:
+                nodes[p].right = nodes[c]
+            
+            children.add(c)
+        
+        for val in nodes.keys():
+            if val not in children:
+                return nodes[val]
+```
