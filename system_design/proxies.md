@@ -80,6 +80,17 @@
         - Load balancer is a specialized reverse proxy that balance load
         - Deploying a load balancer is useful when you have multiple servers. 
         - Reverse proxy can be useful even with just one web server or application server
+    - Benefits includes:
+        - `Increased security` - Hide information about backend servers, blacklist IPs, limit number of connections per client
+        - `Increased scalability and flexibility` - Clients only see the reverse proxy's IP, allowing you to scale servers or change their configuration
+        - `SSL termination` - Decrypt incoming requests and encrypt server responses so backend servers do not have to perform these potentially expensive operations
+        - `Compression` - Compress server responses
+        - `Caching` - Return the response for cached requests
+        - `Static content` - Serve static content directly
+            - HTML/CSS/JS
+            - Photo
+            - Videos
+            - Etc
     - Disadvantage: reverse proxy
         - Introduce reverse proxy results in increase complexity
         - A single reverse proxy is a single point of failure, configuring multiple reverse proxies (ie a failover) further increases complexity.

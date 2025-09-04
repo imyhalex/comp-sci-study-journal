@@ -358,4 +358,38 @@ A `stateless server` does not remember anything about past requests.
 - This is important for scalability and fault tolerant (easy to add/remove servers, no stricky sessions needed)
 
 A `stateful server` remembers information about the client between requests
-- 
+- The server stores state (session data, authentication, history, etc) in memory or storage
+- each request may rely on previous interactions
+
+__Example__:
+1. Stateless:
+    - HTTP: Each HTTP request (GET/POST) is independent. The server doesn’t remember if you visited before.
+        - Example: If you fetch a web page twice, the server doesn’t know it’s the same user unless you send cookies or tokens.
+    - REST APIs: Each request must include authentication (e.g., API key, JWT). The server doesn’t keep track of session state.
+2. Stateful:
+    - Traditional online shopping cart without cookies/sessions:
+        - The server keeps your cart in memory. If the server restarts, your cart is gone.
+    - FTP sessions:
+        - The server remembers your login and working directory across multiple commands.
+    - Database connections:
+        - Once you connect, the DB server remembers your session state (transactions, locks, etc.).
+
+## What is a Session?
+Is a temporary "conversation" or sateful interaction between a client and a server (or between two systems)
+- I starts when client connects or logs in
+- It ends when the client logs out, times out, or the server closes the connection
+- During the session, the server may remember information about the client (the "state")
+
+__Example__:
+1. Web sessions:
+    - When you log into a website:
+        - The server creates a session object to store info like your user ID, login time, preferences, or shopping cart.
+        - It gives you a session ID (often stored in a cookie)
+        - Each request you make sends this ID back to the server 
+2. Database sessions:
+    - When your app connects to a database
+        - A session is established for that connection
+        - The DB remembers your current transaction state, locks, temp variables, etc
+3. Network sessions (OSI layer 5, Session Layer):
+    - A session is a managed, ordered data exchanged between two endpoints
+    - E.g., a VoIP call or remote desktop connection is a “session.”

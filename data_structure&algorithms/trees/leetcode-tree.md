@@ -1384,3 +1384,76 @@ class Solution:
         root1.right = self.mergeTrees(root1.right, root2.right)
         return root1
 ```
+
+## 938. Range Sum of BST[[Link](https://leetcode.com/problems/range-sum-of-bst/description/)]
+
+```py
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+"""
+Question Understanding:
+- Input:
+    - A binary search tree (BST) root
+    - Two integers low and high
+- Output:
+    - The sum of values of all nodes where low <= node.val <= high
+- Key property: BST structure
+    - Left child < node.val < Right child
+
+Clarifications:
+- Can low and high be outside the range of tree values?
+- - Should we assume the BST is valid and not malformed?
+
+Assumptions:
+- low <= high always holds
+- Tree cane be skewed (more like a LL) or balanced
+
+Simple Operations:
+- Compare node.val with low and high
+- Conditional recursion:
+    - If node.val < low → skip left subtree
+    - If node.val > high → skip right subtree
+    - Otherwise, include node.val and recurse both sides
+- Accumulate sum
+
+My Approach & Design:
+Approach:
+- Algo Analysis: Time O(n) in worst case, Space O(h) where h = tree height
+- Maintain:
+    - Recursive DFS function
+    - Running sum
+- Steps:
+    - Step 1: If node is None, return 0
+      - Reasoning: No value to contribute
+    - Step 2: If node.val < low → recurse only right
+      - Reasoning: All left values will be smaller than node.val → < low → skip
+    - Step 3: If node.val > high → recurse only left
+      - Reasoning: All right values will be larger than node.val → > high → skip
+    - Step 4: If low <= node.val <= high → add node.val
+      - Reasoning: Node is inside range
+    - Step 5: Continue recursion on left and right
+      - Reasoning: Still need to check valid children
+    - Step 6: Return accumulated sum
+"""
+class Solution:
+    def rangeSumBST(self, root: Optional[TreeNode], low: int, high: int) -> int:
+        res = 0
+
+        def dfs(node):
+            if not node:
+                return 0
+            
+            if node.val < low:
+                return dfs(node.right)
+            if node.val > high:
+                return dfs(node.left)
+            
+            return node.val + dfs(node.left) + dfs(node.right)
+        
+        return dfs(root)
+```
