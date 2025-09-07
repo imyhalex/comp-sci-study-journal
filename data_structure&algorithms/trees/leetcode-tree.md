@@ -1562,3 +1562,73 @@ class Solution:
             if val not in children:
                 return nodes[val]
 ```
+
+## 314. Binary Tree Vertical Order Traversal[[Link](https://leetcode.com/problems/binary-tree-vertical-order-traversal/description/)]
+
+```py
+"""
+Problem Understanding:
+- Input:
+    - Root of a binary tree
+- Output:
+    - A list of lists of integers, where each inner list represents nodes grouped by vertical column
+    - Within each column:
+        - Nodes should be ordered top to bottom
+        - If two nodes are in the same row and column → order left to right
+
+Clarifying Questions:
+- Can the binary tree be empty? If so, should we return an empty list? 
+
+Cases:
+- root = [], ret: []
+- input tree with only left or only right child, ret: each node with its own colum
+- Multiple nodes at the same row/col -> must ensure the left-to-right order
+
+Assumptions:
+- -100 <= Node.val <= 100
+- number of nodes is within 100
+
+Approach:
+- Simple Oprations:
+    - BFS Traversal
+    - Keep track:
+        - column index
+    - a hashmap to group nodes by column
+- Maintain:
+    - `q`: a queue to store pair (node, col)
+    - `col_map`: a hashmap to map col -> list of node values
+    - `min_col` and `max_col`: track range of colums
+- Steps:
+    - Start with the root at col = 0
+    - For each node in BFS:
+        - Add its value into col_map[col]
+        - If node has left child -> enqueue with col - 1
+        - If nodehas right child -> enqueue with col + 1
+    - Track min_col and max_col during traversal
+    - After BFS:
+        - Collect results from col_map, construct 2d arr, and return
+"""
+
+class Solution:
+    def verticalOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        if not root:
+            return []
+        
+        q = deque([(root, 0)])
+        col_map = defaultdict(list)
+        min_col, max_col = 0, 0
+
+        while q:
+            node, col = q.popleft()
+            col_map[col].append(node.val)
+
+            min_col = min(min_col, col)
+            max_col = max(max_col, col)
+
+            if node.left:
+                q.append((node.left, col - 1))
+            if node.right:
+                q.append((node.right, col + 1))
+            
+        return [col_map[col] for col in range(min_col, max_col + 1)]
+```
