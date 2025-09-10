@@ -1,7 +1,16 @@
 # Relational Models
-- Structure
-- Integrity
-- Maniputation
+The relational model defines a database abstraction based on relations to avoid maintenance overhead
+
+__Key Features__
+- Store database in simple data structure
+- Physical storage left up to the DBMS implementation
+- Access data through high-level language
+- DBMS figures out best execution strategy
+
+__Properties__
+- Structure: The definition of the database's relations and their contents
+- Integrity: Ensure the database's contents satisfy constraint
+- Maniputation: Programming interface for accessing and modifying the contents of a database
 
 __Relation__ is unordered set that contains the relationship of attributes that represents entity
 
