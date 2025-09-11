@@ -2,12 +2,39 @@
 
 __SQL Components:__
 - Data Manipulation Language (DML)
+    - Purpose: Work with the data inside tables
+    - Think: CURD oprations
 - Data Definition Language (DDL)
+    - Purpose: Define and manage the structure of the databse objects
+    - Think: Define the blueprint of the database
 - Data Control Language (DCL)
+    - Purpose: Control accessd and permissions
+    - Think: "Who" can do what
 - Also includes:
     - View definition
+        - Purpose: Create virtual tables that are stored queries
+        - Useful for:
+            - Simplifying queries
+            - Providing abstraction/security(hide sensitive columns)
     - Integrity & Referential Constraints
+        - Purpose: Ensure valid, consistent data.
     - Transactions
+        - Purpose: Group multiple operations into a single logical unit, that is
+            - Atomic
+            - Consistent
+            - Isolated
+            - Durable
+        - Think: Bank transfer -- debit and credit must both succeed or bot fail
+
+Summary Tables:
+| Component                   | Purpose            | Examples                                 |
+| --------------------------- | ------------------ | ---------------------------------------- |
+| **DML**                     | Manipulate data    | `SELECT`, `INSERT`, `UPDATE`, `DELETE`   |
+| **DDL**                     | Define schema      | `CREATE`, `ALTER`, `DROP`, `TRUNCATE`    |
+| **DCL**                     | Control access     | `GRANT`, `REVOKE`                        |
+| **View Definition**         | Virtual tables     | `CREATE VIEW ...`                        |
+| **Integrity & Constraints** | Data consistency   | `PRIMARY KEY`, `FOREIGN KEY`, `NOT NULL`, `UNIQUE`, `CHECK` |
+| **Transactions**            | Reliability (ACID) | `BEGIN`, `COMMIT`, `ROLLBACK`            |
 
 __Aggregations__
 - Functions that return a single vaue from a bag of tuples
@@ -147,8 +174,27 @@ __Cross Join__
 
 __Inner Join__
 - Every Pair tht matches; drop non-matching pairs
-- Natural Join is a shorthand for an Inner Join that automatically matches columns with the same name in both tables.
+- `Natural Join` is a shorthand for an Inner Join that automatically matches columns with the same name in both tables.
     - It only returns rows where those column values match.
+    - Diff between `INNER JOIN` and `NATURAL JOIN`:
+        - `INNER JOIN` is a general join where you explicitly say which columns must match.
+        - `NATURAL JOIN` is not the same thing — it’s a shorthand form of inner join that automatically uses all columns with the same name in both tables as the join condition.
+            ```sql
+            -- Natural Join
+            SELECT *
+            FROM Students
+            NATURAL JOIN Enrollments;
+
+            -- Explicit Inner Join
+            SELECT *
+            FROM Students s
+            INNER JOIN Enrollments e
+            ON s.student_id = e.student_id;
+            ```
+        - Why `NATURAL JOIN` is not common:
+            - If tables have multiple columns with the same name, SQL will join on all of them (sometimes unintentionally).
+            - If schema changes (e.g., new column with the same name is added), your query results can change silently.
+
 - Theta / Equi Join
     - Match tuples using some arbitary join predicate define by theta
     - if theta is just equality predicate, then it is called an "Equi Join"
