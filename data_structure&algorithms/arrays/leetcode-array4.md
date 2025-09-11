@@ -1048,3 +1048,58 @@ class Solution:
             res.append(len(potions) - idx)
         return res
 ```
+
+## 1800. Maximum Ascending Subarray Sum[[Link](https://leetcode.com/problems/maximum-ascending-subarray-sum/description/)]
+
+```py
+"""
+Quesiton Understanding:
+- Input:
+    - `nums` integer arr
+- Output:
+    - Count the maximum possible sum of any of strticly increasing subarray in `nums`
+
+Clarification:
+- Can i assume the length of subarr > 1?
+- Can I assume the nums.length > 1?
+
+Cases:
+- nums = [1], ret: 0
+- nums = [10,20,30,40,50], ret: 150
+
+Simple Operation
+    - Construct a window only contains the subarr in ascending order
+    - Condtion checks
+        - grow the window if next element is greater than current element
+        - or reset and shift windwo if the next element is less than current element
+
+Approach:
+- Algo Analysis: Time O(n), Space O(1)
+- Maintain:
+    - a right ptr `r` = 0: head (right end) of the window
+    - `res`: keep track of the current max sum within the window; initial res = 0
+- Steps:
+    - Iterate `r` from 0 -> n - 1
+        - increment the curr_sum += nums[r] if the nums[r] > prev
+        - if the nums[r] is less than prev
+            - reset the curr_sum = nums[r]
+        - assign prev = nums[r]
+        - keep recording the current maximun by updating res = max(res, curr_sum)
+    - Return the result `res`
+"""
+
+class Solution:
+    def maxAscendingSum(self, nums: List[int]) -> int:
+        res = 0
+        n = len(nums)
+        prev, curr_sum = 0, 0
+
+        for r in range(n):
+            if nums[r] > prev:
+                curr_sum += nums[r]
+            else:
+                curr_sum = nums[r]
+            prev = nums[r]
+            res = max(res, curr_sum)
+        return res
+```
