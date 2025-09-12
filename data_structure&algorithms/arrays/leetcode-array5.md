@@ -1,6 +1,6 @@
 ## 2226. Maximum Candies Allocated to K Children[[Link](https://leetcode.com/problems/maximum-candies-allocated-to-k-children/description/)]
 
-- vide explaination[[Link](https://neetcode.io/solutions/maximum-candies-allocated-to-k-children)]
+- video explaination[[Link](https://neetcode.io/solutions/maximum-candies-allocated-to-k-children)]
 
 ```py
 """
