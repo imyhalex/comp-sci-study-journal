@@ -1,4 +1,4 @@
-## 2226. Maximum Candies Allocated to K Children[[Link](https://leetcode.com/problems/maximum-candies-allocated-to-k-children/description/)]
+## *2226. Maximum Candies Allocated to K Children[[Link](https://leetcode.com/problems/maximum-candies-allocated-to-k-children/description/)]
 
 - video explaination[[Link](https://neetcode.io/solutions/maximum-candies-allocated-to-k-children)]
 
@@ -61,5 +61,79 @@ class Solution:
                 l = m + 1
             else:
                 r = m - 1
+        return res
+```
+
+## *2616. Minimize the Maximum Difference of Pairs[[Link](https://leetcode.com/problems/minimize-the-maximum-difference-of-pairs/)]
+
+- video explaination[[Link](https://neetcode.io/solutions/minimize-the-maximum-difference-of-pairs)]
+
+```py
+"""
+Question Understanding:
+- Input:
+    - `nums`: 0-index integr array
+    - `p: integer
+- Defnition:
+    - difference of a pair = abs(nums[i] - nums[j])
+- Objective:
+    - for each time, find the p pairs of indices, and each pair, find the diff from small to large, 
+    - and among these p differences, take the maximum difference.
+- Output:
+    - max difference between these pairs
+
+Assumptions:
+- 1 <= nums.length <= 10^5
+- 1 <= p <= (nums.length) / 2
+- 1 <= nums[i] <= 10^5
+
+Cases:
+- nums = [1], p = 1, ret: 0
+- nums = [1], p = 0, ret: (not considerd)
+- nums = [2, 1, 3], p = 1, (can nums.length odd ?)
+
+Genral Idea:
+- The origin indeces of elements doesn't matter
+    - sort the `nums` into ascending order
+- Binary Search Approach
+    - calcuate the mid point
+    - the mid point needs to meet some condition
+    - if meet codition, shift r = m - 1 or l = m + 1
+- Things needs to work with:
+    - What is the search range?
+    - What conditions should check?
+    - How to update the final result?
+
+Approach:
+- Algo Analysis: Time: O(n log n), Space: O(1)
+"""
+
+class Solution:
+    def minimizeMax(self, nums: List[int], p: int) -> int:
+        if p == 0:
+            return 0
+
+        def is_valid(threshold):
+            i, count = 0, 0
+            while i < len(nums) - 1:
+                if abs(nums[i] - nums[i + 1]) <= threshold:
+                    count += 1
+                    i += 2
+                else:
+                    i += 1
+                if count == p:
+                    return True
+            return False
+        
+        nums.sort()
+        l, r = 0, nums[-1] - nums[0] # smallest and maximum allowed differences
+        res = nums[-1] - nums[0]
+        while l <= r:
+            m = l + (r - l) // 2
+            if is_valid(m):
+                res = m
+                r = m - 1
+            else:
+                l = m + 1
         return res
 ```
