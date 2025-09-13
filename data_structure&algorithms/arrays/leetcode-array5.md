@@ -137,3 +137,89 @@ class Solution:
                 l = m + 1
         return res
 ```
+
+## 2064. Minimized Maximum of Products Distributed to Any Store[[Link](https://leetcode.com/problems/minimized-maximum-of-products-distributed-to-any-store/)]
+
+```py
+"""
+Question Understanding:
+- Input:
+    - integer `n`: number of special retail store
+    - integer `m`: number of product types
+    - integer arr `quantities`
+        - quantities[i] : number of products under ith product type
+- Objective:
+    - distribute all products within `quantities`
+    - give each store only one product type but any amout
+    - trying to distributed as evenly as possible
+- Output
+    - return the minimal requirement of the maximum number such that (distribute all products within `quantities`)
+
+Assumptions:
+- 1 <= m <= n <= 10^5
+- m == quantities.length
+- 1 <= quantities[i] <= 10^5
+
+Edge Cases:
+- n = 1, quantities = [X] → output = X
+- quantities = [1,1,1,1], n=10 → output = 1
+- Very large quantities with large n
+- quantities has one large and many small → balancing matters
+
+Underlying Simple Operations:
+- Division ceil(q / limit) → number of stores needed for product q if each store can take at most limit
+- Summation across product types → total stores needed for a candidate limit
+- Binary search for smallest limit such that total stores needed ≤ n
+
+Brute Force Approach:
+- Start with maximum quantity = max(quantities)
+- Try decreasing limits from max down to 1, check if possible
+- For each limit, calculate how many stores required
+- Return first feasible limit
+- Complexity O(max(quantities) * m) → too large (up to 1e5 * 1e5)
+
+My Approach & Design:
+Approach:
+- Algo Analysis: Time O(m log(max_q)), Space O(1)
+- Clarify variables needed:
+    - left, right: search range for max load
+    - mid: candidate max load
+    - total_stores_needed: sum(ceil(q / mid) for q in quantities)
+- Maintain:
+    - quantities (sorted or unsorted, doesn’t matter for calculation)
+- Steps:
+    - Step 1: Initialize left=1, right=max(quantities)
+      - Reasoning: min load cannot be less than 1, cannot exceed largest quantity
+    - Step 2: Binary search while left < right
+      - Reasoning: search space monotonic
+    - Step 3: Compute stores needed for mid
+        - total = 0
+        - for q in quantities: total += ceil(q / mid)
+        - If total ≤ n → feasible → shrink right
+        - Else → infeasible → left = mid+1
+      - Reasoning: if we can satisfy with mid, we can also satisfy with larger mid
+    - Step 4: At the end, left=right=answer
+      - Reasoning: binary search invariant guarantees minimal feasible limit
+"""
+
+class Solution:
+    def minimizedMaximum(self, n: int, quantities: List[int]) -> int:
+        def can_distribute(limit):
+            total = 0
+            for q in quantities:
+                total += (q + limit - 1) // limit  # ceil division
+                if total > n:
+                    return False
+            return total <= n
+        
+        l, r = 1, max(quantities)
+        res = 0
+        while l <= r:
+            m = l + (r - l) // 2
+            if can_distribute(m):
+                res = m
+                r = m - 1
+            else:
+                l = m + 1
+        return res
+```
