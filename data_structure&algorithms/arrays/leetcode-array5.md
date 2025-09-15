@@ -223,3 +223,82 @@ class Solution:
                 l = m + 1
         return res
 ```
+
+## 1760. Minimum Limit of Balls in a Bag[[Link](https://leetcode.com/problems/minimum-limit-of-balls-in-a-bag/description/)]
+
+```py
+"""
+Question Understanding:
+- Input:
+    - `nums`: int arr, each index i represent ith bag, nums[i] is the amount of ball contains in ith bag
+    - `maxOperations`: integer
+- Within the `maxOperations` time:
+    - split the balls in a bag, and bag after slpit should have number of balls > 0
+- Output:
+    - minimal number of ball in each bag that lead to penalty
+
+Clafitications:
+- can num = [1], maxOperations = 2?
+- for final result, does every bags contains same amount of balls?
+
+Assumptions:
+- 2 <= nums[i] <= 10^4
+- 2 <= nums.length <= 10^4
+
+General Idea
+- Can be solved by Binary Search algo, two ptrs (left and right ptr) defines a search range
+    - Defines condition for search range
+    - check validation, wither shift left ptr or right ptr to adjust search range
+- Question to solve:
+    - What is the search range for this question
+        - search range: define minimum and maximum allowed bag size
+        - minimum: 1 from a bag
+        - maximum: max(nums) from a bag
+    - What is the logic for search range condition
+        - evalutate and determin the number of operations need for chosen bag size
+    - How to update the final result during opration
+        - search range cacluation: m = l + (r - l) // 2
+        - during the evluation of the search range conditon
+            - if true: final result is assigned to the current allowed bag size, and try to find smaller values shift r = m -1
+            - else: we need more splits, try larger penalty shift l = m + 1
+
+Approach:
+- Algo Analysis: Time O(n log max(nums)), Space O(1)
+- Maintain:
+    - `l`: l = 1, minimal allowed bag size
+    - `r`: r = max(nums), maximal allowed bag size
+    - `res`: final result
+- Steps:
+    - Helper func can_spllit(limit)
+        - test if condition: calculated `opertions` <= maxOperations
+        - operations = (nums[i] - 1) // limit
+    - While l <= r
+        - find the mid point of the search range 
+        - evalutate the condition can_split(limit)
+        - if can_split(m)
+            - res = m
+            - r = m - 1
+        - else
+            - l = m + 1
+    - Return the final result `res`
+"""
+
+class Solution:
+    def minimumSize(self, nums: List[int], maxOperations: int) -> int:
+        def can_split(limit):
+            operations = 0
+            for num in nums:
+                operations += (num - 1) // limit
+            return operations <= maxOperations
+        
+        l, r = 1, max(nums)
+        res = 0
+        while l <= r:
+            m = l + (r - l) // 2
+            if can_split(m):
+                res = m
+                r = m - 1
+            else:
+                l = m + 1
+        return res
+```

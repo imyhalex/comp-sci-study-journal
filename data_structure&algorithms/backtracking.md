@@ -771,3 +771,145 @@ class Solution:
         dfs(0, 0, "")
         return res
 ```
+
+## 1415. The k-th Lexicographical String of All Happy Strings of Length n[[Link](https://leetcode.com/problems/the-k-th-lexicographical-string-of-all-happy-strings-of-length-n/description/)]
+
+```py
+"""
+Problem Understanding
+- We need to generate the k-th lexicographical "happy string" of length n.
+- A happy string:
+  - Characters from {‘a’, ‘b’, ‘c’}
+  - No two adjacent characters are the same.
+- Input:
+  - n: length of the string (1 ≤ n ≤ 10)
+  - k: the rank in lexicographical order (1 ≤ k ≤ 100)
+- Output:
+  - The k-th happy string or empty string if fewer than k exist.
+
+Clarifying Questions
+- Are we guaranteed that k is always valid? (No, if k exceeds the number of happy strings, return "")
+- Should lexicographical order follow standard ASCII order (‘a’ < ‘b’ < ‘c’)? (Yes)
+- Is n small enough to allow backtracking generation? (Yes, max n = 10)
+
+Assumptuion:
+- 1 <= n <= 10
+- 1 <= k <= 100
+
+Approach:
+- Algo Analysis: Time O(2^n), Space O(n) recursion stack.
+- Instead of sorting all, generate in lex order directly with DFS.
+- Clarify variables needed:
+  - result_counter: to track number of happy strings generated so far.
+  - answer: to store k-th string.
+  - path: current building string during recursion.
+- Maintain:
+  - path (string or list)
+  - count (global or nonlocal variable)
+  - answer (result once found)
+- Steps:
+  1. Start DFS with empty path.
+     - Reasoning: Build string character by character.
+  2. At each step, try adding 'a', 'b', 'c' in order if not equal to last character.
+     - Reasoning: Avoid consecutive duplicates.
+  3. When path length == n, increment counter.
+     - Reasoning: Found one valid happy string.
+  4. If counter == k, store answer and stop recursion.
+     - Reasoning: We only care about the k-th string.
+  5. If finished recursion without reaching k, return "".
+     - Reasoning: Fewer than k happy strings exist.
+"""
+
+class Solution:
+    def getHappyString(self, n: int, k: int) -> str:
+        self.count = 0
+        self.answer = ""
+
+        def dfs(path):
+            if len(path) == n:
+                self.count += 1
+                if self.count == k:
+                    self.answer = ''.join(path)
+                return
+
+            for ch in ['a', 'b', 'c']:
+                if path and path[-1] == ch:
+                    continue
+                if not self.answer:
+                    dfs(path + [ch])
+        dfs([])
+        return self.answer
+```
+
+## 1849. Splitting a String Into Descending Consecutive Values[[Link](https://leetcode.com/problems/splitting-a-string-into-descending-consecutive-values/description/)]
+
+```py
+"""
+Question Understanding:
+- Input:
+    - `s`: str contains only digit
+- Oprations:
+    - split `s` to let each substring in descending order and substrs[i] - substrs[i + 1] = 1
+- Output:
+    - bool, return true if splitted result can form a descending order else return false
+
+Clarifications:
+- Do we require at least 2 substrings? (Yes, must split into ≥ 2 parts).
+
+Assumptions
+- 1 <= s.length <= 20
+- s only consists of digits
+- At least two substrs required
+
+Genral Ideas:
+- a backtracking to try every possibilities for every digits
+- questions to solve:
+    - what is the decision tree looks like
+    - what is the base case
+    - what parameter is need for recursive call
+
+Approach:
+- Algo Analysis: Time ~O(2^n), Space O(n)
+- Use DFS backtracking with pruning.
+- Clarify variables needed:
+  - prev: last used number (integer).
+  - index: current position in string.
+  - count: number of substrings used.
+- Maintain:
+  - Recursion state (index, prev, count).
+- Steps:
+  1. Start DFS from index=0, no prev value yet.
+     - Reasoning: We must build first number arbitrarily.
+  2. At each step, try every possible substring s[index:i].
+     - Reasoning: Generate candidate number.
+  3. If no prev, accept as first number and continue.
+     - Reasoning: First number sets starting point.
+  4. Else, check:
+     - If candidate == prev - 1, continue recursion.
+     - Reasoning: Must descend by exactly 1.
+     - If > prev, skip (invalid).
+  5. If index reaches len(s) and count ≥ 2, return True.
+     - Reasoning: Entire string used and valid sequence.
+  6. If recursion finishes without success, return False.
+"""
+
+class Solution:
+    def splitString(self, s: str) -> bool:
+        n = len(s)
+
+        def dfs(index, prev, count):
+            if index == n:
+                return count >= 2
+
+            num = 0
+            for i in range(index, n):
+                num = num * 10 + int(s[i])
+                if prev is None or num == prev - 1:
+                    if dfs(i + 1, num, count + 1):
+                        return True
+                elif prev is not None and num >= prev:
+                    break
+            return False
+        
+        return dfs(0, None, 0)
+```
