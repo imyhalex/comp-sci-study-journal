@@ -1,6 +1,10 @@
 # Relational Models
 The relational model defines a database abstraction based on relations to avoid maintenance overhead
 
+__Data Independence__
+- Physical Data Independence
+- Logical Data Independence
+
 __Key Features__
 - Store database in simple data structure
 - Physical storage left up to the DBMS implementation

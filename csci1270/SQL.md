@@ -220,4 +220,11 @@ __Inner Join__
     - __This is not techinally an inner join__
 
 __Outer Join__
-- Every pair that matches; and keep all non-matching tuples from one or both sides & fill the missing side (if exists) with NULLs
+- Every pair that matches; and keep all non-matching tuples from one or both sides & fill the missing side (if exists) with NULLsq
+- Left Outer Join (LEFT JOIN) (R⟕S)
+    - Genrate all combinations of tuples in R and S that are equal on their shared attributes, in addition to tuples in R that have no matching tuples in S.
+- Right Outer Join (RIGHT JOIN) (R⟖S)
+    - Same as LEFT JOIN but with the input relations reversed
+- Full Outer Join (R⟗S)
+    - Uion of LEFT and RIGHT JOIN
+
