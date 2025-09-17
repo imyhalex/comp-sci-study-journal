@@ -841,7 +841,7 @@ class Solution:
         return self.answer
 ```
 
-## 1849. Splitting a String Into Descending Consecutive Values[[Link](https://leetcode.com/problems/splitting-a-string-into-descending-consecutive-values/description/)]
+## *1849. Splitting a String Into Descending Consecutive Values[[Link](https://leetcode.com/problems/splitting-a-string-into-descending-consecutive-values/description/)]
 
 ```py
 """
@@ -912,4 +912,151 @@ class Solution:
             return False
         
         return dfs(0, None, 0)
+```
+
+## 1980. Find Unique Binary String[[Link](https://leetcode.com/problems/find-unique-binary-string/description/)]
+
+```py
+"""
+Question Understanding:
+- Input:
+    - `num`: string arr, length in `n`, each nums[i] is unique binary str
+- Output:
+    - a binary str in length `n` that does not appear in `num`
+
+Assumption:
+- 1 <= n <= 10
+- n == nums.length
+- Guaranteed to be at least one binary string is missing
+
+Cases:
+- nums = ["01", "10"]
+
+General Idea:
+- build a hash table for current exisited binaries
+- backtrack every possible outcome with recursive call
+- constrtuct a decision tree with depth n
+    - branch 1: 0 -> 0 , 1 
+    - branch 2: 1 -> 0, 1
+    - each path is a possible binary
+- questions to solve:
+    - how to define the base case
+        - if the curent recorded result length == n and it is not appear in hashtable, then return this string
+    - what values need to be keep tracking of, what paramter is need for recursive call
+        - path: str -> keep track of path string
+    - under what condition should do recursive call
+
+Approach:
+- Algo Analysis: Time O(2^n), Space O(n)
+- Maintain:
+    - `seen`: a set of nums for O(1) lookup
+    - recursive buider string `path`
+- Steps:
+    - Build set `seen` from nums
+    - Defin a recursive fucntion `dfs(path)`
+    - Based case: if len(path) == n
+        - If path not in `seen` -> return path
+        - else return None
+    - Recursive call:
+        - try add '0' -> dfs(path + '0')
+        - if returns valid string, propagate upward
+        - else try add '1'
+    - return the first found valid `path`
+"""
+class Solution:
+    def findDifferentBinaryString(self, nums: List[str]) -> str:
+        n = len(nums)
+        seen = set(nums)
+
+        def dfs(path):
+            if len(path) == n:
+                if path not in seen:
+                    return path
+                return None
+            
+            res = dfs(path + '0')
+            if res:
+                return res
+            
+            return dfs(path + '1')
+        
+        return dfs("")
+```
+
+## 1593. Split a String Into the Max Number of Unique Substrings[[Link](https://leetcode.com/problems/split-a-string-into-the-max-number-of-unique-substrings/description/)]
+
+```py
+"""
+Question Understanding
+- Input:
+    - `s`: string
+- Output:
+    - maximum nums of splits from `s`, each splited substr should be unique
+
+Assumption:
+- 1 <= s.length <= 10
+- each s[i] contains only valid ascii value enligsh lowecase letter
+
+Genral Idea:
+- Bactrack every possible splits with recursvie call
+- Record the substr as "seen" into a hashtable along with oprations
+- Quetions to solve:
+    - What is decision tree looks like (take first example)
+        - branch 1: choose 'a' -> b, ba, bab ... -> ...
+        - branch 2: choose 'ab' -> a, ab(existed), abc, abcc -> ...
+        - branch 3: choose 'aba'
+        - branch 4: choose "abab"
+        - ....
+    - What is the base case for recursive call
+        - return 0 if current index == s.lenghth -> no more substr to split
+    - What values need to be recorded, include
+        - Parameters for recursive call
+            - `i`: index for current start index in `s` to split
+        - Final result
+            - `count`: keep record the unique substr
+    - What conditions should do recursiva call
+        - pick s[i : j] (j is from i + 1 to n)
+        - add it to hashtable
+        - recursive call start from j
+        - remove it from hashtable (backtrack)
+
+Approach:
+- Algo Analysis: Time O(2 ^ n) Space O(n)
+- Maintain:
+    - `seen`: a set() act like lookup table in O(1) lookup
+    - `i`: curent position in a string
+    - `max_count`: global tracker for maximum splits
+- Steps:
+    - Define recursive function dfs(i)
+        - if i == len(s) -> return 0 (no more splits)
+        - Iterate j in [i + 1, n]
+            - substr = s[i : j]
+            - if substr not in hashtable
+                - add substr seen.add(substr)
+                - recursive call count = 1 + dfs(j)
+                - keep track max count max_count = max(max_count, count)
+                - remove substr away from hashtable seen.remove(substr)
+        - Return the max_count
+    - Call the dfs(0)
+"""
+ 
+class Solution:
+    def maxUniqueSplit(self, s: str) -> int:
+        seen = set()
+        n = len(s)
+
+        def dfs(i):
+            if i == len(s):
+                return 0
+            
+            max_count = 0
+            for j in range(i + 1, n + 1):
+                substr = s[i : j]
+                if substr not in seen:
+                    seen.add(substr)
+                    count = 1 + dfs(j)
+                    max_count = max(max_count, count)
+                    seen.remove(substr)
+            return max_count
+        return dfs(0)
 ```

@@ -706,3 +706,71 @@ class Solution:
         
         return ''.join([ch * cnt for ch, cnt in stack])
 ```
+
+## *2375. Construct Smallest Number From DI String[[Link](https://leetcode.com/problems/construct-smallest-number-from-di-string/description/)]
+
+```py
+"""
+Problem Understanding:
+- Input:
+    - A string `pattern` of length n, consisting only of 'I' and 'D'
+    - 'I' means increasing → num[i] < num[i+1]
+    - 'D' means decreasing → num[i] > num[i+1]
+- Output:
+    - The lexicographically smallest valid string num of length n+1
+    - num uses digits 1–9, each at most once
+
+Assumption:
+- Ouput length = n + 1, digits stricky within 1-9 no repetitions
+- 1 <= pattern.length <= 8
+
+Cases:
+- pattern = "I" → result: "12"
+- pattern = "D" → result: "21"
+- pattern = "IIII" → result: "12345"
+- pattern = "DDDD" → result: "54321"
+- Alternating "IDID" → must carefully arrange
+
+Approach:
+- Algo Analysis: Time O(n), Space O(n)
+- Clarify variables needed:
+    - `res`: output string builder
+    - `stack`: temporary holder for digits when handling 'D' runs
+    - `curr_digit`: next available smallest digit to use
+- Maintain:
+    - Always assign smallest available digit possible
+    - Use stack to reverse decreasing runs
+- Steps:
+    1. Initialize `curr_digit = 1`
+       - Reasoning: always start from smallest to guarantee lexicographic minimality
+    2. Iterate through pattern with index i
+       - Reasoning: each char indicates "I" or "D"
+    3. Push `curr_digit` into stack, increment `curr_digit`
+       - Reasoning: assign digits sequentially
+    4. If `pattern[i] == 'I'`, flush stack into result
+       - Reasoning: ensures order for increasing constraints
+    5. After loop, push final digit (n+1-th), flush remaining stack
+       - Reasoning: handle last segment
+    6. Join collected digits into string
+       - Reasoning: produce final lexicographically smallest number
+"""
+
+class Solution:
+    def smallestNumber(self, pattern: str) -> str:
+        n = len(pattern)
+        res, stack = [], []
+        curr_digit = 1
+
+        for i in range(n):
+            stack.append(str(curr_digit))
+            curr_digit += 1
+            if pattern[i] == 'I':
+                while stack:
+                    res.append(stack.pop())
+        
+        stack.append(str(curr_digit))
+        while stack:
+            res.append(stack.pop())
+        
+        return ''.join(res)
+```
