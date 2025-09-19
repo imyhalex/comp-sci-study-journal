@@ -1142,3 +1142,79 @@ class Solution:
         
         return dfs(0, set())
 ```
+
+## 2597. The Number of Beautiful Subsets[[Link](https://leetcode.com/problems/the-number-of-beautiful-subsets/description/)]
+
+```py
+"""
+Question Understanding
+- Input:
+    - `num`: positive integer arr
+    - `k`: positive integer
+- Definition:
+    - Beautiful Subsets: within a subset, two integer a and b where abs(a - b) != k
+- Output:
+    - return the number of non-empty beautiful subsets
+
+Assumptions:
+1 <= nums.length <= 10
+1 <= nums[i], k <= 1000
+
+
+General Ideas
+- Backtrack every possible subsets with recursive call
+- Memorize a visited subset using hahtable
+- Problems to solve:
+    - What is the decision tree looks like (take first example)
+        - branch 1: [2] -> [2, 4], [2]...
+        - branch 2: [] -> [4], [] -> ...
+    - What is the base case for recursive call
+    - Under what condition should call the recursive function
+    - What parameter needs, include:
+        - final result:
+        - parameters passed in recursive funciton
+
+Approach:
+- Algo Analysis: Time O(2^n), Space O(n) stack
+- Maintain:
+    - freq: a hashmap tracking counts of numbers chosen so far
+    - idx: current index in nums
+    - total: global result counter
+- Steps:
+    1. Sort nums → Reasoning: ensures consistent order for recursive checks
+    2. Define recursive function dfs(i, freq)
+       - Base: if i == len(nums), return 1 (represents one valid subset path)
+    3. At each index i:
+       - Choice 1: skip nums[i]
+         - Reasoning: subsets may not include current element
+       - Choice 2: include nums[i] if allowed
+         - Condition: freq[nums[i] - k] == 0 and freq[nums[i] + k] == 0
+         - Reasoning: ensures no forbidden pair forms
+         - If allowed, increment freq[nums[i]], recurse, then backtrack
+    4. At the end, subtract 1 from final answer
+       - Reasoning: dfs counts the empty subset, but we need only non-empty
+- This backtracking is efficient due to pruning forbidden inclusions
+"""
+
+class Solution:
+    def beautifulSubsets(self, nums: List[int], k: int) -> int:
+        n = len(nums)
+        freq = defaultdict(int)
+
+        def dfs(i):
+            if i == n:
+                return 1
+            
+            # skip current element
+            total = dfs(i + 1)
+
+            # try to include nums[i] if no conflict
+            if not freq[nums[i] - k] and not freq[nums[i] + k]:
+                freq[nums[i]] += 1
+                total += dfs(i + 1)
+                freq[nums[i]] -= 1
+            
+            return total
+        
+        return dfs(0) - 1
+```
