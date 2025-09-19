@@ -71,6 +71,34 @@ What happend:
 - `local_var` goes to the stack.
 - `heap_var` points to memory in the heap.
 
+## VAS & RAM
+![img](./img/Screenshot%202025-09-17%20at%2015.08.03.png)
+__Explaination:__
+- Two processes: P1 and P2
+- Each has its own VAS (on the left, 4 GB split into 3 GB user + 1 GB kernel).
+- The physical RAM is in the middle.
+- Colored arrows show that:
+    - Different virtual pages from P1 and P2 can map to different physical frames.
+    - They can also map to the same physical frame (shared memory).
+- Key Ideas:
+    - Each process thinks it has a private 0x0 → 4 GB address range.
+    - But in reality, the OS translates those virtual pages to actual physical frames in RAM.
+    - That’s why virtual addresses can overlap across processes (both P1 and P2 can have a page at 0x0), but they end up at different places in RAM.
+
+![img](./img/Screenshot%202025-09-17%20at%2015.08.09.png)
+__What it adds:__
+- Now you’ve drawn page tables at the bottom (yellow boxes).
+- Each process has its own page table:
+    - P1 Page Table: maps virtual page 0x0 → physical frame 0xB000
+    - P2 Page Table: maps virtual page 0x0 → physical frame 0xC000
+- CPU uses a Memory Management Unit (MMU) to perform this translation.
+- The MMU consults the page table (with help from hardware caches like the TLB) to resolve every memory access.
+- Key Ideas:
+    - The OS maintains a separate page table per process.
+    - On a context switch, the OS updates the CPU’s page table base register (e.g., CR3 on x86).
+    - That’s how the CPU knows whether 0x0 means P1’s 0xB000 frame or P2’s 0xC000 frame.
+
+
 
 ## Virtual Address Space layout of a Linux process
 ![img](./img/Screenshot%202025-09-15%20153803.png)
@@ -190,3 +218,88 @@ __What they share and don't share__
         - Thread Control Block (TCB)
         - Registers / program counter
     - Threads are lightweight → switching between them is faster than between processes.
+
+##  Executable Binary within EXEC (ELF)
+![img](./img/Screenshot%202025-09-17%20at%2015.20.22.png)
+- The bottom part labeled EXEC (ELF) is the memory region where your executable binary is mapped into the process’s address space.
+- The ELF has different sections, and the loader (`ld-linux.so`) maps those into memory at fixed virtual addresses.
+
+__Segments under the EXEC (ELF)__
+1. **.text** (Code segment)
+
+   * Contains the program’s **machine code** (compiled instructions).
+   * Usually marked **read-only + executable (r-x)**.
+   * Example: where your `main()` function lives.
+
+2. **.rodata** (Read-only data)
+
+   * Constants, string literals.
+   * Example: `"Hello, world!\n"`.
+
+3. **.data** (Initialized global variables)
+
+   * Global/static variables with initial values.
+   * Example:
+
+     ```c
+     int g = 42;   // goes into .data
+     ```
+
+4. **.bss** (Uninitialized globals)
+
+   * Global/static variables initialized to 0 or left uninitialized.
+   * Example:
+
+     ```c
+     int counter;  // goes into .bss
+     ```
+   * BSS does not take up space in the executable file — the loader just reserves zeroed memory.
+
+5. **.interp** (Interpreter)
+
+   * Stores the path to the **dynamic linker/loader** (e.g., `/lib/ld-linux.so.2` or `/lib64/ld-linux-x86-64.so.2`).
+   * This tells the kernel: “to run this binary, first load this program (dynamic loader).”
+
+6. **Other ELF sections** (not always visible in runtime maps, but present in the ELF file):
+
+   * `.symtab` (symbol table)
+   * `.strtab` (string table)
+   * `.debug` (debug info, if compiled with `-g`)
+   * These are usually not mapped into memory for runtime execution.
+
+
+__Address Ranges__
+
+* **EXEC ELF starts \~0x08048000**
+
+  * Typical for 32-bit Linux executables (unless ASLR randomizes it).
+* **Ends \~0x0804bfff**
+
+  * Contains text, data, bss, rodata.
+
+__Memory Protection__
+
+Each section has specific permissions:
+
+* `.text` → **r-x** (read, execute)
+* `.rodata` → **r--** (read only)
+* `.data` and `.bss` → **rw-** (read, write)
+
+- This separation enforces safety: you can’t accidentally overwrite your code or execute data.
+
+__Example (using `readelf`)__
+
+```bash
+readelf -S ./a.out
+```
+
+You’ll see section headers like:
+
+```
+  [13] .text     PROGBITS  08048400  00000400  0000017d  AX  0  0  4
+  [14] .rodata   PROGBITS  08048580  00000580  00000034  A   0  0  4
+  [15] .data     PROGBITS  08049f00  00001f00  00000010  WA  0  0  4
+  [16] .bss      NOBITS    08049f10  00001f10  00000004  WA  0  0  4
+  [17] .interp   PROGBITS  08048234  00000234  00000013  A   0  0  1
+```
+
