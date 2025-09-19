@@ -1060,3 +1060,85 @@ class Solution:
             return max_count
         return dfs(0)
 ```
+
+## 1239. Maximum Length of a Concatenated String with Unique Characters[[Link](https://leetcode.com/problems/maximum-length-of-a-concatenated-string-with-unique-characters/description/)]
+
+```py
+"""
+Question Understanding:
+- Input:
+    - `arr`: string array, each arr[i] concatenates with each other form a `s`
+        - `s` should contains no duplicated chars
+- Ouput:
+    - record the length of the possible `s` and return the maximum length from those possibilities
+
+Cases:
+- arr = ["un", "iq", "ue"], ret:
+    - un
+    - iq
+    - ue
+    - uniq 
+    - ique
+    - unue(not possible)
+    - unique(not possible)
+
+Assumptions:
+- 1 <= arr[i].length <= 20
+- 1 <= arr.length <= 20
+- each arr[i] contains only valid ascii value english letter in lower cases
+
+General Ideas
+- Backtrack every possible outcome with recursive calls
+- record each char in arr[i] as "seen" while doing the oprations
+- Questions to solve:
+    - What is the decision tree look like (take first example as an example)
+        - branch 1: un -> iq, ue -> ... 
+        - branch 2: iq -> un(repeated), ue - > 
+        - branch 3: ue -> un, iq(repeated) ->  
+    - What is the base case for recursive call
+        - 
+    - What is the condition to do the recursive call
+    - What are values and paramters to keep track of
+
+Approach:
+- Algo Analysis: Time: O(2^n * k), Space: O(n + k)
+- Maintain:
+  - index pointer for backtracking
+  - current set of used characters
+  - current length
+- Steps:
+  1. Pre-filter: skip arr[i] if it contains duplicates within itself
+     - Reasoning: It can never contribute to valid result
+  2. Define recursive dfs(index, usedChars, currLength)
+     - Reasoning: systematically explore include/exclude choices
+  3. Base case: if index == len(arr), return currLength
+     - Reasoning: reached end of subsequence choices
+  4. For each arr[index]:
+     - Exclude branch → dfs(index+1, usedChars, currLength)
+       - Reasoning: skipping this string might avoid conflicts
+     - Include branch (only if arr[index] has no overlap with usedChars)
+       - Add its chars, increase length
+       - dfs(index+1, newUsedChars, currLength + len(arr[index]))
+       - Reasoning: explore path where we include it
+  5. Return max of two branches
+     - Reasoning: ensures we pick best length across all choices
+"""
+
+class Solution:
+    def maxLength(self, arr: List[str]) -> int:
+        filtered = []
+        for word in arr:
+            if len(set(word)) == len(word):
+                filtered.append(word)
+        
+        def dfs(i, used):
+            if i == len(filtered):
+                return len(used)
+            
+            best = dfs(i + 1, used)
+            if not (set(filtered[i]) & used):
+                best = max(best, dfs(i + 1, used | set(filtered[i]))) # set union
+            return best
+        
+        return dfs(0, set())
+```
