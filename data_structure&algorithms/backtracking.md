@@ -1092,11 +1092,7 @@ General Ideas
 - record each char in arr[i] as "seen" while doing the oprations
 - Questions to solve:
     - What is the decision tree look like (take first example as an example)
-        - branch 1: un -> iq, ue -> ... 
-        - branch 2: iq -> un(repeated), ue - > 
-        - branch 3: ue -> un, iq(repeated) ->  
     - What is the base case for recursive call
-        - 
     - What is the condition to do the recursive call
     - What are values and paramters to keep track of
 
@@ -1217,4 +1213,77 @@ class Solution:
             return total
         
         return dfs(0) - 1
+```
+
+## 241. Different Ways to Add Parentheses[[Link](https://leetcode.com/problems/different-ways-to-add-parentheses/description/)]
+
+```py
+"""
+Question Understanding:
+- Input:
+    - `expression`: string of numbers and operators
+- Ouput:
+    - return all possible results of expression by trying to group numbers and operators
+
+Cases:
+- expressions = "", ret:
+- expressions = "123", ret: 123
+- 
+
+Assumption:
+- Input experssion is alwyas valid
+- Only operators are '+', '-', '*'
+- No division, no parentheses in input
+- All results fit in 32-bit signed integer
+- The number of distinct results will not exceed 10^4
+
+Approach:
+- Algo Analysis: Time ~ O(Catalan(n)) (exponential but manageable for n<=20), Space O(n^2) for memoization
+- Clarify variables needed
+    - memo: dictionary to store computed results for substrings
+    - expression: input string
+- Maintain:
+    - Recursive function `dfs(expr)` returns all possible results for substring `expr`
+    - Base case: if expr contains no operator → return [int(expr)]
+- Steps:
+    - Iterate through expr:
+        - If current char is an operator:
+            - Split into left = expr[:i], right = expr[i+1:]
+            - Get leftResults = dfs(left)
+            - Get rightResults = dfs(right)
+            - For each l in leftResults and r in rightResults:
+                - If op == '+', append l+r
+                - If op == '-', append l-r
+                - If op == '*', append l*r
+            - Reasoning: This ensures we compute every parenthesization involving this operator
+    - If no operator found, return [int(expr)]
+    - Memoize results for expr
+- This logic follows naturally from the recursive definition of parenthesization.
+"""
+
+class Solution:
+    def diffWaysToCompute(self, expression: str) -> List[int]:
+        memo = {}
+
+        def dfs(exper):
+            if exper in memo:
+                return memo[exper]
+            
+            res = []
+            for i, ch in enumerate(exper):
+                if ch in "+-*":
+                    left, right = dfs(exper[:i]), dfs(exper[i + 1:])
+                    for l in left:
+                        for r in right:
+                            if ch == '+':
+                                res.append(l + r)
+                            if ch == '-':
+                                res.append(l - r)
+                            if ch == "*":
+                                res.append(l * r)
+            if not res:
+                res = [int(exper)]
+            memo[exper] = res
+            return res
+        return dfs(expression)
 ```
