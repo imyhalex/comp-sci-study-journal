@@ -1287,3 +1287,92 @@ class Solution:
             return res
         return dfs(expression)
 ```
+
+## 1718. Construct the Lexicographically Largest Valid Sequence[[Link](https://leetcode.com/problems/construct-the-lexicographically-largest-valid-sequence/description/)]
+
+```py
+"""
+Quesetion Understanding:
+- Input:
+    - `n`: integer
+- Rules:
+    - range from [1, n]
+    - integer 1 occurs once per sequence
+    - for each integer i (2 ≤ i ≤ n), the two occurrences of i must have a distance exactly i (except 1, every other n occurs twice per sequence)
+- Output:
+    - A sequence (array of integers) with length 2n - 1, with the largest lexicographically order under the rules metnioned above
+
+Case:
+- n = 1, ret: 1
+- n = 2, ret: [2, 1, 2]
+- n = 3, ret: [3, 1, 2, 3, 2]
+
+Assumptions:
+- 1 <= n <= 20
+- sequnce length == 2 * n - 1
+- Input n i a valid integer within constraint
+
+General Idea:
+- Check if a number i can be placed at position p
+    - if i == 1 -> place once
+    - if i > 1 -> check if p + i < len(seq) and both seq[p] and seq[p + i] empty
+- Backtracking recursive placement
+- Compare lexicograpgical order: try to filling larger number first
+- Maintain visited/used array
+
+Approach:
+- Algo Analysis: Time O(n^n), Space O(n)
+- Maintain:
+    - `res`: array of length 2n - 1 initizlied with 0 (empty)
+    - `used`: a set for numbers already placed
+- Steps:
+    - construct a backtracking function dfs(i)
+        - start with the larghets number (n)
+        - for current number i:
+            - if i == 1:
+                - place in first avaible non-empty slot in `res`
+            - else:
+                - iterate position p from 0 to len(res) - i - 1
+                - if res[p] == 0 and res[i + 1] == 0, place i at both
+        - recurse to the next smaller number
+        - if all placed, return true
+        - if stuck, fill largest number fisrt, then smaller ones
+- Return the result array
+"""
+
+class Solution:
+    def constructDistancedSequence(self, n: int) -> List[int]:
+        size = 2 * n - 1
+        res = [0] * size
+        used = set()
+
+        def dfs(i):
+            if i == size:
+                return True
+
+            if res[i] != 0:
+                return dfs(i + 1) # skip filled spot
+
+            for num in range(n, 0, - 1):
+                if num in used:
+                    continue
+                if num == 1:
+                    res[i] = 1
+                    used.add(1)
+                    if dfs(i + 1):
+                        return True
+                    res[i] = 0
+                    used.remove(1)
+                else:
+                    if i + num < size and res[i + num] == 0:
+                        res[i] = res[i + num] = num
+                        used.add(num)
+                        if dfs(i + 1):
+                            return True
+                        res[i] = res[i + num] = 0
+                        used.remove(num)
+            return False
+        
+        dfs(0)
+        return res
+```
