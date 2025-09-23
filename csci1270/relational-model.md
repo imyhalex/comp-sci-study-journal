@@ -13,10 +13,17 @@ __Key Features__
 
 __Properties__
 - Structure: The definition of the database's relations and their contents
-- Integrity: Ensure the database's contents satisfy constraint
+    - Think about the blueprint for the data structured in rows, colums, table. This is how the data is organized.
+- Integrity: Ensure the database's contents satisfy constraint. Making sure the data follows the rules (e.g. non-negative ages, every student must have an ID).
 - Maniputation: Programming interface for accessing and modifying the contents of a database
 
-__Relation__ is unordered set that contains the relationship of attributes that represents entity
+__Relation__: is unordered set that contains the relationship of attributes that represents entity
+- A formal word for a table
+    - It's an unordered set of tuples (rows)
+    - Each tuples is made of attributes (columns)
+    - Those attributes describe an entity (like a student, book, or customer)
+- Which means: 
+    - Is a table made of rows and columns, where each row represents an entity and each colum represents an attributes of that entity.
 
 __Tuple__: another word for a row in a table
 - A table map to multiple rows (tuples)
@@ -32,7 +39,7 @@ __Primary Key:__ uniquely identifies a single tuple
 __Candidate Key:__ a bunch of cancidates that can be chosen to be primary key
 
 __Foreign Key__: specify the an attribute from one relation maps to tuple in another relation
-    - one foreign key map to another table's primary key
+- one foreign key map to another table's primary key
 
 __Schemas__: Blueprint of the database, it defins:
 - What tables exist.
@@ -41,15 +48,58 @@ __Schemas__: Blueprint of the database, it defins:
 - What relationships exist between tables (primary key, foreign key, constraints).
 
 __Constraints__:
-- user-defined conditions that must hold for any instance of the database (database integrity)
-    - can validate data within a single tuple or accross entire relation(s)
-    - prevets modifation that violates any contstraints
+- Rules defined by the user (or database designer) that the data must always follow.
+- They protect database integrity by making sure only valid data can be stored
+- They can check:
+    - Values inside a single row (e.g. _age_ must be >= 0)
+    - Relationship accross rows and tables (e.g., every order must belong to an existing customer).
+- If an opeartion would break a constraint, the DBMS blocks it.
 - `Uniqe key` constraint and `foreign key(referral)` constrinat are most common
 - SQL:92 support `gobal asserts` but these are rarely used
     - `CHECKS` can be defined on one or more table
 
+### Questions:
+__Q__: Why not just use file system(store data in flat file) than DBMS?
+1. Data Consistency
+    - Flat File: Both update might overwrite each other unless you code your own locking system
+    - DBMS: The database enforces constraints (e.g. no duplcate booking) and transaction garatee all-or-nothing
+2. Efficnent Data Retrival
+    - Flat File: To find “all customers who booked in September,” you’d have to scan the whole file.
+    - DBMS: You create an index (like a book’s index) and jump right to the matching rows.
+3. Crash Recovery
+    - Flat File: If your program crashes halfway through writhing, you might end up with a corrupted file
+    - DBMS: Use Write-Ahead Logging (WAL) and checkpoints so it can roll back incomplete transactions or redo finished ones.
+4. Data Independence
+    - Flat File: If you change the file layout (say you add a new file), every program that reads it breaks.
+    - DBMS: Abstarcts the storage. Apps talk to SQL, not the physical layout. Shcema evolution is easier.
+5. Concurrent Access
+    - Flat File: Two process writing at once -> chaos (corrputed file, partial updates)
+    - DBMS: Has concurrency control so multiple users can safely read/write at the same time.
+
+__Q__: Describe the difference between `key`, `primary key`, and `candidate key`
+1. Key (general idea):
+    - A `key` is any set (can be one or more) of attributes that can uniquely identify a tuple (row) in a relation (table)
+2. Candidate Key:
+    - It is a minimal key - meaning you can't remove any attribute from it and still uniquely identify rows
+    - A relation can have multiple candidate keys
+    - Each is an equal valid choice to serve as the primary identifier.
+3. Primary Key:
+    - Is the chosen candidate key the databse will use as the main identifier for rows
+    - It’s also the key that other tables reference (via foreign keys) to build relationships.
+4. Composite Key:
+    - Means the key is made up of more than one attribute
+    - So:
+        - If a candidate key uses one attribute -> it is a simple key
+        - If a candidate key use two or more attributes -> it is a composite key
+5. Foreign Key:
+    - An attribute (one or set of attributes) references the primary key in another table.
+    - It create relationship between two tables
+    - Its job to ensure referential integrity (you can’t borrow a book from a library if the member doesn’t exist in the members table).
+
 ## Data Manipulation Language (DMLS)
 Methods to store tand retrive information from a database
+
+Relational Algebra vs. 
 
 __Procedural__
 - The query sepcifies the (high-level) strategy to find the desired results based on set/bags
@@ -62,7 +112,7 @@ __Non-Procedural__
 - The query specifies only what data is wanted and not wanted (SQL)
 - The DBMS figures out the best execution strategy (query optimizer).
 
-__Relational Algebra__
+__Procedural(Relational Algebra) vs. Non-Procedureal (Declaritive)__
 - Relational Algebra = a formal query language for relational databases.
 - It uses operators to retrieve and manipulate tuples (rows) from relations (tables).
 - It’s the theory behind SQL.
@@ -74,7 +124,6 @@ __Relational Algebra__
     ```sql
      π Name (σ Age > 20 ∧ Major = 'CS' (Students))
     ```
-
 __Relational Algebra: Slection__
 - Choose a subset of the tuples from a relation that satisfies s selection predicates
     - predicates acts as a filter to retain only tuples that fulfill its qualifiying requirements
@@ -166,7 +215,7 @@ __Relational Algebra: Union__
 - Compatibility Requirement (Union-Compatible)
     - Two relations `R` and `S` can be unioned if:
         1. They have the same number of attributes
-        2. The corresponding attributes have the same domains(types)
+        2. The corresponding attributes have the same domains(same data types)
 - Notation:
 ```sql
 R ∪ S
@@ -190,9 +239,14 @@ Result:
 | 3 | 4 |
 | 5 | 6 |
 
--- SQL Equivalent
+-- SQL Equivalent (remove duplicate naturally)
 SELECT a, b FROM R
 UNION
+SELECT a, b FROM S;
+
+-- This contains duplicates
+SELECT a, b FROM R
+UNION ALL
 SELECT a, b FROM S;
 ```
 
@@ -352,7 +406,12 @@ SELECT *
 FROM Students
 NATURAL JOIN Majors;
 
--- Theta join (explicit condition)
+SELECT * FROM R JOIN S USING (a_id, b_id);
+
+SELECT * FROM R JOIN S
+ON R.a_id = S.a_id AND R.b_id = S.b_id;
+
+-- Theta join (explicit condition, a cross join with predicates)
 SELECT *
 FROM Students S, Majors M
 WHERE S.MajorID = M.MajorID;
@@ -365,3 +424,17 @@ __Extra Operators__
 - Aggregation(γ)
 - Sorting(τ)
 - Division (R÷S)
+
+### Questions:
+__Q__: what are differences between SQL and relational algebra
+- In relational algebra(procedural)
+    - A relation is always a set -> no duplicate anywhere in the final result
+    - Every operation (`∪, ∩, −, π, σ, ⋈, ×`) produces a duplicate-free set
+        - If duplicates appear naturally during the operation, they are collapsed (only one copy remains).
+    - You must spell  out the steps (`e.g., σ condition (π attributes (R × S))`).
+    - It's like writhing a receipe -> you're in control "how" to compute
+- In SQL/ relational calculus (non-procedural, delcarative):
+    - Tables are bags(multisets) by default -> duplicates appear unless you explicitly remove them (`DISTINCT`)
+    - You state what you want, not the steps to get it
+    - The DBMS query optimizer choose the execution plan (join, scans, indexs, etc..)
+    - It's like ordering food at a restaurant -> you say "I want pasta" not "boil water, add salt, cook noodles..."
