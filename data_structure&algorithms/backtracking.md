@@ -1376,3 +1376,79 @@ class Solution:
         dfs(0)
         return res
 ```
+
+## 2044. Count Number of Maximum Bitwise-OR Subsets[[Link](https://leetcode.com/problems/count-number-of-maximum-bitwise-or-subsets/description/)]
+
+```py
+"""
+Question Understanding:
+- Input:
+    - `nums`: int arr
+- Rule:
+    - get a subsets that has the maximum maximum bitsiwe or
+- Ouput:
+    - return the count of subsets that achieve that maximum OR.
+
+Cases:
+- nums = [1], ret: 1
+- nums = [1, 2], ret: 1
+
+Assumption:
+1 <= nums.length <= 16
+1 <= nums[i] <= 10^5
+
+General Ideas
+- Backtrack every possible subset with recursive call
+- No need for a hashtable of seen subsets → we don’t care about avoiding duplicates by indices
+- Questions to solve:
+    - What is the decision tree looks like
+        - branch 1: include nums[i]
+        - branch 2: not include nums[i]
+    - What is the base case for the recursive call
+        - i == len(nums), means considered all element,
+            - then increment count if current OR equals to max OR
+    - Under what condition should call the recursive function
+        - At index i
+            - Choose to incluide: dfs(i + 1, curr_or | nums[i])
+            - Choose to skip: dfs(i + 1, curr_or)
+    - What values needed:
+        - final result:
+            - `max_or`: the target OR
+            - `count`: number of subsets that acheive max OR
+        - parameters passed in recursive funciton
+            - `i`: current OR value so far
+            - `curr_or`: current OR values so far
+Approach:
+- Algo Analysis: Time O(2^n), Spcae O(n)
+- Maintain:
+    - `max_or`: the target OR
+    - `count`: number of subsets that acheive max OR
+- Steps:
+    - Iterate through nums[i] to get the target `max_or`
+    - Construct a recursive function dfs(i, curr_or)
+        - If i == len(nums), increment count by 1 by evaluating if curr_or == max_or
+        - Call recursive function dfs(i + 1, curr_or), dfs(i + 1, curr_or | nums[i])
+    - Call the dfs(0, 0)
+    - Return the final result `count`
+"""
+
+class Solution:
+    def countMaxOrSubsets(self, nums: List[int]) -> int:
+        max_or = 0
+        for num in nums:
+            max_or |= num
+        
+        self.count = 0
+
+        def dfs(i, curr_or):
+            if i == len(nums):
+                if curr_or == max_or:
+                    self.count += 1
+                return 
+            
+            dfs(i + 1, curr_or)
+            dfs(i + 1, curr_or | nums[i])
+        
+        dfs(0, 0)
+        return self.count
+```
