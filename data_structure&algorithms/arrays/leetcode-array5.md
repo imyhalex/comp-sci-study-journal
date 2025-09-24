@@ -302,3 +302,84 @@ class Solution:
                 l = m + 1
         return res
 ```
+
+## 2594. Minimum Time to Repair Cars[[Link](https://leetcode.com/problems/minimum-time-to-repair-cars/description/)]
+
+```py
+"""
+Question Understanding:
+- Input:
+    - `ranks`: int arr
+        - ranks[i] means ith mechanic, let r = ranks[i], repair n cars take  r * n^2 minutes
+    - `cars`: int, number of cars to repair in total
+- Rule:
+    - all mechanics can repair at the same time
+- Ouput:
+    - intger, minimum time to repair all cars
+
+Assumption:
+- 1 <= ranks.length <= 10^5
+- 1 <= ranks[i] <= 100
+- 1 <= cars <= 10^5
+
+Cases:
+- Only one mechanic and 1 car -> time = r * 1^2 = r
+- Large number of mechanics and cars == 1 -> mechanic with lowest rank to repair that car
+
+Brute Force Approach
+- Start from T = 1 and go upward.
+- For each T, compute sum of cars each mechanic can handle.
+- Stop when sum ≥ cars.
+- Complexity: O(cars * n) worst case → infeasible (cars up to 1e6, n up to 1e5).
+
+Genral Ideas:
+- Algo Analysis: Time O(n log(maxTime)), Space: O(1)
+- Run binary search to find the appropraite time to repair the cars
+- Question to solve:
+    - How to define the search range and condition to update the search range
+        - Idea:
+            - Given rank r, only uncertain variable is number of cars n.
+            - And we knew T = r * n^2
+            - So we can get the maximum number of car given r is n = sqrt(T/r)
+        - This means:
+            - We can define a condition isFeasible(T):
+            - Calcuate the maximum number of cars given time T under the rank r
+            - Iterate through each r in ranks
+            - If result >= cars, it is a feasible choice, return True
+            - Else too small return False
+    - What is the lower bound and upper bound of the search range
+        - lower bound: 0 minutes -> minimum possible time
+        - upper bound: max(ranks) * cars * cars -> maximum possible time
+    - How to update the search range
+        - within search range -> while l <= r
+        - define a mid point for for lower bound (l) and upper bound (r) -> m = l + (r - l) // 2
+        - if isFeasibale(m) is True:
+            - update final result = m
+            - r = m - 1
+        - else:
+            - l = m + 1
+        - The final result will be return at the end of the program
+"""
+
+class Solution:
+    def repairCars(self, ranks: List[int], cars: int) -> int:
+        l, r = 0, max(ranks) * cars * cars
+        res = 0
+        
+        def isFeasible(T):
+            total = 0
+            for r in ranks:
+                total += floor(sqrt(T / r))
+                if total >= cars:
+                    return True
+            return False
+
+        while l <= r:
+            m = l + (r - l) // 2
+            if isFeasible(m):
+                res = m
+                r = m - 1
+            else:
+                l = m + 1
+        return res
+```
