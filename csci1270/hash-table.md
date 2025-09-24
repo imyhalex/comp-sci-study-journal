@@ -51,6 +51,7 @@ __Static Hashing Scheme__
 - Solution: Use a collision resolution strategy.
 - Limitation: If load factor grows too high → must rebuild from scratch.
 - Use case: Often inside query execution operators (e.g., hash join).
+    - In a DBMS, a __short-lived structure__ means a data structure that exists only temporality during query execution and is discarded right after.
 - Fixed size hash table; resize from scratch ad needed typically used during query execution
 - Approaches:
     - Approach 1: Linear Probe Hashing (90% of the commercial DBs)
@@ -85,6 +86,7 @@ __Static Hashing Scheme__
         - Based on the Load Factor (_lf_) is a meausre of how full the table is
             - Typically, # full slots / # slots. E.g. ff _lf_ > 0.7, double size
             - Reduce collisions but increase memory usage
+
 __Dynamic Hashing Scheme__
 - Table can grow/shrink as to support more/less key support incremental sizing
 - Chained Hashing
@@ -93,11 +95,31 @@ __Dynamic Hashing Scheme__
     - Dynamic because lists can grow without resizing the table.
     - Con: Worst-case lookup is O(n) if many items hash to the same slot.
     - Pro: Simple and flexible (easy insert/delete).
-- Extendible Hashing
+- Extendible Hashing[[Link1](https://www.youtube.com/watch?v=Bxfo2LwOIj4) | [Link2](https://en.wikipedia.org/wiki/Extendible_hashing)]
+    - Two common way: LSB vs. MSB
     - Idea: Uses a directory of pointers to buckets.
     - The directory can double in size when buckets overflow.
     - Each bucket has a “local depth” (how many hash bits are being used).
     - Very popular in databases because you can grow/shrink gracefully.
+    - `Directories`: The directory store addresses of the buckets in pointers. And id is assigned to each directory wich may change each time when Directory Expansion takes place.
+        - directory size = 2 ^ global_depth
+    - `Buckets`: The buckets are user to hash tha actual data
+        - has a local depth showing how many bits of the hash are actually being used.
+    - `Global Depth`: It is associtated with the Directories. They denote the number of bits which are used by the hash function to categorize the keys. Global Depth = Number of bits in directory id.
+    - `Local Depth`: It is the same as that Global Depth except for the fact that Local Depth is associated witht the buckets and not the directories. 
+        - Local Depth is accodance with global depth is used to decide the action that to be performed in case an overflow occurs.
+        - Local Depth is always less than or equal to Global Depth
+    - `Bucket Splitting`: When the number of element in a bucket exceeds a particular size, then the bucket is split into two parts
+    - `Directory Expansion`: Directory Expansion takes place when a bucket overflow.
+        - Note: It happend only when bucket's new Local Depth > Global Depth
+        - If a bucket overflows:
+            - Increase its local depth by 1 (LD++).
+            - If the new LD ≤ GD → just split, no directory expansion.
+            - If the new LD > GD → must expand the directory (GD++).
+        - Why video says that a bucket hit its cap and LD = GD, need to directory expaision?
+            - You have LD = GD at overflow.
+            - After split → LD = GD + 1.
+            - That means LD > GD → forces directory doubling.
 - Linear Hashing
     - Idea: Instead of doubling the directory, it splits buckets gradually.
     - Uses a “split pointer” that moves through the table one bucket at a time.
