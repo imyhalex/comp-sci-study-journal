@@ -228,3 +228,10 @@ __Outer Join__
 - Full Outer Join (R⟗S)
     - Uion of LEFT and RIGHT JOIN
 
+### Conclusion
+- Cross join is the R X S in relational algebra
+- Theta join is cross join with predicates
+- Semi join is theta join with only preserve the first relation table
+- Anti semi join is present first relation table records that are not included in Semi Join
+- Dangling tuples is rows that first relation table do not match.
+- Dangling reference is the foreign key value do not match from non-first relation table.

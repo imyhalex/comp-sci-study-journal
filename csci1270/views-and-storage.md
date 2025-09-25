@@ -316,6 +316,11 @@ __Final Illustration (illustration of a single page)__
 [ Page Header | ... Tuple Area ... | Slot Directory ]
                      |
                      --> [ Tuple Header | Bitmap | Attributes ]
+                            |
+                            --> [ Tuple Header 
+                                    | Null Bitmap 
+                                    | Offsets (if variable-length) 
+                                    | Attributes ]
                      --> [ Tuple Header | Bitmap | Attributes ]
 
 Page Header = metadata about the page.
@@ -324,7 +329,12 @@ Slot Directory = fixed-size entries pointing to each tuple’s offset.
 Tuple Header = per-tuple metadata (visibility, null-bitmap).
 Attributes = the actual row values.
 ```
-
+_Takeaways (`For variable-length fields, if the value is null, what would be stored in the offset and
+length fields?`):_
+- What if the value is NULL?
+    - The null bitmap already says "this attribute is NULL, don't read it."
+    - So the actual offset/length does not matter: the DBMS won’t use them.
+    - To avoid confusion, most system just set `offset = 0` and `length = 0` as a consistent convention
 
 ## Problem #2: How the DBMS manages its memory and moves data back-and-forth from disk.
 __Buffer Pool Organization__
