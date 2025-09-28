@@ -144,4 +144,64 @@ __Compilation = 4 stages → Preprocess → Compile → Assemble → Link.__
         readelf -l esrv
         ```
 3. Section Header Table (Linker's View)
-- 
+    - Each section is for linking/debugging, not for runtime execution
+    - Examples:
+        - `.text` → executable machine code
+        - `.rodata` → read-only constants, string literals
+        - `.data` → initialized global/static vars
+        - `.bss` → uninitialized vars (just space)
+        - `.plt` / `.got` → dynamic linking stubs
+        - `.symtab` / `.dynsym` → symbol tables
+        - `.strtab` → string table (names of symbols)
+    - Sections are usually stripped in production binaries
+    - Command:
+        ```bash
+        readelf -S esrv
+        ```
+
+4. Symbols (Names -> Addresses)
+    - Two main tables:
+        - `.symtab` → full symbol table (may be stripped).
+        - `dynsym` → symbols needed for dynamic linking.
+    - Each symbol entry:
+        - Name (index into .strtab)
+        - Value (address / offset)
+        - Size (bytes)
+        - Binding (local/global)
+        - Type (func, object)
+    - Command:
+        ```bash
+        readelf -s esrv
+        ```
+
+5. Relocations (Glue for linking)
+    - When code refers to things whose addresses aren't know until link/load time:
+        - `R_X86_64_PC32`, `R_X86_64_GLOB_DAT`, etc.
+        - Common in dynamically linked binaries (`printf`, `malloc`).
+        - Resolved at runtime via the PLT (Procedure Linkage Table) and GOT (Global Offset Table).
+    - Command:
+        ```bash
+        readelf -r esrv
+        ```
+
+6. Dynamic Section (If dynamically linked)
+    - Holds runtime loader info:
+        - Needed Shared libs (`DT_NEEDED`)
+        - Address of symbol hash tables
+        - Relocation Tables
+        - Init/fini function pointers
+    - Command:
+        ```bash
+        readelf -d esrv
+        ```
+7. Real Memory Layout (when loaded)
+    - Example:
+        ```text
+        0x400000 ─► [ ELF headers / read-only ]
+        0x401000 ─► [ .text   (instructions)  R-X ]
+        0x406000 ─► [ .rodata (constants)     R-- ]
+        0x407000 ─► [ .data   (initialized)   RW- ]
+        0x408000 ─► [ .bss    (zero-fill)     RW- ]
+        0x7fff... ─► [ stack ]
+        0x5555... ─► [ heap ]
+        ```
