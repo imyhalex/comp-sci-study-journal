@@ -205,3 +205,19 @@ __Compilation = 4 stages → Preprocess → Compile → Assemble → Link.__
         0x7fff... ─► [ stack ]
         0x5555... ─► [ heap ]
         ```
+8. `-e` option in `readelf`
+    - Example
+        ```bash
+        readelf -e esrv
+        ```
+    - You’ll get in one go:
+        - The ELF identity card (architecture, entry point, offsets)
+        - The segment table (what kernel maps into memory)
+        - The section table (all the named sections like `.text`, `.data`, `.bss`, .`rodata`, `.symtab`, etc.)
+    - Useful for _reverse engineering_ when you want a big picture of the file layout.
+        - Instead of calling readelf `-h`, then `-l`, then `-S`, you see all three in one output.
+        - After that, you can drill down with:
+            - `-s` (symbols)
+            - `-r` (relocations)
+            - `-d` (dynamic section)
+            - `-x` (hex dump of a section)

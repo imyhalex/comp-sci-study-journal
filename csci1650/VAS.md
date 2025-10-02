@@ -124,10 +124,22 @@ __Dynanmic Libiaries(DYN - ELF)__
 - Example: when you use printf(), it comes from libc.so.
 
 __Heap__
+- What you labeled as "Heap" above “Thread-Stack” likely refers to mmap-based heap allocations.
+- Modern allocators (glibc malloc) don’t only use `brk`; they also allocate large chunks with mmap().
 - Grows upward.
 - Allocated with `malloc()`,` calloc()`, `new` in C++.
     - `brk()` system call → moves the "program break".
     - `mmap()` when allocation is large.
+
+__BRK(Heap)__
+- The classic heap region that starts just above your data/bss.
+- Managed by the kernel’s brk()/sbrk() system calls.
+- These appear as “anonymous mmap” regions elsewhere in the VAS.
+- So:
+    - BRK (Heap) = contiguous region grown via `brk`.
+    - Heap (mmap) = separate chunks allocated with `mmap`.
+- Used by `malloc()` for small/medium allocations.
+- Grows upward (toward higher addresses).
 
 __Thread Stack__
 - Each thread gets its own stack separate from the main thread
@@ -183,6 +195,152 @@ __Difference between Heap and mmap__
         return 0;
     }
     ```
+### 1. **Address Space Range**
+
+* On a **32-bit machine**, the entire VAS is `0x00000000` → `0xffffffff` (4 GB).
+* This space is **split between user space and kernel space**.
+
+  * By default (on Linux):
+
+    * **User space**: `0x00000000` → `0xbfffffff` (3 GB)
+    * **Kernel space**: `0xc0000000` → `0xffffffff` (1 GB, reserved, not accessible from user processes)
+
+So **user space starts at `0x00000000`**, not at `0xbfffffff`.
+The address `0xbfffffff` is actually the **top of user space**, where the **stack grows downward**.
+
+---
+
+### 2. **What the Diagram Shows**
+
+From **top to bottom** (high addresses → low addresses):
+
+* **Environment variables & arguments (ENV | ARGS)**: placed near the very top of user space, just below `0xc0000000`.
+* **Stack**: starts near `0xbfffffff` and grows downward.
+
+  * In your diagram, default `ulimit -s` = 8 MB means the stack can extend down from the top.
+* **MMAP region**: used for `mmap()` calls, shared libraries, memory-mapped files.
+* **Dynamic libraries (ld.so, libc.so, etc.)**: loaded into the mmap area, addresses randomized (ASLR can shift them).
+* **Heap**: grows upward, starting after the BSS/data segment of the main program (brk area).
+* **Executable segments (ELF)**: at the bottom region (`0x08048000` typically, historically). Contains `.text`, `.data`, `.rodata`, etc.
+
+---
+
+### 3. **Key Point About Your Question**
+
+> *“So what does this 32-bit machine VAS anatomy mean? The user space start from `0xbfffff`?”*
+
+No —
+
+* **User space starts at `0x00000000`**.
+* **User space ends at `0xbfffffff`**.
+* The **stack starts at the very top (`0xbfffffff`)** and grows downward, which is why many diagrams show it starting “from 0xbfffffff.”
+
+So the confusion is that `0xbfffffff` is not the *start of user space*, but the *end (top) of user space* where the stack begins.
+
+---
+
+**Summary**:
+On a 32-bit Linux machine with the 3G/1G split:
+
+* User space = `0x00000000` → `0xbfffffff`
+* Kernel space = `0xc0000000` → `0xffffffff`
+* The diagram shows how different segments (stack, heap, libraries, code) are arranged within user space.
+
+## 1. Why is each VAS 4 GB on a 32-bit machine?
+
+* A **32-bit CPU** uses 32-bit pointers (virtual addresses).
+* That means the maximum number of distinct addresses is:
+  [
+  2^{32} = 4,294,967,296 \text{ bytes} = 4 \text{ GB}
+  ]
+* So, the **total virtual address space per process = 4 GB**, regardless of how much physical RAM the machine has.
+* Each process gets its **own** 4 GB virtual address space (thanks to page tables and MMU). They are isolated from one another.
+
+---
+
+## 2. Why split 3 GB user / 1 GB kernel?
+
+The kernel must always be accessible in any process context. But we don’t want user processes messing with kernel memory directly.
+
+So the OS designers **divide the 4 GB VAS**:
+
+* **Lower 3 GB (0x00000000 → 0xbfffffff)**
+
+  * Mapped to **user space**.
+  * Each process has its own mappings here.
+
+* **Upper 1 GB (0xc0000000 → 0xffffffff)**
+
+  * Mapped to the **kernel’s address space**.
+  * This region is **the same in all processes** (so the kernel can run regardless of which process is active).
+  * User processes cannot access it (privilege checks prevent that).
+
+This design has some benefits:
+
+* Kernel can be mapped into every process’s VAS → **no need to switch page tables** when entering kernel mode.
+* Keeps user and kernel memory separated for protection.
+
+---
+
+## 3. Could we change the split?
+
+Yes — Linux allows different splits:
+
+* **3G/1G (default)**: 3 GB user, 1 GB kernel.
+* **2G/2G split**: gives kernel more virtual space, useful for systems with huge kernel memory demands.
+* **4G/4G patches** (rare): experimental, kernel and user each get full 4 GB, but very complex.
+
+ **Summary**
+
+* **Each process gets 4 GB VAS** because 32-bit addresses = 4 GB max.
+* It’s split (typically 3G/1G) so both user code and kernel can coexist in the same address space.
+* Kernel part is shared across all processes and always mapped; user part is private per process.
+
+
+## 1. Theoretical maximum (64-bit addressing)
+
+* With 64-bit pointers, in theory the CPU could address:
+  [
+  2^{64} = 16 \text{ exabytes (EB)} = 16,777,216 \text{ TB}
+  ]
+* That’s way more than any real hardware or OS needs today.
+
+
+## 2. Practical limits (canonical addresses)
+
+* On **x86-64** (AMD64), current CPUs don’t use the full 64 bits.
+* They use **48 bits of virtual addressing** (sometimes 57 bits in newer CPUs).
+
+  * With **48 bits**:
+    [
+    2^{48} = 256 \text{ TB of virtual address space per process}
+    ]
+  * With **57 bits** (newer Intel/AMD):
+    [
+    2^{57} = 128 \text{ PB}
+    ]
+
+---
+
+## 3. OS split (Linux/Windows convention)
+
+* Just like 32-bit had **3G user / 1G kernel**, 64-bit has its own split:
+
+  * **Linux x86-64 (48-bit VAS)**:
+
+    * **128 TB user space** (lower half)
+    * **128 TB kernel space** (upper half)
+  * Each process gets this entire user-space range. Kernel is mapped separately and protected.
+
+---
+
+## 4. Key difference from 32-bit
+
+* On **32-bit**: Each process only got 4 GB VAS. That became a limitation.
+* On **64-bit**: Each process gets **128 TB (or more)**, which is effectively unlimited for today’s applications.
+
+So: Not 16 GB. On common 64-bit CPUs today, it’s **128 TB of user-space VAS per process** (with a matching 128 TB kernel space).
+
 
 __Waht is shared libraries?__
 - A shared library is a collection of compiled code (functions, classes, variables) stored in a file that can be loaded into memory at runtime and used by multiple programs.
