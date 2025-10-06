@@ -185,6 +185,3 @@ If you want, I can:
 
 * Provide full solutions for the exercises above, or
 * Run a vulnerability checklist on a code snippet you paste (I’ll point out injection risks and give fixes). Which would you like next?
-
-
-# 

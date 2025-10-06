@@ -489,7 +489,15 @@ Mapped address spaces:
 	- It grows downward (towards lower addresses).
 	- Here it is marked rwxp — read, write, execute (because you compiled with -z execstack). Normally, stack should be rw-p only.
 
-### Putting it all together
+### 
+```bash
+gdb$ disassemble main
+
+gdb$ si # step 
+
+
+```
+0### Putting it all together
 ```bash
 0xc0000000   [top of user space]
    [stack]          rwxp
@@ -518,7 +526,7 @@ Disassembly of section .init:
  8049000:       53                      push   %ebx
  8049001:       83 ec 08                sub    $0x8,%esp
  8049004:       e8 77 01 00 00          call   8049180 <__x86.get_pc_thunk.bx>
- 8049009:       81 c3 2b 23 00 00       add    $0x232b,%ebx
+ 8049009:       81 c3 2b 23 00 0       add    $0x232b,%ebx
  804900f:       8b 83 fc ff ff ff       mov    -0x4(%ebx),%eax
  8049015:       85 c0                   test   %eax,%eax
  8049017:       74 02                   je     804901b <_init+0x1b>
