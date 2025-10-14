@@ -139,7 +139,7 @@ __Sort-Merge Join__
 __Join Algo Summary__
 ![img](./img/Screenshot%202025-10-09%20at%2014.01.59.png)
 
-# Query Plan
+# Query Plan (Lecture 10 & 11)
 - DBMS converts query into plan comprised of logical operators
     - Represented as a tree
     - Technically a Directed Acyclic Graph (DAG)
@@ -153,6 +153,7 @@ __Processing Model__
 - Approach #3: Vectorized / Batch Model
 
 __Iterator Model__
+![img](./img/Screenshot%202025-10-14%20at%2013.10.53.png)
 - Each query plan opeator implements three functions:
     - `Open()`
     - `Close()`
@@ -165,4 +166,110 @@ __Iterator Model__
     - Hash joins, hash aggregaties, order by
     - Thee are called pipeliine breakers
 - No intermediate buffers needed
-- Ouput control works easily with this approach(e.g. LIMIT)
+- Ouput control works easily with this approach(e.g. `LIMIT`)
+
+__Materialization Model__
+![img](./img/Screenshot%202025-10-14%20at%2013.11.35.png)
+- Each oprator processes its inoyt all at once and them emits its putput all at once
+    - The oprator "materializer" its output as a single result.
+    - The DBMS can push down hint (e.g. LIMIT) to avoid scanning too many tuples
+
+__Iterator vs. Materilization Tradeoffs__
+- Number of function calls
+- Buffer Spcae
+- Early Result and concurrency
+    - The pipeline model can emit results early and overlap work
+
+__Vectorization Model__
+![img](./img/Screenshot%202025-10-14%20at%2013.21.34.png)
+- Like the iterator model where each operator implements a Next() function, but..
+- Each operator emits a batch of tuples instead of a single tuple.
+    - The operator's internal loop processes multiple tuples at a time. 
+    - The size of the batch can vary based on hardware or query properties.
+- Reduces the number of incoration per operators
+- Allows for operators to more easily use vectorized (SIMD) instructions to process batches of tuples.
+- A happy middle between tuple-at-a-time and full materialization models
+
+## Query Optimization
+
+__Architecture Overview__
+![img](./img/Screenshot%202025-10-14%20at%2013.21.34.png)
+
+__Query Optmization__
+1. Logical plan optimization via Heuristic /Rules
+2. Physical plan optimiztion via Cost-based Search
+
+__Logical plan optimization__
+- Rewrite a logical plan into an equivalent logical plan using pattern matching rules (aka rewrite rules)
+- The goal is to increase the likelihood of enumerating the optimal plan in the search
+- Cnnot compare plans because there is no cost model but "direct" a transformation to a preferred side.
+- Common Example
+    - Split Conjunctive Predicates
+    - Predicate Pushdown
+    - Replace Cartesian Products with Joins
+    - Projection Pushdown
+
+__Physical plan optimization__
+- Cost Estimation
+    - The DBMS uses a cost model to predict the behavior of a query plan hiven a database states
+    - This is an internal cost that allows the DBMS to compare one plan with another.
+- Cost Model Component
+    1. Physical Cost
+        - Predict IO, CPU cycles, cache misses, RAM consumption, network messages
+        - Depends heavily on hardware
+    2. Logical Cost
+        - Estimate output size per operator
+        - Independent of the operator algorithm
+        - Need cardinality estimations for result sizes
+    3. Algorithm Costs
+        - Complexity of the operator implementation.
+
+__Postgres: Cost Model__
+- Uses a combination of CUP and I/O costs that are weighted by "magic" constant factors
+- e.g.:
+    - Cost = cup_tuple_cost * number_of_rows + seq_page_cost * number_of_pages
+- Default settings are for a disk-resident database without a lot of memroy:
+    - processing a tuple in memory is 400x faster than reading a tuple from disk
+    - Sequential I/O is 4x faster than random I/O
+- `EXPLAIN` prints the plan chosen from a given query, plus the estimated cost and result set size
+- `ANALYZE` also runs the query, prints the acutal values
+
+__Statistics__
+- The DBMS stores internal statistics about tables, attribtues, and idexes in its internal cataglog
+- Different system update them at different time
+- Manual invocation:
+    - Postgres/SQLite: ANALYZE
+    - Oracle/MySQL: ANALYZE TABLE
+    - SQL Server: UPDATE STATISTICS
+    - DB2: RUNSTATS
+
+__Slection Cardinatliy__
+- The selectively (sel) of a predicate P is fraction of tuples that qualify (i.e. what fractio of tuples will be selected)
+- Example
+    ```sql
+    SELECT * FROM people WHERE age = 9;
+    ```
+- Equality Predicates: A=constant
+    - sel (A=constant) = #occurences/abs(R)
+    - Example sel(age=9)
+- Statistic Collections
+    - Choice #1: Histograms
+        - Equi-Width Histograms
+            - Maintain counts for a group of values instead of each uniqe key
+            - All buckets have the same width (i.e. same # of values)
+        - Equi-Depth Histograms
+            - Vary the width of buckets so that the total number of occurrences for each bucket is roughly the same.
+        - Equi-Width vs. Equi-Depth Histograms
+            - Equi-width histograms:
+                - Simple, fixed bin size
+                - Well suited for uniform data
+                - Inefficient for sparse data
+            - Equi-depth histograms:
+                - Expensive, variable bin sizes
+                - Accommodates data skew
+    - Choice #2: Sketches
+        - Probabilistic data structures that generate approximate statistics about a data set.
+        - Cost-model can replace histograms with sketches to improve its selectivity estimate accuracy.
+    - Choice #3: Sampling
+        - Modern DBMSs also collect samples from tables to estimate selectivities.
+        - Update samples when the underlying tables changes significantly.
