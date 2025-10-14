@@ -1,16 +1,26 @@
 # Operator execution Continue
 
+## Family #2: Hash Join
+
 __Basic Hash Join Algorithm__
 ```text
-build hash table HTR for R. // build phase
+build hash table HT_R for R. // build phase
     foreach tuple s ∈ S // probe phase
         output, if h1(s) ∈ HTR.
 ```
+- __Often the best general-purpose join when no indexes or sorting exist__
 - Phase #1: Build
-    - Scan the outer relation and populate a hash table using the hash function h1 on the join attributes.
-    - We can use any hash table that we discussed before but in practice linear probing usually works well.
+    - Choose ont table (usually the smaller one, say `R`)
+    - Build an in-memory hash table using `h₁(key)`
+    - Key = join attribute(s) from R
+    - Value = rest of tuplesd (or pointer)
 - Phase #2: Probe
-    - Scan the inner relation and use h1 on each tuple to jump to a location in the hash table and find a matching tuple.
+    - Scan the other table (`S`)
+    - For each tuple in S:
+        - Compute h₁(S.key)
+        - Check if a matching key exists in hash table HT_R
+- The Problem:
+    - If most tuplesd in S do not have a match in R, then we are wasting CPU time by probing the hash table over: each costs CPU cycles and cache misses.
 
 __Hash Table Content__
 - Key: The attribute(s) that the query is joining the tables on
@@ -19,71 +29,95 @@ __Hash Table Content__
     - Depends on what the oprators above the join in the query plan expect as its input
     - Early vs. Late Materialization
 
-__Optimization : Probe Filter__
+__Optimization : Probe Filter (Bloom Filter)__
 - Create a _Bloom Filter_ during the __build phase__
 - Use it in the __probe phase__ to decide if an actual probe is needed
 
-__Bloom Filter__
+__Bloom Filter = "Fast Pre-Check Chache"__
+- During the build phase, while we insert keys from R into the hash table, we also insert them into a Bloom Filter
+- __What is Bloom Filter?__
+    - A compact bitmap that quickly tell you:
+        - "This key is defintly not in the set" (Flase negative never occurs)
+        - "This key might be in the set" (Flase positive can occur)
 - Probabliistic data structure (bitmap) that answers set memebership queries
-    - False negatives never occurs
-    - Flase positive can occur
-- Insert(x):
-    - Use k hash functions to set bits in the filter to 1
-- Lookup(x):
-    - Check whether the bits are 1 for each hash function.
-- Imagine a row of light switches (bits) all turned off initially: You have multiple friends (hash functions) — each friend, when given a name, flips specific switches.
-    - When you add a name, all friends flip their switches.
-    - When you check a name, you ask each friend: “Is your switch on?”
-        - When you check a name, you ask each friend: “Is your switch on?”
-            - If any friend says “off,” the name was definitely never added.
-            - If all say “on,” it might have been added (but possibly not — due to collisions).
+    - False negatives never occurs = __impossible (never say “not in set” if it actually is)__
+    - Flase positive can occur = __possible (might say “maybe” even if not really in set)__
+
+- __How it is used in Hash Join?__
+    - Insert(x):
+        - Use k hash functions to set bits in the filter to 1
+    - Lookup(x):
+        - Check whether the bits are 1 for each hash function.
+    - Build Phase:
+        - For every tuple in R:
+            - Insert its join key into both:
+                1. Hash table (`HT_R`)
+                2. Bloom Filter(`BF`)
+    - Probe Phase:
+        - For every tuple in S:
+            1. First check the Bloom filter (`BF`) using `h₁(S.key)`
+            2. If `BF` says, _"definitely not present" → skip the hash probe (cheap rejection)_
+            3. If `BF` says, _"maybe present" → probe the hash table `HT_R` as normal_
+    - So Bloom Filter acts as a lightweight pre-check to avoid expensive lookups
 
 __Probe Filter (Summary)__
 - Create a Bloom Fliter during the build phase when the key is likely to not exist in the hash table
 - The filter is then check before probing the hash table
 - This will be faster since the filter will fit in CPU caches and may reduce relatively expensive hash lookups
-- Q: A bloom filter used to optimize a hash-based join can only decrease but never increase the number of probes to the hash table. (True/__False__)
-    - In a hash join:
-        - You build a hash table on the smaller relation (say, `R`).
-        You probe it using tuples from the larger relation (say, `S`).
-    - Each probe checks whether a tuple from S has a matching key in R.
-    - Before probing, we can create a Bloom filter on all the join keys of `R`.
-        - Then, for each tuple in S:
-            - We first check the Bloom filter.
-            - If the filter says “not in R,” we skip the probe.
-            - If it says “maybe in R,” we perform the probe (and confirm).
-        - Effect on Probes
-            - False negatives: never happen → we’ll never skip a key that’s actually in R.
-            - False positives: may happen → sometimes we’ll still probe unnecessarily.
-        - So:
-            - The Bloom filter can eliminate some probes
-            - It never adds extra probes, since false negatives don’t exist.
-        - It can only decrease (or leave unchanged) the number of probes — never increase them.
+- __Q:__ A bloom filter used to optimize a hash-based join can only decrease but never increase the number of probes to the hash table. (__True__/False)
+    - Because:
+        - Every probe you skip is guaranteed correct (no false negative)
+        - In the worst case (if bloom filter may has many false positive), you still probe the same tuples as before: no worse
+    - So:
+        - Best case: you skip many uncessary probes -> faster
+        - Worst case: Bloom Filter gives no benefit -> same number of probes
 
-## External Hash Join
-- What happens if we do not have enough memory to fit the entire hash table?
-- We do not want to let the buffer pool manager swap out the hash table pages at random.
+### External Hash Join
+- The problem is:
+    - Table `R` (or `S`) is too large to build an in-memory hash table
+    - Memory = B pages (too small)
+    - If we ket OS swap pages randomly, we'd give terrible I/O performance (thrashing)
+        - We do not want to let the buffer pool manager swap out the hash table pages at random.
+- So instead, the DBMS takes control and performs the join in two phases:
+    - Using the same divide-and-conquer idea as `external hash aggregation`
 
 __Partitioned Hash Join (Grace Join)__
 ![img](./img/Screenshot%202025-10-09%20at%2013.39.38.png)
 ```text
-build hash table HTR,0 for bucketR,0
+build hash table HT_R,0 for bucketR,0
     foreach tuple s ∈ bucketS,0
         output, if h2(s) ∈ HTR,0
 ```
-- Hash R into (0, 1,..., max) `buckets` (aka `partitions`)
-- Hash S into the same # of buckets with the same hash function
-- Perform regular hash join on each pair of matching buckets in the same level between R ad S
-- Cost of external hash join?
-    - Assume that we have enough buffers
-    - Partitioning Phase: 
-        - Read+Write both tables
-        - 2(M + N)
-    - Probing Phase: 
-        - Read both table
-        - M + N
+- __Phase #1: Partitioning (Divide)__
+    - Key Idea: Tuples can join will always hash to the same partition
+        - So we only need to join corresponding paris `(bucketR[i], bucketS[i])`
+    1. _Hash R_ into k partitions on disk using hash function h₁:
+        - For each tuple `r ∈ R`
+            - Compute `bucketID = h₁(r.key)`
+            - Write it into correponding partition file `bucketR[i]`
+    2. _Hash S_ into k partitions using the same hash function h₁:
+        - For each tuple `s ∈ S`
+            - compute `buckectID = h₁(s.key)`
+            - Write it to `bucketS[i]`
+- __Phase #2: Build & Probe (Conquer)__
+    - For each partition pair `(Ri, Si)`
+        1. Build an in-memory hash table __on__ `Ri` using hash function `h₂` (to avoid collision bias).
+        2. Probe with all tuples in `Si`, checking matches using `h₂`
+- Cost Analysis:
+    - Phase #1: Partitioning Phase 
+        - Read and write both R and S once.
+        - So, `2(M + N)`
+    - Phase #2: Probing Phase: 
+        - Read each partition once (for both R and S).
+        - So, `M + N`
     - Total Cost: 
-        - 3(M + N)
+        - `3(M + N)`
+- Why “Grace” Hash Join Works So Well
+    - Each partition fits into memory for the second phase
+    - All access in both phases is sequential I/O: no random swapping
+    - Each page is read/write a small, fixed number of time (3 total)
+
+## Family #3: Soret-Merge Join
 
 __Sort-Merge Join__
 - Phase #1: Sort
@@ -105,7 +139,7 @@ __Sort-Merge Join__
 __Join Algo Summary__
 ![img](./img/Screenshot%202025-10-09%20at%2014.01.59.png)
 
-## Query Plan
+# Query Plan
 - DBMS converts query into plan comprised of logical operators
     - Represented as a tree
     - Technically a Directed Acyclic Graph (DAG)

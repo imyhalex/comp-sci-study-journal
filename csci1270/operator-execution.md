@@ -14,6 +14,9 @@ __Access Methods__
     - Table Scan (sequential)
     - Index Scan (many variants)
 
+
+## Scans
+
 __Table Scan__
 - The DBMS reads every page of the table, one by one
 - For each page in the table
