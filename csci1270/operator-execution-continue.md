@@ -136,7 +136,7 @@ __Sort-Merge Join__
     - Relations don’t fit in main memory.
     - The input relations may be sorted either by an explicit sort operator, or by scanning the relation using an index on the join key.
 
-__Join Algo Summary__
+## Join Algo Summary
 ![img](./img/Screenshot%202025-10-09%20at%2014.01.59.png)
 
 # Query Plan (Lecture 10 & 11)
