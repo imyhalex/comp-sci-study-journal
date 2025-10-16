@@ -118,23 +118,34 @@ build hash table HT_R,0 for bucketR,0
     - Each page is read/write a small, fixed number of time (3 total)
 
 ## Family #3: Soret-Merge Join
-
-__Sort-Merge Join__
-- Phase #1: Sort
+- Phase #1: Sort (Preparation)
     - Sort both table on the join key(s)
     - We can use the external merge sort we discussed
-- Phase #2: Merge
-    - Step through the two sorted table with cursors and emit matching tuples
-        - May need to some backtracking in the inner table
-- Sort Cost (R): 2M ∙ (1 + ⌈ logB-1⌈M / B⌉ ⌉)
-- Sort Cost (S): 2N ∙ (1 + ⌈ logB-1 ⌈N / B⌉ ⌉)
-- Merge Cost: (M + N)
-- Total Cost: Sort + Merge
+    - We must first sort both relations on the join key
+    - It the data is not already sorted (e.g, by index or ORDER BY), we must use __[External Merge Sort](./operator-execution.md/#sortings)__
+    - That is why the sort cost formula from that algorithm
+        - __Sort Cost (R): 2M * (1 + ⌈ log_B-1⌈M / B⌉ ⌉)__
+        - __Sort Cost (S): 2N * (1 + ⌈ log_B-1 ⌈N / B⌉ ⌉)__
+        - Interpretation:
+            - Each pass of external merge sort reads + writes the data onece (2x per pages)
+            - The "log" term counts the number of merge passes
+- Phase #2: Merge (Join Proper)
+    - Once both inpuits are sorted by the join key:
+        1. Keep two cursor: one scanning `R`, one scanning `S`
+        2. Compare the current `R.key` and `S.key`
+            - If `R.key < S.key` → advance R’s cursor.
+            - If `R.key > S.key` → advance S’s cursor.
+            - If equal → output joined tuple(s).
+    - Becuase both are sorted, you only move forward: __no random access__
+    - Sometimes, if multiple duplicates exist in one table, you need a little backtracking within that key group: but only within a small range (the matching keys).
+    - __Merge Cost: (M + N)__
+- __Total Cost: Sort + Merge = Sort(R) + Sort(S) + (M + N)__
 - When is sort-merge join useful?
-    - One or both tables are already sorted on join key.
-    - Output must be sorted on join key.
-    - Relations don’t fit in main memory.
-    - The input relations may be sorted either by an explicit sort operator, or by scanning the relation using an index on the join key.
+    - __Already sorted data__: If R or S (or both) are sorted on the join key -> e.g., via clustered index or ORDER BY, you skip sorting cost entirely.
+    - __Need sorted output__: If the query’s final output must be ordered on the join key, this join gives it “for free.”
+    - __Large data on disk__: Works well for big, unsorted datasets (external sort + sequential merge).
+    - __Stable performance__: Always O(M log M + N log N), predictable even if data distribution changes.
+    
 
 ## Join Algo Summary
 ![img](./img/Screenshot%202025-10-09%20at%2014.01.59.png)
@@ -189,6 +200,66 @@ __Vectorization Model__
 - Reduces the number of incoration per operators
 - Allows for operators to more easily use vectorized (SIMD) instructions to process batches of tuples.
 - A happy middle between tuple-at-a-time and full materialization models
+
+### Questions
+
+__What is a pipeline?__
+- When a query run, the DBMS executes a series of operators like:
+    ```sql
+    SELECT * 
+    FROM R JOIN S 
+    WHERE R.a > 5;
+    ```
+- Internally, this might looks like:
+    ```sql
+    Scan(R) → Filter(a > 5) → Join(S)
+    ```
+- These operators can often run in a pipeline:
+    - the output of one operator can be fed directly to the next one without writing intermediate results to disk
+    - that is called __pipeline execution__
+- __Blocking (pipeline-breaking) operator__
+    - An operator that cannot produce any output until it has comsumed (and usually processed) all of its input
+    - So it breaks the pipeline, forcing intermediate results to be fully materialized (stored) before the next operator can start.
+
+- Why it matters
+    - Blocking operator prevent early output: they break the pipeline between operators
+    - That means:
+        - The system needs extra memory or temporary disk space to hold intermediate data
+        - Parallelism and concurrency are reduced
+        - Query latency increaes (no early tuples)
+- Non-blocking Example:
+    ```sql
+    Scan(R) → Filter(a > 5) → Project(a)
+    ```
+- Blocking Example
+    ```sql
+    Scan(R) → Sort(a) → Output
+    ```
+
+- __Q:__ `SELECT DISTINCT col FROM T (with streaming hash DISTINCT)` blocking or non-blocking?
+    - The answer is — it depends on the implementation.
+    - If hash-based (which the question mentioned), _Non-blocking (streaming)_
+        - DBMS keeps a hash table of seen values.
+        - For each new tuple:
+            1. Check if the value already exists in the hash table.
+            2. If not — emit it immediately (stream up the pipeline).
+            3. Insert it into the hash table for future checks.
+    - If Sort-based DISTINCT → _Blocking_
+        - DBMS sorts all tuples on the DISTINCT key.
+        - Then scans through the sorted list, removing duplicates.
+        - Needs all input before sorting ⇒ fully blocking.
+
+__Summary__
+| Operator                              | Blocking?             | Why                                                    |
+| ------------------------------------- | --------------------- | ------------------------------------------------------ |
+| **Filter / Selection (σ)**            |  Non-blocking        | Can pass tuples as soon as they’re checked             |
+| **Projection (π)**                    | Non-blocking        | Can emit projected tuple immediately                   |
+| **Nested Loop Join**                  |  (usually)           | Can produce joined tuples as soon as matches found     |
+| **Hash Join (build + probe)**         |  Partially blocking | Must finish **build** phase before **probe** phase     |
+| **Sort**                              |  Blocking            | Must read all input to sort before outputting in order |
+| **Aggregate (GROUP BY, SUM)**         |  Blocking            | Must read all input to compute grouped results         |
+| **Set operations (UNION, INTERSECT)** |  Blocking            | Must read both inputs to compute result                |
+
 
 ## Query Optimization
 

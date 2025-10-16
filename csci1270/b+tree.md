@@ -64,9 +64,11 @@ __B+ Tree__
 - A self-balancing tree data structure that keeps data stored and allow searches, sequential access, insertions, and deletion always in O(log n)
 - Generalization of a binary search tree, since a node can have more than two children
 - Optimized for systems that read and write large blocks of data
-- A B+ Tree is a multi-way serach tree with the following properties:
+- A B+ Tree is a multi-way serach tree with the following __properties__:
     - It is perfectly balanced (every leaf node is at the same depth in the tree)
-    - Every node other than the root is at leat half-full: `[m / 2] - 1 <= #key <= m - 1` (m / 2 take the ceiling)
+        - By definition: All leaves are at the same depth
+        - No leaf is closer to or farther from the root than another, so lookups, inserts, and deletes always require the same number of node visits.
+    - Every node other than the root is at leat half-full: `ceil(m / 2) - 1 <= #key <= m - 1` (m / 2 take the ceiling)
         - `m` is the degree of the tree(aka fanout, order, branching factor)
             - degree is the maximum number of children you can have
         - Every node with `d` keys has `d+1` non-null children

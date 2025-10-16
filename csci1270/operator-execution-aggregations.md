@@ -130,7 +130,7 @@ __External Hashing Aggregates__
 __Basic Setup for Cost Analysis__
 
 __Joins__
-- We normalize tables ina relational database to aviod redundancy
+- We normalize tables in a relational database to aviod redundancy
 - We then use the join operator to reconstruct the original tuples without any information loss.
 - Join Algos: 
     - All physical join operators are built around the same idea:
@@ -161,6 +161,15 @@ __Joins__
 - Sort-Merge Join
 
 ### Family #1: Nested Loop Join (Baseline)
+- Nested Loop Join already processes data one tuple or block at a time — it doesn’t try to load whole tables into memory.
+- That means:
+    - Even if relations are huge,
+    - You can still run a nested loop join by streaming both from disk.
+- Takeaways:
+    - Pick the smaller table as the outer table.
+    - Buffer as much of the outer table in memory as possible.
+    - Loop over the inner table (or use an index).
+
 __Simple Nested Loop Join (Tuple-at-a-time)__
 ```text
 foreach tuple r ∈ R: <- Outer

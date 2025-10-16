@@ -173,7 +173,7 @@ __2-Way External Merge Sort__
 - Second pass: generate runs are twice the size of previous pass
 - Number of Passes: `1 + log₂N`
 - In each pass, we read and write every page in the file.
-- Total `I/O cost: 2N * (# of passes)` 
+- Total __`I/O cost: 2N * (# of passes)` = 2N * (1 + ⌈ log_B-1 ⌈N / B⌉ ⌉)__ 
 - __Q:__ What is the minum # buffer pages does 2-way merge require?
     - B=3 pages, One per each input run and one for the output run
     - Only need one buffer page for output and n pages for n-way merge
