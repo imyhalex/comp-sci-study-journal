@@ -1,4 +1,4 @@
-# Basics [ELF, VAS, $gdb `info proc mappings`, stack registers (antanomy and offsets calculations)]
+# Basics [ELF, VAS, $gdb `info proc mappings`, Stack registers (antanomy and offsets calculations)]
 
 ## ELF dump `readelf -e esrv`
 ```bash
@@ -166,7 +166,7 @@ debpool07 ~/l05 $ ldd ./esrv
     - `file esrv` → quick summary.
     -` readelf -l esrv | grep STACK` or use checksec (if available) to list security features quickly. Your GNU_STACK RWE already tells you stack is executable.
 
-## Real Runtime Virtual Address Space
+## Real Runtime Virtual Address Space ($gdb `info proc mappings`)
 ```bash
 gdb$ info proc mappings
 process 387537
@@ -256,6 +256,18 @@ Mapped address spaces:
 	- Stack lives at the very top of the user address space (near 0xc0000000 for 32-bit).
 	- It grows downward (towards lower addresses).
 	- Here it is marked rwxp — read, write, execute (because you compiled with -z execstack). Normally, stack should be rw-p only.
+
+## Stack (registers, instructions, and calculation)
+
+__What is Stack jitter__
+- `Stack jitter` means randomly changing the starting address of the starting address of the stack each time a program runs.
+- `Why`:
+    - Because most sttacks (like stack smashing) rely on predicting exactly where the stack will live in memory
+    - If the OS keeps moving it around, it becomes much harder to guess where your shellcode or return address should go.
+
+__What is Gadget__
+- A `gadget` is a short sequence of instructions already present in a program or libraries (usually ending with `ret`) that attacker reuses by arranging return addresses on the stack.
+- Gadgets are building blocks of __ROP (Return-Oriented Programming)__ chains: they let you perform arbitarry computation without injecting new executable code.
 
 # Control-flow Hijacking | Code Injection | Shellcode Development
 
