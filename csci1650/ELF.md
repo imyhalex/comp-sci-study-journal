@@ -151,6 +151,9 @@ __Compilation = 4 stages → Preprocess → Compile → Assemble → Link.__
         - `.data` → initialized global/static vars
         - `.bss` → uninitialized vars (just space)
         - `.plt` / `.got` → dynamic linking stubs
+            - A stub simply means a small piece of code that acts as a placeholder or gateway for something else.
+                - It doesn’t do the real work itself.
+                - it redirects control to the real implementation, often somewhere else in memory (for example, inside `libc.so.6`).
         - `.symtab` / `.dynsym` → symbol tables
         - `.strtab` → string table (names of symbols)
     - Sections are usually stripped in production binaries
