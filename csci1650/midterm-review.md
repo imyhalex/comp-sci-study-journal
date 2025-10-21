@@ -447,6 +447,31 @@ __Difference Between Code Injection and Code Reuse (ret2libc / ROP)__
 - Code injection: attacker supplies new instructions (shellcode) into writable memory (stack, heap, data) and transfers execution there.
 - Code reuse (ret2libc / ROP): attacker does not put new instructions into memory (or tries not to). They instead craft a sequence of return addresses (or gadget addresses) that make the program execute
 
+__Question__
+```text
+[10 pts] You have to select between two different ASLR implementations re: 
+the mmap  region. One offers 8-bits of entropy and requires mmap‘ed objects 
+to be 4KB-aligned. The other one offers 7-bits of entropy and requires  
+mmap‘ed objects to be 8KB-aligned. Which one offers better protection 
+against return-to-libc (ret2libc) attacks where the attacker aims at 
+reusing functions and gadgets from libc? (Justify your answer.) 
+```
+- __Short Answer:__ the 8-bit / 4KB-aligned scheme is better.
+    - In ASLR, entropy refers to how many bits of an address are randomized when the OS decides where to place something in memory — for example, the base address of the libc shared library or the stack.
+        - __Each bit of entropy doubles the number of possible positions__.
+        - So:
+            - 8 bits of entropy -> __2^8 = 256 possible placements__
+            - 7 bits of entropy -> __2^7 = 128 possible placements__
+        - If an attacker wants to guess where `system()` or `/bin/sh` is in memory (for a ret2libc attack), they have to guess the random base address of libc.
+        - __Also: Let’s say the mmap region (where shared libraries like libc live) can start somewhere in a 2 MB range.__
+            - If you’re 4KB-aligned, there are: __2 MB/4 KB = 512 possible pages__
+            - If you’re 8KB-aligned, there are: __2 MB/8 KB = 256 possible pages__
+    - _Entropy = how unpredictable the base address is._
+    - _Alignment = how finely memory can be placed (in pages)._
+    - _Higher entropy & smaller alignment step = stronger ASLR._
+- __ASLR__ is a memory protection technique used by modern operating systems (Linux, Windows, macOS, Android, etc.) to make memory addresses unpredictable for each program execution.
+    - ASLR randomizes where key parts of a program are placed in memory — such as the stack, heap, shared libraries, and code segments — every time the program runs.
+
 ### Non-Executable Stack (Why attackers prefer code reuse sometimes)
 - Modern defenses block executable writes: __DEP/NX__ marks stack/heap non-executable, which makes injected shellcode fail. Code-reuse works around this because it uses already executable code.
 - ASLR (Address space layout randomization) complicates finding gadgets or libc addresses, but leaking addresses or partial overwrites can still make reuse possible.
@@ -522,3 +547,15 @@ __What an attacker gains if they control it__
 3. `A stream for gadgets (ROP)`: By pivoting `%esp` into an attacker-controlled buffer, the attacker can place a sequence of addresses (addresses of gadgets) there; ret instructions will pop each gadget address in sequence (this is the basis of return-oriented programming — ROP). Controlling `%esp` turns a memory buffer into the program’s execution stack.
 4. `Fake stack frames (setcontext) -style control`: By controlling stack contents and `%esp` you can craft fake saved registers, return addresses, and sometimes emulate the effect of setcontext or longjmp to resume execution in arbitrary contexts.
 5. `Stack scanning / stack pointer arithmetic`: Some machine instructions treat `%esp` specially (push/pop, enter/leave, function prologues/epilogues). By changing `%esp` you can change where these instructions affect memory, causing the program to read/write attacker-chosen memory regions.
+
+## Q: What is the purpose of the %ebp register in x86?
+- Is the frame pointer on 32-bit x86. Its job is to act as a stable base (a fixed reference point) for the current function’s stack frame so the function can reliably find its saved return address, arguments, and local variables even while `%esp` moves.
+
+__What %ebp does__
+- Marks the base of the current stack frame. After `push ebp; mov ebp, esp`, `%ebp` points to the saved old `%ebp` value on the stack.
+- Provides fixed offsets to access arguments and locals:
+    - `[ebp+0]` → saved old `%ebp` (value pushed by caller)
+    - `[ebp+4]` → return address
+    - `[ebp+8]` → first function argument
+    - `[ebp+12]` → second argument, etc.
+    - `[ebp-4], [ebp-8]`, ... → local variables
