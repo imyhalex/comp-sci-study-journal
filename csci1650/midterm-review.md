@@ -271,7 +271,59 @@ __What is Gadget__
 
 # Control-flow Hijacking | Code Injection | Shellcode Development
 
-## NOP
+__Questions__
+```text
+[5 pts] You have discovered two buffer overflow vulnerabilities in a victim
+application. One is in the stack region of the address space and the other one
+in the heap. Which one has higher chances to result control-flow hijacking
+(when abused)?
+```
+- __stack overflow (stack region) is more likely to yield control-flow hijacking.__
+- __Short conclusion:__ Stack overflows are more likely to result in control-flow hijacking because they can directly and predictably overwrite return addresses; heap overflows can also lead to hijack but usually require extra steps and deeper allocator/object knowledge.
+
+## Code Injection
+- Meaning: Placing the machine instructions ("shellcode") into a program's memory and tricking the CPU into executiong them
+
+### a. NOP sleds technique
+- The attacker fills the start of the payload with many `NOP` instructions, followed by th real shellcode.
+- When the program jumps anywhere inside the sled, execution "slides" through NOPs until it reaches the shellcode.
+- At the end of the attacker-supplied data (after NOPs instructions), the attacker places a instruction to perform __relative jump__ to the top of buffer where shellcode is located
+- __It helps tolerate uncertainty in the exact return address: you do not need to land on the first byte exactly__
+
+```text
+High Address
+    [...]
+    [Arg0]
+    [saved eip (ret: arbitary addr of NOPs)]
+    [saved ebp (overwrite with shellcode)]
+    [Shellcode]
+    [buf (NOPs)]
+Low Address
+```
+### b. jmp %esp
+- The attacker overwrites the retrun address with the address of a gadget (usually inside the program or libc) that executes `jmp %esp`
+- `%esp` holds the stack pointer — i.e., it points directly at the top of the attacker’s injected payload.
+- So when the CPU executes `jmp *%esp`, it jumps to the injected code sitting on the stack.
+
+```text
+High Address
+    [Shellcode]
+    [saved eip (ret: addr of jmp %esp)]
+    [saved ebp (overwrite with junk)]
+    [buf (junk)]
+Low Address
+```
+
+### c. register spring
+- An exploitation technique where the attacker arranges for execution to jump to an instruction that indirectly jumps through a CPU register (for example `jmp %ebx`, `call %eax`, or `ret` to an address stored in some register). Before that jump, the attacker arranges for that register to contain the address of their payload (or some useful gadget)
+- In short:
+    1. Set a `register` to point at attacker-controlled data (using a `pop reg; ret` gadget, a write primitive, or by placing the value on the stack where a pop will consume it).
+    2. Return / jump to a gadget that jumps through that register (jmp *%reg, call *%reg, or any indirect control transfer that reads the register).
+    3. Execution continues at the attacker-controlled address.
+
+__Why use register spring?__
+- Useful when stack location is uncertain, when you can’t land precisely on %esp, or when a `jmp *%reg` gadget exists in a predictable module while `jmp *%esp` doesn’t.
+- Helps if you can write the address into some register reliably (via gadgets).
 
 ## Register Anatanomy
 - There are 8 general-purpose registers, each 32 bits (4 bytes) wide:
@@ -385,6 +437,75 @@ __`strcpy` / `strncpy` / other `str*()` specifics — can they inject shellcode?
 
 
 # Non-Executable Memory | Ret2libc | Code Resue 
+
+## Ret2libc
+- Not code injection; It is __code reuse attacks (code-reuse exploit)__
+- Aims to reuse existing executable code (in libc, the binary, or other modules) instead of placing new machine code (shellcode) into memory and running it. But both families share the same high-level goal: gain control of execution
+- Used when stack is non-executable
+
+__Difference Between Code Injection and Code Reuse (ret2libc / ROP)__
+- Code injection: attacker supplies new instructions (shellcode) into writable memory (stack, heap, data) and transfers execution there.
+- Code reuse (ret2libc / ROP): attacker does not put new instructions into memory (or tries not to). They instead craft a sequence of return addresses (or gadget addresses) that make the program execute
+
+### Non-Executable Stack (Why attackers prefer code reuse sometimes)
+- Modern defenses block executable writes: __DEP/NX__ marks stack/heap non-executable, which makes injected shellcode fail. Code-reuse works around this because it uses already executable code.
+- ASLR (Address space layout randomization) complicates finding gadgets or libc addresses, but leaking addresses or partial overwrites can still make reuse possible.
+
+## Ret2libc Chaining
+-  you overwrite saved EIP with addresses of libc functions and craft fake return addresses + arguments on the stack so each function executes and returns into the next desired address. Each call typically needs a "return address" position because the called function will ret to whatever dword is on the stack unless it never returns.
+- When you can omit a valid return address: only when the called function does not return (or you accept a crash), but you usually still place a placeholder.
+
+__Example__
+```text
+[ addr_setuid ] [ addr_after_setuid -> addr_system ] [ arg_setuid=0 ]
+[ addr_system ] [ addr_after_system -> addr_exit ] [ ptr_bin_sh ]
+```
+
+## %esp lifting
+- Means adjusting the stack pointer so that when a gadget or function rets, the next ret address arguments we want are at the correct position.
+- Common mechanism:
+    - Gadgets that change esp directly: `pop pop pop; ret`
+
+__Example Payload__
+```c
+unsigned char payload[] =
+        /* ------------------------------------ */
+        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        "XXXXXXXXXXXX"
+        /* ------------------------------------ */
+        /* FIXME */
+        /* ------------------------------------ */
+        /*Flag 5*/
+        "\x00\xae\x13\xb4"              // open addr
+        "\x6b\x35\x05\xb4"              // pop; pop; pop; ret
+        "\x04\xd3\xff\xbf"              // pointer to "magic.txt"
+        "\x01\x00\x00\x00"              // O_WRONLY
+        "\x00\x00\x00\x00"              // MODE_ZERO
+
+        "\xe0\xb3\x13\xb4"              // write addr
+        "\x6b\x35\x05\xb4"              // pop; pop; pop; ret
+        "\x03\x00\x00\x00"              // fd = 3
+        "\x0e\xd3\xff\xbf"              // pointer to "!xyzzy"
+        "\x06\x00\x00\x00"              // length = 6
+
+        "\x00\x91\x06\xb4"              // raise addr
+        "\xc7\x3e\x05\xb4"              // pop; ret
+        "\x0c\x00\x00\x00"              // arg SIGUSR2
+
+        "\x60\xbd\x06\xbf"              // exit(not sure)
+
+        "magic.txt\0"
+        "!xyzzy\0"
+        ;
+        /* ------------------------------------ */
+```
 
 ## Q: What's the purpose of the %esp register in x86? What does it offer to attackers controlling it (in terms of code reuse)?
 
