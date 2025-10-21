@@ -344,3 +344,75 @@ __Slection Cardinatliy__
     - Choice #3: Sampling
         - Modern DBMSs also collect samples from tables to estimate selectivities.
         - Update samples when the underlying tables changes significantly.
+
+__Cost-Based Query Optimization__
+- After performing rule-based rewritting, the DBMS wil:
+    1. Enumerate different plans considering
+        - different operator implementations and
+        - different equivalent oopeartor ordering
+    2. Estimate their costs.
+
+
+__Single-Relation Query Plannning__
+- Pick the best access method
+    - sequential scan
+    - index scan
+        - whether to use indexs
+        - which ones to use
+- Decided predicate evaluation ordering
+    - Simple heuristic are often good enougth for this
+
+__Multi-Relation Query Planning__
+- Example
+    ```sql
+    SELECT ARTIST.NAME
+    FROM ARTIST, APPEARS, ALBUM
+    WHERE ARTIST.ID=APPEARS.ARTIST_ID
+    AND APPEARS.ALBUM_ID=ALBUM.ID
+    AND ALBUM.NAME="Purple"
+    ORDER BY ARTIST.ID
+
+    ARTIST: Sequential Scan
+    APPEARS: Sequential Scan
+    ALBUM: Index Look-up on NAME
+
+    ARTIST ⨝ APPEARS ⨝ ALBUM
+    APPEARS ⨝ ALBUM ⨝ ARTIST
+    ALBUM ⨝ APPEARS ⨝ ARTIST
+    APPEARS ⨝ ARTIST ⨝ ALBUM
+    ARTIST × ALBUM ⨝ APPEARS
+    ALBUM × ARTIST ⨝ APPEARS
+    ```
+- Step #1: Choose the best access path to each table
+- Step #2: Enumerate all possible join ordering for tables; for each ordering enumerate possible implementations
+- Step #3: Determine the join with the lowest cost
+
+__Common Approach: Left-Deep join trees__
+- A left-deep tree means that at every join, the left input is always a base table or the result of a previous join — the right input is always a base table.
+- Construction:
+    1. pick two tables to join
+    2. pick a third one to join with the results as the right relation
+    3. repeate previous step until all tables are joined
+- Advantages:
+    - Pipelineable: The inner (right) table can be scanned for each tuple of the outer (left) table, enabling iterator-style execution (no need to materialize intermediates).
+    - Simpler implementation: Works well with nested-loop joins; every new join attaches on the right.
+    - Efficient for cost-based optimization: The optimizer only needs to consider left-deep trees (drastically reduces search space from factorial to exponential).
+    - Supports index utilization: The right input can often use an index lookup keyed by the join attribute.
+    - Reduces the join serach space
+    - Can use dynamic programming for optimal result
+    - Works well with pipelining
+    - Good early filtering
+    - Lowe memory requirements
+- Disadvantages:
+    - Bushy may allow more concurrency
+    - Bushy may generate cheaper plans
+
+__Bottom-up Optimization__
+![img](./img/Screenshot%202025-10-21%20at%2013.35.52.png)
+
+__Conclusion__
+- Logical Optimization:
+    - We use static rules and heuristics to optimize a query plan without needing to understand the contents of the database. -> Takes a logical plan and produces a better logical plan
+- Cost-based optimizaton:
+    - We use a cost model to help perform more advanced query optimizations -> Takes a logical plan, and produces the “optimal”physical plan
+- In practice, query optimzation is all about avoiding bad plans, not identifying the actual optimal plan
