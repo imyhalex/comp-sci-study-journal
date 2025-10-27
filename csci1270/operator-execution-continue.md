@@ -151,39 +151,57 @@ build hash table HT_R,0 for bucketR,0
 ![img](./img/Screenshot%202025-10-09%20at%2014.01.59.png)
 
 # Query Plan (Lecture 10 & 11)
+
+__What is a Query Plan__
 - DBMS converts query into plan comprised of logical operators
     - Represented as a tree
     - Technically a Directed Acyclic Graph (DAG)
 - Data flows from the leaves of the tree up towards the root.
 - The output of the root node is the result of the query.
+- When you write:
+    ```sql
+    SELECT name FROM users WHERE age > 30;
+    ```
+    - The DBMS:
+        - Parses it into an abstract syntax tree (AST)
+        - Translate that into a __logical plan__ of relational operators (like `Scan`, `Filter`, `Project`)
+        - Then converts it ont a __physical plan__, choosing algoritms for each opeartor (e.g. "use seqential scan" or "use index scan")
+
 
 __Processing Model__
 - A DBMS's processing model defines how the system executes a query plan.
-- Approach #1: Iterator Model
-- Approach #2: Materialization Model
+- Approach #1: Iterator Model ("Tuple-at-a-time")
+- Approach #2: Materialization Model (“Operator-at-a-time”)
 - Approach #3: Vectorized / Batch Model
 
-__Iterator Model__
+__Iterator Model ("Tuple-at-a-time")__
 ![img](./img/Screenshot%202025-10-14%20at%2013.10.53.png)
 - Each query plan opeator implements three functions:
     - `Open()`
     - `Close()`
     - `Next()`
-    - On each invocatoin, the oprator returns either a single tuple or a null marker if there are no more tuples
-    - The operator implements a look that calls Next() on its children to retrive their tuples and then process them
-- This is called the iterator model (aka _tuple-at-a-time_, or _pipeline_ model)
-- Used on almost every DBMS. Allow for tuple pipelining
-- Some operators must block until their children emit all their tuples
-    - Hash joins, hash aggregaties, order by
-    - Thee are called pipeliine breakers
-- No intermediate buffers needed
-- Ouput control works easily with this approach(e.g. `LIMIT`)
+- Each call to `Next()` pulls one tuple at a time from its child
+- This is the __most common model__ (used in PostgreSQL, SQLite, MySQL)
+- Analogy: Imagine waiters passing one dish at a time from the kitchen to the customer: as soon as one is ready, it moves up the chain
+- Pros:
+    - Streams data: good for pipelining
+    - Low memory useage
+    - Works nicely with `LIMIT` (can stop early)
+- Cons:
+    - Many function calls (each tuple = one call)
+    - Some operators (like hash join or sort) must materialize all input first: they are "pipline breakers"
 
-__Materialization Model__
+__Materialization Model (“Operator-at-a-time”)__
 ![img](./img/Screenshot%202025-10-14%20at%2013.11.35.png)
-- Each oprator processes its inoyt all at once and them emits its putput all at once
-    - The oprator "materializer" its output as a single result.
-    - The DBMS can push down hint (e.g. LIMIT) to avoid scanning too many tuples
+- Each operator comsumes all its input, computes the result, and emits the full output at once
+- Used in system optimized for OLAP workloads (e.g., column stores like MonetDB or DuckDB)
+- Analogy: Each chef finishes cooking all dishes first before serving: no partial results
+- Pros:
+    - Fewer function calls
+    - Great for batch processing and caching
+- Cons:
+    - Needs more memory (buffers)
+    - No early results (must finish all work before output)
 
 __Iterator vs. Materilization Tradeoffs__
 - Number of function calls
@@ -193,13 +211,16 @@ __Iterator vs. Materilization Tradeoffs__
 
 __Vectorization Model__
 ![img](./img/Screenshot%202025-10-14%20at%2013.21.34.png)
-- Like the iterator model where each operator implements a Next() function, but..
-- Each operator emits a batch of tuples instead of a single tuple.
-    - The operator's internal loop processes multiple tuples at a time. 
-    - The size of the batch can vary based on hardware or query properties.
-- Reduces the number of incoration per operators
-- Allows for operators to more easily use vectorized (SIMD) instructions to process batches of tuples.
-- A happy middle between tuple-at-a-time and full materialization models
+- A hybrid: Each opeartor emits a batch (e.g. 1000 tuples) per `Next()` call.
+- Great for SIMD/vectorization: CPU can process multiple tuples in parallel.
+- Analogy: Instead of passing dishes one by one, a waiter carries a tray with 10 dishes: fewer trips, more efficient.
+- Pros:
+    - Reduce per-tuple overhead
+    - Leverages modern CPU optimizations
+    - Still allows some pipelining
+- Cons:
+    - Slightly more complex buffer managing
+    - Not as fully streaming as tuple-at-a-time
 
 ### Questions
 
@@ -268,18 +289,140 @@ __Architecture Overview__
 
 __Query Optmization__
 1. Logical plan optimization via Heuristic /Rules
+    - Apply transformation rules to rewrite the plan into equivalent but more efficient logical form
+    - No cost model: purely rule-based (pattern matching)
 2. Physical plan optimiztion via Cost-based Search
+    - Conver the logical plan into physical operators (e.g. hash join vs. nested-loop join)
+    - Assign cost estimates (I/O, CPU)
+    - Use dynamic programming or search algorithms to find the cheapest overall plan.
 
+### Logical plan optimization via Heuristics / Rules
 __Logical plan optimization__
 - Rewrite a logical plan into an equivalent logical plan using pattern matching rules (aka rewrite rules)
 - The goal is to increase the likelihood of enumerating the optimal plan in the search
-- Cnnot compare plans because there is no cost model but "direct" a transformation to a preferred side.
+- Cannot compare plans because there is no cost model but "direct" a transformation to a preferred side.
 - Common Example
     - Split Conjunctive Predicates
     - Predicate Pushdown
     - Replace Cartesian Products with Joins
     - Projection Pushdown
 
+#### Logical plan optimization example
+```sql
+SELECT ARTIST.NAME
+FROM ARTIST, APPEARS, ALBUM
+WHERE ARTIST.ID=APPEARS.ARTIST_ID
+AND APPEARS.ALBUM_ID=ALBUM.ID
+AND ALBUM.NAME=”Purple"
+```
+- If we naively convert SQL to a logical plan, it might look like:
+    ```sql
+    Project(ARTIST.NAME)
+            ↑
+            Select(ARTIST.ID = APPEARS.ARTIST_ID AND
+                APPEARS.ALBUM_ID = ALBUM.ID AND
+                ALBUM.NAME = "Purple")
+            ↑
+        CrossProduct(ARTIST, APPEARS, ALBUM)
+    ```
+- This means:
+    - The DBMS first form the __Cartesian product__ of all three tables.
+    - Then applies a big `WHERE` condition over it
+    - Then projects only the artists name
+- That is correct logically, but _terrible_ performance-wise: becauase a Cartesian product of large table is hugh (millions of rows)
+
+__Split Conjunctive Predicates__
+- __Rule:__ A `WHERE` with multiple `AND` conditions can be split into __multiple smaller filters__
+- So:
+    ```sql
+    Select(A ∧ B ∧ C)
+    ```
+- Becomes:
+    ```sql
+    Select(A)
+    ↑
+    Select(B)
+    ↑
+    Select(C)
+    ```
+- Our Example:
+    ```sql
+    Select(ARTIST.ID = APPEARS.ARTIST_ID)
+    Select(APPEARS.ALBUM_ID = ALBUM.ID)
+    Select(ALBUM.NAME = "Purple")
+    ```
+
+__Predicate Pushdown__
+- __Rule:__ Push filter (`WHERE` conditions) as close to the data source as possible (down the tree)
+    - Filtering eariler reduces the number of tuples passed up to later joins
+    - Example
+        ```sql
+        Select(price > 100)
+            ↑
+        Join(...)
+        ```
+    - Becomes:
+        ```sql
+        Join(
+            Select(price > 100)(Table),
+            OtherTable
+        )
+        ```
+    - Apply to our query:
+        ```sql
+        Project(ARTIST.NAME)
+                ↑
+            Join(ARTIST, APPEARS, ALBUM)
+                ↑
+        ALBUM: Select(NAME = "Purple")
+        ```
+        - `ALBUM.NAME = 'Purple'` only involves `ALBUM`, so we can push it down to the `ALBUM` scan
+        - So now, instead of scanning all album, we can sacn only those where `NAME = 'Purple'`
+
+__Replace Cartesian Products__
+- __Rule:__ If you have a Cartesian product followed by a `WHERE` condition that equates columns between the two tables, replace it with an explicit join operator.
+- Example:
+    ```sql
+    CrossProduct(A, B)
+    Select(A.id = B.id)
+    ```
+- Becomes:
+    ```sql
+    Join(A.id = B.id)(A, B)
+    ```
+- Now Query becomes:
+    ```sql
+    Project(ARTIST.NAME)
+            ↑
+    Join(ARTIST.ID = APPEARS.ARTIST_ID)
+            ↑
+    Join(APPEARS.ALBUM_ID = ALBUM.ID)
+            ↑
+    Select(ALBUM.NAME = "Purple")(ALBUM)
+    ```
+
+__Final Optimized Logical Plan__
+```sql
+Project(ARTIST.NAME)
+        ↑
+Join(ARTIST.ID = APPEARS.ARTIST_ID)
+        ↑
+Join(APPEARS.ALBUM_ID = ALBUM.ID)
+        ↑
+Select(ALBUM.NAME = "Purple")(ALBUM)
+```
+- No Cartesian Products
+- Filters are pushed down
+- Joins explicity defined
+- Each join connects relevant relations directly
+- __Why it matters__
+    - Without Optimization
+        - The DBMS would compute a hugh `ARTIST × APPEARS × ALBUM `(potentially billions of rows), then filter most of them out later
+    - With heuristic optimzation
+        - It pushes filter early and converts products to joins, reducing intermediate results drastically.
+
+
+### Physical plan optimization via Cost-based Search
 __Physical plan optimization__
 - Cost Estimation
     - The DBMS uses a cost model to predict the behavior of a query plan hiven a database states
