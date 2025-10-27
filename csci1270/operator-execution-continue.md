@@ -423,11 +423,38 @@ Select(ALBUM.NAME = "Purple")(ALBUM)
 
 
 ### Physical plan optimization via Cost-based Search
+- __What is Physical Optimzation:__
+    - After logical rewrite, the DBMS has a "clean" logical plan, but there are still many ways to implement it physically
+    - For example:
+        ```sql
+        SELECT * 
+        FROM A JOIN B ON A.id = B.id;
+        ```
+        - Possible physical implementations:
+            - Nested Loop Join
+            - Hash Join
+            - Sort-Merge Join
+            - Index Nested Loop Join
+        - They are all logically equivalent but have different costs.
+    - The cost-based optimizer uses:
+        - A cost model (predicts how expensive each plan will be)
+        - A search algorithm (enumerates possible plans and picks the cheapest)
+
 __Physical plan optimization__
 - Cost Estimation
     - The DBMS uses a cost model to predict the behavior of a query plan hiven a database states
     - This is an internal cost that allows the DBMS to compare one plan with another.
 - Cost Model Component
+    ```text
+    Total Cost = I/O Cost + CPU Cost + Memory Cost + Network Cost
+    ```
+    - Each opeartor (scan, join, sort, etc.) has an estimated cost based on:
+        - number of tuples processed (cardinality)
+        - number of pages read/written
+        - algorithm complexity
+        - selectivity of predicates
+        - harware parameters (I/O speed, memory size) 
+
     1. Physical Cost
         - Predict IO, CPU cycles, cache misses, RAM consumption, network messages
         - Depends heavily on hardware
@@ -441,14 +468,30 @@ __Physical plan optimization__
 __Postgres: Cost Model__
 - Uses a combination of CUP and I/O costs that are weighted by "magic" constant factors
 - e.g.:
-    - Cost = cup_tuple_cost * number_of_rows + seq_page_cost * number_of_pages
+    - __Cost = cpu_tuple_cost * number_of_rows + seq_page_cost * number_of_pages__
+        ```text
+        Total Cost = I/O Cost + CPU Cost + Memory Cost + Network Cost
+        ```
 - Default settings are for a disk-resident database without a lot of memroy:
     - processing a tuple in memory is 400x faster than reading a tuple from disk
     - Sequential I/O is 4x faster than random I/O
 - `EXPLAIN` prints the plan chosen from a given query, plus the estimated cost and result set size
 - `ANALYZE` also runs the query, prints the acutal values
+- Example:
+    ```sql
+    SELECT * FROM users WHERE id = 123;
+    ```
+    -  Postgres compares two plans
+        1. Seq Scan: cost = (all pages) * seq_page_cost
+        2. Index Scan: cost = (few random I/Os) * random_page_cost
+    - If the table is small or cached -> Seq Scan cheaper
+    - If the table is large -> Index Scan cheaper
 
 __Statistics__
+- to make good cost estimates, the DBMS must know:
+    - how many rows in each table
+    - Value distribution of each column
+    - How selective each predicate is
 - The DBMS stores internal statistics about tables, attribtues, and idexes in its internal cataglog
 - Different system update them at different time
 - Manual invocation:
@@ -458,21 +501,43 @@ __Statistics__
     - DB2: RUNSTATS
 
 __Slection Cardinatliy__
-- The selectively (sel) of a predicate P is fraction of tuples that qualify (i.e. what fractio of tuples will be selected)
+- The selectively (`sel`) = fraction of tuples that pass a condition
 - Example
     ```sql
     SELECT * FROM people WHERE age = 9;
     ```
-- Equality Predicates: A=constant
-    - sel (A=constant) = #occurences/abs(R)
-    - Example sel(age=9)
-- Statistic Collections
-    - Choice #1: Histograms
+    - If:
+        - Table has 1,000,000 rows
+        - 10,000 have `age = 9`
+        - __Then: sel (age=9) = 10,000 / 1,000,000 = 0.01__
+        - So the expected output size = sel × total_rows = 0.01 × 1,000,000 = 10,000.
+
+__How the DBMS Estimates Selectivity__
+- Because it can't scan the table every time, it uses _statistical summaries_ like:
+    - __Choice #1: Histograms__
+        - Store frequency/count information for ranges of values
         - Equi-Width Histograms
-            - Maintain counts for a group of values instead of each uniqe key
-            - All buckets have the same width (i.e. same # of values)
+            - Divide attribute's value range into __equal-width bins__
+            - Count how many tuples fall in each
+            - Each bucket has same width, but uneven count
+            - Simple to compute, but not great for skewed data (e.g., most users are 30–40 years old).
+            - Example of age
+                | Range | Count |
+                | ----- | ----- |
+                | 0–10  | 10k   |
+                | 10–20 | 50k   |
+                | 20–30 | 200k  |
+                | 30–40 | 400k  |
         - Equi-Depth Histograms
-            - Vary the width of buckets so that the total number of occurrences for each bucket is roughly the same.
+            - Buckets have equal counts, but varying widthes
+            - Handles skewed data better
+            - Example
+                | Range | Count |
+                | ----- | ----- |
+                | 0–18  | 100k  |
+                | 19–25 | 100k  |
+                | 26–55 | 100k  |
+                | 56–99 | 100k  |
         - Equi-Width vs. Equi-Depth Histograms
             - Equi-width histograms:
                 - Simple, fixed bin size
@@ -481,12 +546,14 @@ __Slection Cardinatliy__
             - Equi-depth histograms:
                 - Expensive, variable bin sizes
                 - Accommodates data skew
-    - Choice #2: Sketches
-        - Probabilistic data structures that generate approximate statistics about a data set.
-        - Cost-model can replace histograms with sketches to improve its selectivity estimate accuracy.
-    - Choice #3: Sampling
-        - Modern DBMSs also collect samples from tables to estimate selectivities.
-        - Update samples when the underlying tables changes significantly.
+    - __Choice #2: Sketches__
+        - Probabilistic summaries (e.g., HyperLogLog, Count-Min Sketch)
+        - Estimate counts, distinct values, or join sizes quickly
+        - Used in large distributed systems (e.g., BigQuery, SparkSQL)
+    - __Choice #3: Sampling__
+        - Randomly sample a subset of the table
+        - Estimate predicate selectivity from that sample
+        - Update sample periodically when table changes significantly
 
 __Cost-Based Query Optimization__
 - After performing rule-based rewritting, the DBMS wil:
@@ -494,9 +561,11 @@ __Cost-Based Query Optimization__
         - different operator implementations and
         - different equivalent oopeartor ordering
     2. Estimate their costs.
-
+- It chooses the best plan it has seen for the query after exhausting all plans or some timeout.
+- Exhaustive search is NP-complete
 
 __Single-Relation Query Plannning__
+![img](./img/Screenshot%202025-10-27%20123416.png)
 - Pick the best access method
     - sequential scan
     - index scan
@@ -526,11 +595,55 @@ __Multi-Relation Query Planning__
     ARTIST × ALBUM ⨝ APPEARS
     ALBUM × ARTIST ⨝ APPEARS
     ```
-- Step #1: Choose the best access path to each table
-- Step #2: Enumerate all possible join ordering for tables; for each ordering enumerate possible implementations
-- Step #3: Determine the join with the lowest cost
-
+- What the DBMS must decide:
+    1. Access path: how to read each table (seq scan? index scan?)
+    2. Join order: in which sequence to join table
+    3. Join algorithm: nested loop, hash join, sort-merge, etc
+- __Step #1: Choose the best access path to each table__
+    | Table   | Access Path            | Notes                      |
+    | ------- | ---------------------- | -------------------------- |
+    | ARTIST  | Sequential Scan        | No index used              |
+    | APPEARS | Sequential Scan        | Many tuples, join on keys  |
+    | ALBUM   | Index Lookup on `NAME` | Use index to find "Purple" |
+    - So `ALBUM` is filtered first because `NAME = "Purple"` is highly selective
+- __Step #2: Enumerate all possible join ordering for tables; for each ordering enumerate possible implementations__
+    ```text
+    ARTIST ⨝ APPEARS ⨝ ALBUM
+    APPEARS ⨝ ALBUM ⨝ ARTIST
+    ALBUM ⨝ APPEARS ⨝ ARTIST
+    APPEARS ⨝ ARTIST ⨝ ALBUM
+    ARTIST × ALBUM ⨝ APPEARS
+    ALBUM × ARTIST ⨝ APPEARS
+    ..
+    ```
+    - If there are n tables, there are (2n – 3)! / (n – 2)! possible binary join trees (factorial growth!).
+That’s why the search space explodes: making full enumeration infeasible for large n.
+- __Step #3: Determine the join with the lowest cost__
+    - For every possible ordering:
+        - The optimizer estimates the intermediate result sizes (cardinality)
+        - Applies __cost formulas__ for join algorithms
+        - Keeps the __lowest-cost plan__
+    - Example:
+        - If `ALBUM` filter returns few rows, start with it -> cheaper than starting with `ARTIST x APPEARS (huges)`
 __Common Approach: Left-Deep join trees__
+- To contol the search space, DBMS oftern restrict themselves to __left-deep trees__
+- Definition: A left-deep tree means
+    - The __left child__ of every join is either a base table or the result of previous joins
+    - The __right child__ is always a base table
+    - Example (left-deep):
+        ```text
+        (((ARTIST ⨝ APPEARS) ⨝ ALBUM))
+        ```
+    - Conterexample (bushy)
+        ```text
+        ((ARTIST ⨝ ALBUM) ⨝ (APPEARS ⨝ SONG))
+        ``` 
+    - Why Left-Deep Trees are so Popular
+        - __Piplelinable:__ Each join output can stream to the next (iterator model) without storing intermediate results
+        - __Simpler Implementation:__ Works well with nested loop joins.
+        - __Supports indexes:__ The right input can be an indexed table, improving lookup speed.
+        - __Smaller search space:__ Only exponential, no factorial
+        - __Dynamic programming friendly:__ Can reuse ooptimal subplans
 - A left-deep tree means that at every join, the left input is always a base table or the result of a previous join — the right input is always a base table.
 - Construction:
     1. pick two tables to join
@@ -552,6 +665,21 @@ __Common Approach: Left-Deep join trees__
 
 __Bottom-up Optimization__
 ![img](./img/Screenshot%202025-10-21%20at%2013.35.52.png)
+- Modern optimizers (like PostgreSQL or System R) use a bottom-up strategy:
+    - Build optimal plans for small subsets of relations first
+    - Reuse them to build larger subsets
+- Example: For table `{A, B, C}`
+    1. Compute best plan for each pair:
+        - `A ⨝ B`
+        - `A ⨝ C`
+        - `B ⨝ C`
+    2. Use these results to build 3-way joins:
+        - `(A ⨝ B) ⨝ C`
+        - `(A ⨝ C) ⨝ B`
+        - `(B ⨝ C) ⨝ A`
+    - At each step, store:
+        - The best cost so far. 
+        - The chosen join method (hash, merge, nested-loop)
 
 __Conclusion__
 - Logical Optimization:
