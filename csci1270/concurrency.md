@@ -86,22 +86,58 @@ __Latch Crabbing / Coupling (hand-over-hand latching) in B+Tree__
     - Example: Insert/Delete(Update)
         - Start at root with __W latch__
         - Acquire W latch on child
-        - Check if child is safte:
+        - Check if child is safe:
             - If safe -> releaase all ancestor latches (less blocking)
             - If unsafe -> hold parent latch (to safely split/merge later)
         - Continue downward
 
 __Optimistic Latching Algorithms__
-- Most modification to a B+Tree will not require a split or merge
+- __Observation:__ Most modification to a B+Tree will not require a split or merge
 - Instead of assuming that there will be a split/merge, optimistically traverse the tree using read latches.
 - If you guess wrong, repeat traversal with the pessimistic algorithm.
-- Search: Same as before
-- Insert/Delete:
-    - Set latches as if for search, get to leaf, and set W latche on leaf
-    - If leaf is not safe, release all latches, and restart thread using previous insert/delete protocol with write latches
-- Works of low contentions case
 - Observations
     - The threads acquire "top-down" manner
         - A thread can only acquire a latch from a node that is below its current node
         - If the desired latch is unavaible, the thread must wait until it becomes available.
+- Search: Same as before
+- Insert/Delete:
+    - Try to acquire W latch
+    - If leaf is safe -> perform update
+    - If not safe -> release everything and retry using full pessmistic protocal
+- Pros:
+    - Fewer write latches (less blocking)
+    - Works well under low contention
+- Cons:
+    - If your guess was wrong (usafe leaf), must restart
+- Works of low contentions case
+- Top-Down Latch Acquistition Rule
+    - All thread acquire latches __top-down:__
+        - From Parnet -> child (never upward)
+        - Prevents circular wait conditions
+    - If latch unavailable -> thread waits
+    - This ordering ensures no deadlocks (since all threads move in same direction)
 - Deadlocks
+    - Locks (transaction-level) can deadlock.
+    - Latches do not, because:
+        - Acquired in strict top-down order.
+        - Released immediately when safe.
+        - No cyclic waiting possible.
+
+## Questions:
+```text
+In B+-tree concurrency control, which are true of the latch crabbing (hand-over-hand)
+protocol? (Select all that apply)
+a. Allows multiple threads to traverse the tree concurrently.
+b. Always holds latches on all ancestor nodes until commit.
+c. Releases parent latches once the child is known to be “safe.”
+d. Prevents structural corruption during splits or merges.
+e. Ensures logical isolation across transactions.
+```
+- False options: b, e
+    - b. Always holds latches on all ancestor nodes until commit.
+        - This would make the system extremely slow and serial.
+        - Crabbing does the opposite: “Release the latch for the parent once the child is safe.”
+        - You don’t hold all ancestor latches to the end: you only hold them temporarily while moving down.
+        - __Commit__ is a transaction-level event, while latches are operation-level (short-lived). So b is wrong both conceptually (about “until commit”) and mechanically (we release ancestors early).
+    - e. Ensures logical isolation across transactions.
+        - So latch crabbing does not prevent one transaction from reading data another transaction is concurrently writing: that’s __logical isolation, handled later by the lock manager__ during transaction processing.

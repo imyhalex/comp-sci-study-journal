@@ -71,7 +71,7 @@ __Formal Properties of Schedules__
 
 
 __How to Determine Seralizability__
-- Check to see if a particular shceudle produces a state equivalent to a db state that results from a serial execution?]
+- Check to see if a particular shceudle produces a state equivalent to a db state that results from a serial execution?
 - When multiple transactions run concurrently, we want to ensure they behave as if they ran one after another (in some
 order).
 - That’s what “serializability” means:
@@ -85,8 +85,9 @@ order).
 __Alternative: Serializability Using Conflicting Opeartions__
 - Instead, we used a formal notion of equivanence that can be implemented efficienctly based on the notion of "conflicting" operations
 - Two operations conflict if:
-    - They are by different transactions
-    - They are on the same object and one of them is a write.
+    - They are on the same object (A, B, etc)
+    - They belong to different transactions
+    - Af least one is a write
 - Interleaved Execution Anomalies
     - Read-Write Conflict (R-W)
     - Write-Read Conflicts (W-R)
@@ -95,29 +96,32 @@ __Alternative: Serializability Using Conflicting Opeartions__
 __Why Care About Conflicting Operations__
 - Read-Write Conflict
     - __Unrepeatable Read:__ Txn gets different values when reading the same object multiple times.
+    - Examle: T1 reads A, then T2 writes A
 - Write_read Conflict
     - __Dirty Read:__ One txn reads data writen by another txn that is not commited yet
+    - Example: T1 writes A, then T2 reads A
 - Write-Write Conflicts
     - __Lost Update:__ One txn overwites uncommited data from another uncommited txn
+    - Example: T1 writes A, then T2 overwrites A
 
 __Conflict Serializable Schedules__
 - Two schedules are conflict equivalent if:
-    - They involve the same actions of the same transactions
-    - Every pair of conflicting actions is ordered the same way
+    - They involve the same set of operations
+    - The order of every conflicting pair of opeartions is the same
 - Schedule S is conflict serializable if:
     - S is conflict equivalent to some serial schedule
     - Intuition: you can transform S into a serial schedule by swapping consecutive non-conflicting opeartions of different transactions.
+- A schedule is conflict-serializable if:
+    - It can be transformed into a serial schedule by swapping non-conflicting operations.
 
 __Dependency Graphs__
 ![img](./img/Screenshot%202025-10-24%20120327.png)
 ![img](./img/Screenshot%202025-10-24%20120327.png)
 ![img](./img/Screenshot%202025-10-24%20120559.png)
-- One node per txn
-- Edge from Ti to Tj if:
-    - An operation Oi of Ti conflicts with an operation Oj of Tj and
-    - Oi appears earlier in the schedule than Oj.
-- Also known as a precedence graph.
-- A schedule is conflict serializable if its dependency graph is acyclic.
+- An efficient way to check serializability:
+    - Create one node per transaction.
+    - For every conflict Ti → Tj, draw a directed edge.
+    - If the graph is acyclic, the schedule is conflict-serializable.
 
 __Serrializability__
 - In practice, Conflict Serializability is what systems support becuase it can be enforced efficiency.
