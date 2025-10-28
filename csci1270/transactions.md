@@ -22,7 +22,7 @@ __Definitions__
 
 __Transactional Properties: ACID__
 - Atomicity: All actions in transaction happen, or non happen.
-- Consistency: Is each transaction is consistent and DB starts consistent, the it remains consistent after transaction.
+- Consistency: If each transaction is consistent and DB starts consistent, then it remains consistent after transaction.
 - Isolation: Execution of one transaction is isolated from that of other transactions
 - Durability: If a transaction commits, its effects persist.
 
