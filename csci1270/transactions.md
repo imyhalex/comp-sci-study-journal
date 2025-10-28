@@ -128,3 +128,105 @@ __Serrializability__
 - There are more flexible notions such as View Serializability, which is hard to enfoce
 - To allow more concurrency, some special cases can get handled separately at the application level
 - Allows parralelism on the inside, but (look like) one-at-a-time outside.
+
+# Transaction II
+
+__Executing With Locks__
+![img](./img/Screenshot%202025-10-28%20115119.png)
+
+__Using Locks__
+- Transactions request locks
+- Lock Manager grants or blocks requests
+- Transactions release locks
+- Lock manager updates its internal lock table
+    - It keeps track of what transactions hold what locks and what transactions are waithing to acquire any locks.
+
+__Concurrency Control Protocol__
+- __Two-phase locking (2PL)__ is a concurrency control protocol that determines whether a txn can access an objeect in the database at runtime
+- The protocol does not need to know all the queries that a txn will execute ahead of time
+
+__Two-phase locking (2PL)__
+- Phase #1: Growing
+    - Each txn requests the locking that needs from the DBMS's lock manager
+    - The lock manager grants/denies lock requests
+- Phase #2: Shrinking
+    - The txn is allowed to only release/downgrade locks that it previouly acquired. It cannot acquire new locks.
+- The txn is not allowed to acquire/upgrade locks after the growing phase finishes
+
+__2PC Guarantees Conflict Serializability__
+- Lock point is when txn reaches end of growth phase
+- At lock point:
+    - Everything txn needs is locked
+    - Any conflicting transactions either started its shirink phase earlier or are blocked by this txn
+- The __order of lock points__ give us the equivalent serial order
+
+__Problem w/2PL: Cascanding Aborts__
+![img](./img/Screenshot%202025-10-28%20121836.png)
+
+__2PL Observations__
+- There are potential schedule that are serializable but would not be allowed by 2PL becuase locking limits concurrency
+    - Most DBMSs prefer correctness before performance
+- May still have "dirty reads" thus cascading aborts
+    - Solution: __Strong Strict 2PL (aka Rigorous 2PL)__
+
+__Strong Strict 2PL (aka Rigorous 2PL)__
+- The txn is only allowed to release locks after it has ended (i.e., committed or aborted)
+- Allows only conflict serializable schedules, but it is often stronger than needed for some apps
+
+__2 PL Deadlocks__
+- A deadlock is a cycle of transactions waithing for locks to be relased by each other
+- Two ways of dealing with deadlocks:
+    - Approach #1: Detection & Resolution
+    - Approach #2: Prevention
+
+__Deadlock Detection__
+- The DBMS creates a _waits-for graph_ to keep track of what locks each txn is waithing to acquire:
+    - Node are transactions
+    - Edge from Ti to Tj if Ti is waithing for Tj to release a lock
+- The system periodically checks for cycles in wait-for graph and then decides how to break it.
+
+__Deadlock Resolution__
+- When the DBMS detects the deadlocks, it will select a txn to rollback to break the cycle
+- The victim txn will either restart or abort depending on how it was invoked
+- There is a trade-off between the frequency of checking for deadlocks and how long txns wait before deadlocks are broken.
+- __Considerstions__
+    - Selecting the proper txn to terminate depends on a lot of different variables
+        - By age (e.g., highest timestamp)
+        - By progress (e.g., leaast/most queries executed)
+        - By the # of items already locked
+        - By the # txns that we have to rollback with it
+    - We also should consider the # of times a txn has been restarted to past to prevent starvation
+
+__Deadlock Resolution: Rollback Length__
+- After sleecting a txn to abort, the DBMS can also decide on how far to rollback the txn's changes
+- Approach #1: Completely
+    - Rollback entire txn and tell the application it was aborted
+- Approach #2: Partial (Savepoints)
+    - DBMS roll back a portion of txn (to break deadlock) and then attemps to re-execute the undone queries
+
+__Deadlock Prevention：Protocols__
+- Assign priorites based on timestamps:
+    - Higher Priority = Older Timestamp (e.g., T1 > T2)
+- __Wait-Die ("Old waits for Young")__
+    - If requestiong txn has higher priority than holding txn, then requestiong txn waits for holding txn
+    - Otherwiese requesting txn aborts
+- __Wound-Wait ("Yong Waits for Old")__ 
+    - If requesting txn has a higher priority than holding txn, then holding txn aborts and release lock
+    - Otherwise requesting txn waits
+
+__Deadlock Prevention：Questions__
+![img](./img/Screenshot%202025-10-28%20131506.png)
+- Why do these schemes guarantee no deadlocks?
+    - Only one "type" of direction allowed when waiting for a lock.
+        - Only old-waits-for-young (Wait-Die) or
+        - Only young-waits-for-old (Wound-Wait)
+- When a txn restarts, what is its (new) priority?
+    - Its original timestamp to prevent it from getting starved for resources.
+
+
+__Lock Granilarities__
+- When a txn wants to acquire a "lock", the DBMS can decide the granularity (i.e., scope) of that lock.
+    - Attribute? Tuple? Page? Table?
+- The DBMS should ideally obtain fewest number of locks that a txn needs.
+- Trade-off between parallelism versus overhead.
+    - Fewer Locks, Larger Granularity vs. More Locks, Smaller Granularity.
