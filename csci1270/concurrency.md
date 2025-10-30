@@ -101,6 +101,14 @@ __Optimistic Latching Algorithms__
         - If the desired latch is unavaible, the thread must wait until it becomes available.
 - Search: Same as before
 - Insert/Delete:
+    1. Traverse with read(R) latches only
+        - Becasue 99% of the time, on split/merge happens
+    2. When reach the target leaf:
+        - Try to upgrade to W-latch and perform the insert/delete
+    3. If it turns out the leaf is full (need splits)
+        - Release everything
+        - Retry using the __full pessimistic (W-latch) traversal__.
+<!-- - Insert/Delete:
     - Try to acquire W latch
     - If leaf is safe -> perform update
     - If not safe -> release everything and retry using full pessmistic protocal
@@ -108,7 +116,7 @@ __Optimistic Latching Algorithms__
     - Fewer write latches (less blocking)
     - Works well under low contention
 - Cons:
-    - If your guess was wrong (usafe leaf), must restart
+    - If your guess was wrong (usafe leaf), must restart -->
 - Works of low contentions case
 - Top-Down Latch Acquistition Rule
     - All thread acquire latches __top-down:__
