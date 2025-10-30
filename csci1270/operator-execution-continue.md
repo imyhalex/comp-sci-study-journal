@@ -625,6 +625,7 @@ That’s why the search space explodes: making full enumeration infeasible for l
         - Keeps the __lowest-cost plan__
     - Example:
         - If `ALBUM` filter returns few rows, start with it -> cheaper than starting with `ARTIST x APPEARS (huges)`
+        
 __Common Approach: Left-Deep join trees__
 - To contol the search space, DBMS oftern restrict themselves to __left-deep trees__
 - Definition: A left-deep tree means
