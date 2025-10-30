@@ -85,9 +85,9 @@ order).
 __Alternative: Serializability Using Conflicting Opeartions__
 - Instead, we used a formal notion of equivanence that can be implemented efficienctly based on the notion of "conflicting" operations
 - Two operations conflict if:
-    - They are on the same object (A, B, etc)
-    - They belong to different transactions
-    - Af least one is a write
+    - They are from different transactions
+    - They access the same data item
+    - At least one is a write
 - Interleaved Execution Anomalies
     - Read-Write Conflict (R-W)
     - Write-Read Conflicts (W-R)
@@ -132,6 +132,7 @@ __Serrializability__
 # Transaction II
 
 __Executing With Locks__
+
 ![img](./img/Screenshot%202025-10-28%20115119.png)
 
 __Using Locks__
