@@ -231,3 +231,244 @@ __Lock Granilarities__
 - The DBMS should ideally obtain fewest number of locks that a txn needs.
 - Trade-off between parallelism versus overhead.
     - Fewer Locks, Larger Granularity vs. More Locks, Smaller Granularity.
+
+# Transaction III
+
+## Crash Recovery
+
+- Recovery algorithms are techniques to ensure ACID properties despite failures.
+- Recovery algorithms have two parts:
+    - Actions during normal txn processing to ensure that the DBMS can recover from a failure.
+    - Actions after a failure to recover the database to a state that ensures atomicity, consistency, and durability.
+
+### Actions during normal txn processing to ensure that the DBMS can recover from a failure.
+__Storage Type__
+- Stable Storage:
+    - A non-existent form of non-volatiile storage that survice all possible failure scenarios
+    - Use multiple storage devices (redundancy) to approximate.
+
+__Failure Classifications__
+- Three types:
+    - Transaction Failure
+    - System Failure
+    - Storage Media Failures
+- Transaction Failures:
+    - Logical Errors
+        - Transaction cannot complete due to some internal error conditions (e.g., integrity constraint violation).
+    - Internal State Errors
+        - DBMS must terminate an active transaction due to an error condition (e.g., deadlock).
+- System Failures:
+    - Software Failure
+        - Problem with the OS or DBMS implementation (e.g. uncaught divide-by-zero exception).
+    - Hadware Failure
+        - The computer hosting the DBMS crashes (e.g., power plug gets pulled).
+        - Fail-stop Assumption: Non-volatile storage contents are assumed to not be corrupted by system crash.
+- Storage Media Faiure
+    - Non-Repairable Hardware Failure
+        - A head of crash or similar disk failure destroys all or part of non-volatile storage
+        - Destruction is assumed to be detectable (e.g. disk controller use checksums to detect failures)
+    - No DBMS can recover from this, database must be restored from archilved version
+
+__Goals__
+- The DBMS needs to ensure Atomicity (all or nothing):
+    - The changes for any txn are durable once the DBMS has told somebody that it committed.
+    - No partial changes are durable if the txn aborted.
+
+__Undo vs. Redo__
+- Undo: The process of removing the effect of an incomplete or aborted txn
+- Redo: The process of re-applying the effects of a committed txn for durability
+
+__Buffer Pool Policy__
+- Steal Policy:
+    - Whether DBMS allows an uncommited txn to write updates back to stable storage
+    - Why:
+        - A: if running out of buffer space
+        - STEAL: Is allowed
+        - NO-STEAL: Is not allowed
+- Force Policy:
+    - Whether the DBMS requires that all updates made by a txn are reflected on stable storage before the txn can commit
+    - FORCE: Is required.
+    - NO-FORCE: Is not required.
+- These four can form combinations for a policy
+
+__NO-STEAL + FORCE__
+- Advantage:
+    - Never have to undo changes for an aborted txn because the changes were not written to disk
+    - Never have to redo changes of a committed txn because all the changes are guaranteed to be written to disk at commit.
+- However, we cannot support write sets that exceed the amount of physical memory available. Thus, no system implements this approach!
+
+__SHADOW PAGING__
+- The DBMS copies pages on write to crate two versions:
+    - Primary: Contains only changes form commited txns
+    - Shadow: Tempoary database with changes made from uncommitted txns.
+- To install updates when a txn commits, overwrite the root so it points to the shadow, thereby swapping the primary and shadow.
+- Advantages:
+    - Supporting rollbacks and recovery is easy
+    - Undo: Remove the shadow pages. Leave the master and the DB root pointer alone.
+    - Redo: Not needed at all.
+- Disadvantages:
+
+__Write-Ahead Log (WAL)__
+- Maintain a log file that contains the changes that txns make to databse
+    - Log is separate from data files
+    - Log will also be written to stable storage
+    - Log contains enough information to perform the necessary undo and redo actions to restore the database
+- WAL property: the DBMS must write to disk the log file records that correspond to changes made to a database object before it can flush that object to disk
+- Buffer Pool Policy: STEAL + NO-FORCE
+- Is WAL a good idea:
+    - Decouples writing log pages from writting data pages
+    - WAL is efficient because it is:
+        - Small
+        - Written Sequentially
+
+__WAL Protocol__
+- The DBMS stages of all a txn's log records in volatile storage.
+- All log records pertaining to an updated page are written to non-volatile storage before the page itself is overwritten in non-volatile storage.
+- A txn is not considered committed until all its log records have been written to stable storage.
+- Write a <BEGIN> record to the log for each txn to mark its starting point
+- When a txn finishes, the DBMS will:
+    - Write a <COMMIT> record on the log
+    - Make sure that all log records are flushed before it returns an acknowledgement to application.
+
+__WAL Implementation__
+- Flushing the log buffer to disk every time a txn commits will become a bottleneck.
+- The DBMS can use the group commit optimization to batch multiple log flushes together to amortize overhead, or use a flush trigger:
+    - When the buffer is full, flush it to disk.
+    - Or if there is a timeout (e.g., 5 ms).
+
+__Buffer Pool Policy__
+- Almost every DBMS uses NO-FORCE + STEAL
+    - key assumption: crashes, thereby recovery, will be rare
+
+__Logging Schemes__
+- Physical Logging
+    - Record the byte-level changes made to a specific page
+    - Example: git diff
+- Logical Logging
+    - Record the high-level operations executed by txns
+    - Example: UPDATE, DELETE, and INSERT queries
+    - Not restricted to a single page
+- Physiological Logging
+    - Hybrid approach with byte-level changes for a single tuple identified by page id + slot number
+    - Does not specify organization of the page.
+
+__Physiacl vs. Logical Loggings__
+- Logical logging requires less data written in each log record than physical logging.
+    - for undo, need the before-state of the records
+- Difficult to implement recovery with logical logging if you have concurrent txns.
+    - Hard to determine which parts of the database may have been modified by a query before crash.
+- Also takes longer to recover because you must re-execute every txn all over again.
+- Most systems use physiological logging.
+
+__WAL Summary__
+- Write-Ahead Logging (WAL) is (almost) always the best approach to handle loss of volatile storage.
+- WAL is append-only, compact and can be written sequentially.
+- WAL property requires that the log record (of an update) is persisted before the corresponding data record.
+- WAL is the ground truth. The DB state is whatever WAL represents.
+
+__Why not just use the log for query processing?__
+```txt
+We use the log for recovery. But since the log records
+every change, could we in theory just query the log instead
+of the data pages? In other words — if the log contains
+every insert, update, and delete, why do we still need the
+data pages at all?
+
+Answer: The log is designed for recovery: append only, optimized for sequential writes. The data pages are deisigend for querying" 
+random access, indexing and efficeint read.  It is possible for processing to just use the log. But the performance would be very 
+poor since he log would be horrible for quering
+```
+
+### Actions after a failure to recover the database to a state that ensures atomicity, consistency, and durability. 
+
+__Checkpoints__
+- The DBMS periodically takes a checkpoint where it flushes all buffers out to disk
+    - This synchronizes the WAL and the data pages on disk
+    - It also provides a hint on how far back it needs to replay the WAL after a crash
+- Blocking Checkpoint Protocol:
+    - Pauses all queries
+    - Flush all WAL records in memory to disk
+    - Flush all modified pages in the buffer pool to disk
+    - Write a <CHECKPOINT> entry to WAL and flush to disk
+    - Resume queries
+
+__Checkpoints: Frequency__
+- Checkpointing too frequently caues the runtime performance to degrade
+    - system spends too much time flushing buffers
+- But waiting a long time is just as bad
+    - The checkpoint wil be large and slow
+    - Makes recovery time much longer.
+    - Tunable option that depends on application recovery time requirements. 
+
+__ARIES__
+- Algorithm for Recovery and Isolation Exploiting Semantics
+- Main Idea
+    - Write-Ahead Logging:
+        - Any change is recorded in log on stable storage before the database change is written to disk
+        - Use STEAL+NO-FORCE buffer pool policies
+    - Repeat History Duration Redo:
+        - On DBMS restrat, retrace actions and restore database to exact state before crash
+    - Logging Changes During Undo:
+        - Record undo action to log to ensure action is not repeated in the event of repeated failures.
+
+__Log Sequence Numbers (LSNs)__
+- Every log record includes a globally unique log sequence number (LSN)
+    - LSNs represent the physical order that txns make changes to the database.
+    - In effect, LSNs form a logical timeline for the database
+    - Various components in the system keep track of LSNs that pertain to them... 
+
+__Important LSN__
+- flushedLSN
+    - Location: disk
+    - Definition: Latest LSN in log on disk
+- pageLSN
+    - Location: each pagex
+    - Definition: Latest update to pagex
+- lastLSN
+    - Location: each Ti
+    - Definition: Latest record of txn Ti
+- MasterRecord
+    - Location: Disk
+    - Defition: LSN of latest checkpoint
+
+__Writing Log REcords__
+- All log records have an LSN.
+- Update the pageLSN every time a txn modifies a record in the page.
+- Update the flushedLSN in memory every time the DBMS writes out the WAL buffer to disk.
+
+__Transaction Commit__
+- When a txn commit, the DBMS write a COMMIT record to log and guarantees that all log records up to txn's COMMIT record are flushed to disk
+    - Log flush are sequential, synchronous write to disk
+    - Many log records per log page
+    - Ensure durability
+- When the commit succeeds, write a special TXN-END record to log.
+    - Indicates that no new log record for a txn will appear in the log ever again
+    - This does not need to be flushed immediatly 
+    - Ensures final cleanup
+
+__Transaction Abort__
+- Aborting a txn is a special case of the undo opeartion applied to only one txn
+- For efficiecn (not required): we add another field to our log records:
+    - PrevLSN: The previous LSN for the txn
+    - This maintains a linked-list for each txn that makes it easy to walk through its record
+
+__Compensation Log Record (CLRs)__
+- A CLR describes the actions taken to undo the actions of a previous update record.
+- It has all the fields of an update log record plus the undoNext pointer (the next-to-be-undone LSN).
+- CLRs are added to log records but the DBMS does not wait for them to be flushed before notifying the application that the txn aborted.
+
+__Abort Algorithm__
+- First write an ABORT record to log for the txn.
+- Then analyze the txn's updates in reverse order. For each update record:
+    - Write a CLR entry to the log.
+    - Restore old value.
+- Lastly, write a TXN-END record and release locks.
+- Notice: CLRs never need to be undone.
+
+__ARIES: Recovery Phases__
+- Phase #1: Analysis
+    - Examine the WAL in forward direction starting at the latest checkpoint (MasterRecord) to identify the active txns at the time of the crash.
+- Phase #2: Redo
+    - Repeat all actions starting from MasterRecord in the log (even txns that will abort)
+- Phase #3: Undo
+    - Undo the actions of txn that did not commit before the crash
