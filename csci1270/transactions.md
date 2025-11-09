@@ -84,10 +84,14 @@ order).
 
 __Alternative: Serializability Using Conflicting Opeartions__
 - Instead, we used a formal notion of equivanence that can be implemented efficienctly based on the notion of "conflicting" operations
-- Two operations conflict if:
+- __Two operations conflict if__:
     - They are from different transactions
     - They access the same data item
     - At least one is a write
+    - __Meaning of “Not Conflict-Serializable”__
+        - There is no equivalent serial order of the transactions that produces the same result on the database.
+        - The interleaving operations changes the final outcome compared to any serial (one-after-the-other)
+        - The database may end up in a state that could not happend if transactions had run one at a time
 - Interleaved Execution Anomalies
     - Read-Write Conflict (R-W)
     - Write-Read Conflicts (W-R)
@@ -132,8 +136,22 @@ __Serrializability__
 # Transaction II
 
 __Executing With Locks__
-
 ![img](./img/Screenshot%202025-10-28%20115119.png)
+- T1 beigns and request lock on A
+    - `LOCK(A)` by T1
+    - Lock Manager checks if A is free -> Granted (T1 -> A)
+    - T1 can now safely read/write A
+- T2 beigns and requests a lock on A (while T1 still holds it) 
+    - LOCK(A) by T2
+    - Lock Manager sees A is already locked by T1 -> Denied(T2 waits)
+- T1 continues working
+    - Peforms `R(A)`, `W(A)` while holding the lock
+    - Then execute `UNLOCK(A)` -> Lock Manager marks A as released(T1 -> A)
+- Lock Manager rechecks the waitithing queue
+    - It sees T2 has been waiting -> now grants the lock to T2 Granted(T2 -> A)
+- T2 executes its read/write operations
+    - Reads and writes A
+    - Finally `UNLOCK(A)` -> Released(T2 -> A)
 
 __Using Locks__
 - Transactions request locks
@@ -141,44 +159,156 @@ __Using Locks__
 - Transactions release locks
 - Lock manager updates its internal lock table
     - It keeps track of what transactions hold what locks and what transactions are waithing to acquire any locks.
+- Lock Manager's Job
+    - Maintains an internal lock table
+        - Which transactions hold which locks
+        - Which transactions are waititing
+    - Handles grant, block and release requests
 
 __Concurrency Control Protocol__
-- __Two-phase locking (2PL)__ is a concurrency control protocol that determines whether a txn can access an objeect in the database at runtime
-- The protocol does not need to know all the queries that a txn will execute ahead of time
+- __Example__
+    ![img](./img/Screenshot%202025-11-08%20140608.png)
+    - Explain
+        - X-lock granted to T1
+        - T1 releases its lock before commit
+        - Then T2 get the lock, modifies A
+        - T1 still hasn't committed yet (not finished)
+        - After T2 commits, T1 later commits too
+- __Why locking alone does not guarantee conflict-serializability__
+    - Bcause just "having locks" does not force transactions to hold them long enough to preserve serializability
+    - A system can use locks. but if transactions: Release them too early(before commit), Or reacquiring locks after releaseing
+        - then operations can interleave in a non-serializable way.
+- __Two-phase locking (2PL)__ 
+    - Is a concurrency control protocol that determines whether a txn can access an objeect in the database at runtime
+    - The protocol does not need to know all the queries that a txn will execute ahead of time
+    - GOAL: Ensure that all interleaved transactions still hebave as if they ran in some serial order
 
 __Two-phase locking (2PL)__
+- This definition describes the per transactions level:
+    - Each transaction has its own growing phase and shrinking phase
+    - A transaction can keep acquiring new locks as long as it hasn’t started unlocking anything.
 - Phase #1: Growing
     - Each txn requests the locking that needs from the DBMS's lock manager
-    - The lock manager grants/denies lock requests
+    - The transaction can request new locks (shared or exclusive)
+    - The lock manager grants or denies them depending on conflicts
+    - Once a transaction release its first lock, this phase __ends__
 - Phase #2: Shrinking
-    - The txn is allowed to only release/downgrade locks that it previouly acquired. It cannot acquire new locks.
-- The txn is not allowed to acquire/upgrade locks after the growing phase finishes
+    - After releasing a lock, the transaction cannot request or upgrade any new locks
+    - It can only release the ones it already holds
+- __Why 2PL Guarantees Conflict-Serializability__
+    - Every conflicting pair ot transactions will have a clear order in which one holds the lock first
+    - That order defines the edges direction in the precedence graph
+    - Since locks cannot be reacquired later, the edges cannot form a cycle
 
-__2PC Guarantees Conflict Serializability__
-- Lock point is when txn reaches end of growth phase
-- At lock point:
-    - Everything txn needs is locked
-    - Any conflicting transactions either started its shirink phase earlier or are blocked by this txn
-- The __order of lock points__ give us the equivalent serial order
+__Executeing with 2PL__
+![img](./img/Screenshot%202025-11-08%20142922.png)
+- Two transactions T₁ and T₂, both want to read/write the same item A.
+    - Both use X-LOCK(A) because they intend to write
+    - The lock Manager decides who can access `A` and when.
+- Step 1: T1 Beigns
+    - T1 request an exclusive lock (`X-LOCK`) on `A`
+    - For now, A is free
+    - T1 ask the Lock Manager, Lock Manager checks -> A is free -> Grants the lock to T1
+    - So not, T1 owns A (T1 -> A)
+    - So T1 can safely do R(A) W(A)
+- Step 2: Transaction T2 starts
+    - T2 also wants to write A, so it ask Lock Manager
+    - Lock Manager checks -> A is no free -> Request denied
+    - Fow now, T2 is blocked
+- Step 3: T₁ finishes its work
+    - T₁ is done reading/writing A.
+    - It now calls `UNLOCK(A)` and releases the lock.
+    - Lock Manager marks A as free again.
+    - At this moment, T₁ has entered its __shrinking phase__: it can no longer acquire new locks.
+- Step 4: T₂’s turn
+    - Lock Manager notices T₂ was waiting.
+    - Now that A is free → Grants the lock to T₂.
+    - When done, T₂ also calls `UNLOCK(A)` → releases the lock.
 
 __Problem w/2PL: Cascanding Aborts__
 ![img](./img/Screenshot%202025-10-28%20121836.png)
+- One of the main weakness of baisc 2PL: Cascading Abort Problem
+    - Example Shceudle timeline:
+        1. T₁ starts, locks A and B (exclusive locks) → allowed under 2PL.
+        2. T₁ reads `A`, writes `A (W(A))`, and then unlocks A early (before commit).
+        3. T₂ now requests `X-LOCK(A)` → granted, because T₁ released it.
+        4. T₂ reads A, but the version of A it reads is the one modified by T₁, whic has not yet committed.
+            - This called a dirty read (T2 read uncommited )
+        5. Later, T1 aborts: its changes must be undone
+        6. But T2 has already used that "dirty" version of A
+            - DBMS must also abort T2, because its results are now invalid
+    - Problem here:
+        - Even though this schedule follows the 2PL rules, it still causes trouble
+        - When T₁ aborts, T₂ must also abort.
+        - And if other transactions had used T₂’s results, they would also have to abort.
+        - This can cause a chain reaction ->__“Cascading aborts.”__
+        - Why it happend?
+            - In __basic 2PL__, a transaction is allowed to release locks before it commits.
+            - That means other transactions can see uncommitted data.
+            - If the first transaction aborts later, everyone who depended on its data must roll back too
 
 __2PL Observations__
-- There are potential schedule that are serializable but would not be allowed by 2PL becuase locking limits concurrency
+- _Observation #1_: 2PL may reject some “safe” schedules
+    - 2PL prevents all non-serializable schedules, but it also blocks some schedules that would have been serializable.
+    - This happens because transactions might need to wait longer for locks, even when the actual operations wouldn’t have conflicted.
     - Most DBMSs prefer correctness before performance
-- May still have "dirty reads" thus cascading aborts
+    - Trade-off:
+        - 2PL = safety first (guaranteed serializability)
+        - less concurrency / performance
+- _Observation #2_: 2PL still allows dirty reads -> cascading aborts
+    - May still have "dirty reads" thus cascading aborts
     - Solution: __Strong Strict 2PL (aka Rigorous 2PL)__
 
 __Strong Strict 2PL (aka Rigorous 2PL)__
-- The txn is only allowed to release locks after it has ended (i.e., committed or aborted)
-- Allows only conflict serializable schedules, but it is often stronger than needed for some apps
+- __Rule__:
+    - A txn can release no locks at all until it commits or aborts
+    - The txn is only allowed to release locks after it has ended (i.e., committed or aborted)
+    - That means:
+        - Hold all S-locks and X-locks until the very end.
+        - Only after commit (or abort) does the DBMS release all locks at once.
+    - Allows only conflict-serializable schedules, but it is often stronger than needed for some apps
 
-__2 PL Deadlocks__
-- A deadlock is a cycle of transactions waithing for locks to be relased by each other
-- Two ways of dealing with deadlocks:
+__2PL Deadlocks__
+![img](./img/Screenshot%202025-11-09%20105743.png)
+- Even thought 2PL guarantees conflict-serializability, it does not prevent deadlocks
+- Timeline:
+    - Step 1: T1 starts
+        - T1 begins and request `X-LOCK(A)` to write A
+        - Lock Manager grants it: Granted (T₁ → A).
+        - T1 holds A exclusively
+    - Step 2: T2 starts
+        - T2 beigns and requests S-LOCK(B) to read B
+        - Lock manager grants it: Granted (T₂ → B).
+        - T2 now holds B (shared mode, but that is enough to block others from writing B)
+    - Step 3: T1 request another lock
+        - T1 now wants to write B -> `X-LOCK(B)`
+        - Lock Manager checks:
+            - But T2 already hold a `S-LOCK(B)`
+            - Shared + Exclusive are incompatible
+        - Requested denied: T1 must wait for B to be released
+    - Step 4: T2 requests another lock
+        - T2 now wants to read A -> `S-LOCK(A)`
+        - Lock Manager checks:
+            - But T1 holds and `X-LOCK(A)`
+            - Incompatible again
+            - Requested denied -> T2 must wati for A to be released
+
+- __Definition:__
+    - A deadlock is a cycle of transactions waithing for locks to be relased by each other
+- __Two ways of dealing with deadlocks__:
     - Approach #1: Detection & Resolution
+        - The DBMS build a wailt-for graph
+            - Node = transaction
+            - Edge = "Tᵢ is waiting for Tⱼ"
+        - If a cycle is found -> deadlock
+        - The system aborts one transaction (the victim) to break the cycle
     - Approach #2: Prevention
+        - Avoid cycle by imposing rules
+            - Wait-Die
+                - older transactions wait, younger abort
+            - Wound-Wait
+                - older transactions force abort yonger ones
+            - Or always acquire locks ina predefined global order
 
 __Deadlock Detection__
 - The DBMS creates a _waits-for graph_ to keep track of what locks each txn is waithing to acquire:
@@ -199,38 +329,92 @@ __Deadlock Resolution__
     - We also should consider the # of times a txn has been restarted to past to prevent starvation
 
 __Deadlock Resolution: Rollback Length__
-- After sleecting a txn to abort, the DBMS can also decide on how far to rollback the txn's changes
-- Approach #1: Completely
+- After selecting a txn to abort, the DBMS can also decide on how far to rollback the txn's changes
+- Approach #1: Completely Rollback
+    - The DBMS rolls back the entire transaction
     - Rollback entire txn and tell the application it was aborted
-- Approach #2: Partial (Savepoints)
+    - The transaction will restrat from scratch or report failure to the application
+- Approach #2: Partial (Savepoints) Rollback
+    - Mordern DBMSs let tranasctions define savepoint
     - DBMS roll back a portion of txn (to break deadlock) and then attemps to re-execute the undone queries
+
+__Deadlock Prevention__
+- Insted of detecting and fixing a deadlock later, the DBMS can prevent one from ever happening by forcing and abort early
+- How Prevention Works:
+    - Whenever a transaction tries to acquire a lock that’s already held by another transaction:
+        - Instead of letting it wait and risk a deadlock later, the DBMS uses a priority rule (based on timestamps) to decide:
+            - Should it wait, or
+            - Should it abort immediately?
+- When a txn tries to acquire a lock that is held by another txn, the DBMS terminates one of them to prevent a deadlock.
+    - __This approach does not require a waits-for graph or detection algorithm.__
 
 __Deadlock Prevention：Protocols__
 - Assign priorites based on timestamps:
     - Higher Priority = Older Timestamp (e.g., T1 > T2)
+    - __Defition:__
+        - Requesting Tranaction: The transaction that is trying to acquire a lock (but the lock is currently held by someone else)
+        - Holding Transaction: The transaction that already owns the lock on the data item
 - __Wait-Die ("Old waits for Young")__
     - If requestiong txn has higher priority than holding txn, then requestiong txn waits for holding txn
     - Otherwiese requesting txn aborts
 - __Wound-Wait ("Yong Waits for Old")__ 
     - If requesting txn has a higher priority than holding txn, then holding txn aborts and release lock
     - Otherwise requesting txn waits
+- Example:
+    ![img](./img/Screenshot%202025-11-09%20130555.png)
+    - Scenario 1:
+        - T1 older, T2 yonger
+        - T1 is the requesting txn
+        - T2 is the holding txn
+        - __Wait-Die:__
+            - If the requester is younger, it aborts.
+            - If the requester is older, it waits.
+            - Result: T1 wait
+        - __Wound Wait:__
+            - If the requesting txn yonger, it wait
+            - If the requester is older, it “wounds” (forces abort) the holder.
+            - Result: T2 aborts
+    - Scenario 2:
+        - T1 older, T2 yonger
+        - T1 is the holding txn
+        - T2 is the requesting txn
+        - __Wait-Die:__
+            - T2 abrots
+        - __Wound Wait:__
+            - T2 waits
 
 __Deadlock Prevention：Questions__
-![img](./img/Screenshot%202025-10-28%20131506.png)
-- Why do these schemes guarantee no deadlocks?
+- __Why do these schemes guarantee no deadlocks?__
+    - Both Waut-Die and Wound-Wait are designed so that cycles like this can never form
+        - because all waiting goes only one direction
     - Only one "type" of direction allowed when waiting for a lock.
         - Only old-waits-for-young (Wait-Die) or
         - Only young-waits-for-old (Wound-Wait)
-- When a txn restarts, what is its (new) priority?
-    - Its original timestamp to prevent it from getting starved for resources.
-
+- __When a txn restarts, what is its (new) priority?__
+    - When a transaction aborts (due to a deadlock prevention rule) and restarts, it keeps its original timestamp.
+    - Why:
+        - To prevent starvation.
+        - If a transaction geot a new (later) timestamp everytime it restart, it would always be "youngest" : always have the loes priority might keep aborting forever
+        - So the DBMS keeps the same original timestamp, meaning its priority stays the same
+            - eventually it will become old enough that no one can wound or kill it
 
 __Lock Granilarities__
-- When a txn wants to acquire a "lock", the DBMS can decide the granularity (i.e., scope) of that lock.
-    - Attribute? Tuple? Page? Table?
+- `Lock granularity` = how big or small the “unit” of locking is.
+- When a transaction locks something, the DBMS can choose what that “something” means:
+    - a tuple (row)
+    - a page (block of rows)
+    - a whole table
+    - or even an entire database
 - The DBMS should ideally obtain fewest number of locks that a txn needs.
-- Trade-off between parallelism versus overhead.
+- There’s a performance trade-off between parallelism versus overhead.
     - Fewer Locks, Larger Granularity vs. More Locks, Smaller Granularity.
+    - Parallelism (Concurrency) — how many transactions can run at the same time
+    - Locking Overhead — how much memory and CPU time it costs to track locks
+| Lock Granularity                       | Pros                                                    | Cons                                   |
+| -------------------------------------- | ------------------------------------------------------- | -------------------------------------- |
+| **Fine (small)** — e.g., row/attribute | High concurrency (many txns can work on different rows) | More locks to manage → higher overhead |
+| **Coarse (large)** — e.g., page/table  | Fewer locks to manage → lower overhead                  | Less concurrency (others are blocked)  |
+
 
 # Transaction III
 
