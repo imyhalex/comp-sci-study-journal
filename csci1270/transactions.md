@@ -419,11 +419,20 @@ __Lock Granilarities__
 # Transaction III
 
 ## Crash Recovery
-
 - Recovery algorithms are techniques to ensure ACID properties despite failures.
 - Recovery algorithms have two parts:
-    - Actions during normal txn processing to ensure that the DBMS can recover from a failure.
+    - a. During Normal Transcation Processing (crash happend during transaction processing)
+        - The DBMS must record enough information so that it can:
+            - Undo uncommited transactions, and
+            - Redo commityrf one after a crash
+        - Actions included:
+            - Write-Ahead Logging (WAL): Before modifying any data on disk, log the change
+            - Fore/Steal policies: Decided whether to flush dirty pages or delay them
+        - These are Actions during normal txn processing to ensure that the DBMS can recover from a failure.
     - Actions after a failure to recover the database to a state that ensures atomicity, consistency, and durability.
+        - Analyze -> figure out which transactions were active/committed at crash.
+        - Redo -> reapply updates of committed transactions to ensure durability.
+        - Undo -> roll back incomplete transactions to ensure atomicity.
 
 ### Actions during normal txn processing to ensure that the DBMS can recover from a failure.
 __Storage Type__
@@ -432,22 +441,38 @@ __Storage Type__
     - Use multiple storage devices (redundancy) to approximate.
 
 __Failure Classifications__
-- Three types:
-    - Transaction Failure
-    - System Failure
-    - Storage Media Failures
-- Transaction Failures:
+- __Transaction Failures:__
+    - These affect the a single transaction, not the whole system
     - Logical Errors
         - Transaction cannot complete due to some internal error conditions (e.g., integrity constraint violation).
+        - Action: DBMS aborts that transaction and rolls back its changes.
     - Internal State Errors
         - DBMS must terminate an active transaction due to an error condition (e.g., deadlock).
-- System Failures:
+        - Action: DBMS aborts the victim transaction and undoes partial updates.
+    - Recovery mechanism: Undo logging (or WAL UNDO phase) reverts modifications of aborted txns.
+
+- __System Failures__:
+    - These crash the DBMS process or host machine: all active transactions are interrupted.
     - Software Failure
         - Problem with the OS or DBMS implementation (e.g. uncaught divide-by-zero exception).
+        - Examples:
+            - Segmentation fault in DBMS code
+            - OS panic or bug in memory allocator
+        - Effect: All in-memory state is lost.
     - Hadware Failure
+        - Example: Power outage, sudden restart, CPU failure
         - The computer hosting the DBMS crashes (e.g., power plug gets pulled).
-        - Fail-stop Assumption: Non-volatile storage contents are assumed to not be corrupted by system crash.
-- Storage Media Faiure
+        - Fail-stop Assumption:
+            - Data on disk remains intact (only volatile memory lost).
+            - So the DBMS can safely replay logs from disk to recover.
+    - Recovery mechanism: ARIES-style recovery (Analysis → Redo → Undo) uses WAL logs to rebuild consistent state.
+
+- __Storage Media Faiure__:
+    - These are the worst-case scenarios: physical corruption of non-volatile storage.
+    - Examples
+        - Disk head crash
+        - SSD controller failure
+        - Bit rot (undetected data corruption)
     - Non-Repairable Hardware Failure
         - A head of crash or similar disk failure destroys all or part of non-volatile storage
         - Destruction is assumed to be detectable (e.g. disk controller use checksums to detect failures)
@@ -459,21 +484,39 @@ __Goals__
     - No partial changes are durable if the txn aborted.
 
 __Undo vs. Redo__
-- Undo: The process of removing the effect of an incomplete or aborted txn
-- Redo: The process of re-applying the effects of a committed txn for durability
+- Undo: __removing__ the effect of an __incomplete or aborted txn__
+- Redo: __re-applying__ the effects of a __committed txn__ for durability
 
 __Buffer Pool Policy__
 - Steal Policy:
-    - Whether DBMS allows an uncommited txn to write updates back to stable storage
-    - Why:
-        - A: if running out of buffer space
-        - STEAL: Is allowed
-        - NO-STEAL: Is not allowed
+    - Definition: Whather the DBMS allows page modified by __uncommited__ transactions to be written to disk.
+    - STEAL
+        - Allowed to write uncommited data to disk
+        - Needed when buffer pool is full -> must "steal" a frame to load new page
+        - But this means dirty pages from uncommited transactions might end up on disk
+    - Implication: The DBMS must be able to UNDO these changes during recovery
+    - NO-STEAL
+        - Never writes pages __touched by uncomiited__ transactions (to disk)
+        - Guarantees disk only has committed data -> simpler recovery
+        - But needs to keep all uncommited data in memory -> require huge buffer
 - Force Policy:
-    - Whether the DBMS requires that all updates made by a txn are reflected on stable storage before the txn can commit
-    - FORCE: Is required.
-    - NO-FORCE: Is not required.
+    - Whether all dirty pages of a committed transaction must be written on disk before the commit completes
+    - FORCE
+        - On commit, the DBMS forces all dirty pages for that txn to disk
+        - Guarantees durability: no need to redo later
+        - But causes lots of random writes: slow commits
+    - NO-FORCE
+        - On commit, the DBMS may delay writing dirty pages
+        - Faster commits (just flush log), but:
+            - Some committed updates might not yet be on disk -> need Redo after crash
 - These four can form combinations for a policy
+
+    | Policy                  | What Happens                                          | Undo Needed? | Redo Needed? | Example                                      |
+    | ----------------------- | ----------------------------------------------------- | ------------ | ------------ | -------------------------------------------- |
+    | **NO-STEAL + FORCE**    | Uncommitted never hit disk; commit forces all to disk | ❌            | ❌            | Simplest, but unrealistic                    |
+    | **STEAL + FORCE**       | Uncommitted may hit disk; commit flushes all          | ✅            | ❌            | Safe but slow                                |
+    | **NO-STEAL + NO-FORCE** | Keeps uncommitted in memory; delays commit flush      | ❌            | ✅            | Simple Redo only                             |
+    | **STEAL + NO-FORCE**    | Uncommitted may hit disk; commits don’t flush         | ✅            | ✅            | 🔥 Most flexible but complex — used by ARIES |
 
 __NO-STEAL + FORCE__
 - Advantage:
@@ -482,28 +525,53 @@ __NO-STEAL + FORCE__
 - However, we cannot support write sets that exceed the amount of physical memory available. Thus, no system implements this approach!
 
 __SHADOW PAGING__
+- Key idea: Intead of modifying data in place, the DBMS makes a copy (shadow) of any page that is about to be changed
 - The DBMS copies pages on write to crate two versions:
-    - Primary: Contains only changes form commited txns
-    - Shadow: Tempoary database with changes made from uncommitted txns.
-- To install updates when a txn commits, overwrite the root so it points to the shadow, thereby swapping the primary and shadow.
-- Advantages:
+    - Primary Page: The currently committed, durable database (safe on disk)
+    - Shadow Page: Copies of modified pages created by ongoing, uncommited transactions.
+- When the transaction commits:
+    - The DBMS atomatically switches a single pointer (root of the page table) from the old page (primary) to the new one (shadow)
+    - That is the "Commit Point"
+- This makes recovery trivial:
+    - If the system crashes before commit -> ignore the shadow pages
+    - If the system crashes after commit -> new root points to new pages (already consistent)
+- __Advantages:__
     - Supporting rollbacks and recovery is easy
-    - Undo: Remove the shadow pages. Leave the master and the DB root pointer alone.
-    - Redo: Not needed at all.
-- Disadvantages:
+    - Undo: Just discard the shadow pages; since primary pages were never modified, no rollback I/O is needed.
+    - Redo: Not needed at all: commit is an atomic root pointer swap; all committed pages are already on disk.
+- __Disadvantages:__
+    - `Copy-on-Write Overhead`: Every update requires copying an entire page (even if only one tuple changes). This causes high I/O cost and space blow-up.
+    - `Poor Performance for Large Transcations`: A transaction touching many pages must copy them all: expensive in both time and space.
+    - `Fragmentation`: Old and new versions of pages get scattered all over disk: poor locality and degraded read performance over time.
+    - `Difficult to Handle Concurrency`: Managing multiple active transactions (each with its own shadow copies and roots) is complex and memory-heavy.
+    - `Hard to Support Incremental Changes or Partial Commits`: A single crash during root-pointer swap can corrupt the page table pointer, leaving the DB inconsistent unless protected by extra mechanisms.
 
 __Write-Ahead Log (WAL)__
+- The standard recovery mechanism used by almost all modern DBMSs
+- Component:
+    - Log file
+    - Data file
+    - Stable storage
+    - Log Sequence Number (LSN)
 - Maintain a log file that contains the changes that txns make to databse
     - Log is separate from data files
     - Log will also be written to stable storage
     - Log contains enough information to perform the necessary undo and redo actions to restore the database
-- WAL property: the DBMS must write to disk the log file records that correspond to changes made to a database object before it can flush that object to disk
-- Buffer Pool Policy: STEAL + NO-FORCE
+- WAL property:
+    - Before any data page is written to disk, the log records describing its changes must first be written to disk
+    - This ensures:
+        - You can always __Undo uncommited__ changes (old values are logged)
+        - You can always __Redo committed__ one (new values are logged)
+- Buffer Pool Policy: **STEAL + NO-FORCE** 
 - Is WAL a good idea:
     - Decouples writing log pages from writting data pages
-    - WAL is efficient because it is:
-        - Small
-        - Written Sequentially
+    - __WAL is efficient because it is:__
+        - Sequential Writes: Logs are appended linearly: this is fast even on spinning disks (and trivial for SSDs).
+        - Compact Records:
+            - Each log record stores only: `<TxnID, PageID, Offset, OldValue, NewValue>`
+            - small footprint compared to entire page writes.
+        - Asynchronous Data Writes: Data pages can be written lazily; the log ensures recovery correctness.
+
 
 __WAL Protocol__
 - The DBMS stages of all a txn's log records in volatile storage.
@@ -515,6 +583,13 @@ __WAL Protocol__
     - Make sure that all log records are flushed before it returns an acknowledgement to application.
 
 __WAL Implementation__
+- The Problem: Log Flushing Bottleneck
+    - When a transaction commits, it must guarantee durability:
+        - All its log records must be safely stored on disk before confirming “COMMIT”.
+    - However:
+        - Each disk flush = an expensive fsync() call (tens of microseconds to milliseconds).
+        - If every transaction flushes individually → massive bottleneck.
+    - So, even if each transaction updates only a few bytes, you’d be doing one disk flush per commit → throughput plummets.
 - Flushing the log buffer to disk every time a txn commits will become a bottleneck.
 - The DBMS can use the group commit optimization to batch multiple log flushes together to amortize overhead, or use a flush trigger:
     - When the buffer is full, flush it to disk.
@@ -526,7 +601,7 @@ __Buffer Pool Policy__
 
 __Logging Schemes__
 - Physical Logging
-    - Record the byte-level changes made to a specific page
+    - Exact byte-level changes to a specific page in the buffer pool.
     - Example: git diff
 - Logical Logging
     - Record the high-level operations executed by txns
