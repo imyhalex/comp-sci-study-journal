@@ -136,7 +136,9 @@ __Serrializability__
 # Transaction II
 
 __Executing With Locks__
+
 ![img](./img/Screenshot%202025-10-28%20115119.png)
+
 - T1 beigns and request lock on A
     - `LOCK(A)` by T1
     - Lock Manager checks if A is free -> Granted (T1 -> A)
@@ -166,8 +168,11 @@ __Using Locks__
     - Handles grant, block and release requests
 
 __Concurrency Control Protocol__
+
 - __Example__
+
     ![img](./img/Screenshot%202025-11-08%20140608.png)
+
     - Explain
         - X-lock granted to T1
         - T1 releases its lock before commit
@@ -201,7 +206,9 @@ __Two-phase locking (2PL)__
     - Since locks cannot be reacquired later, the edges cannot form a cycle
 
 __Executeing with 2PL__
+
 ![img](./img/Screenshot%202025-11-08%20142922.png)
+
 - Two transactions T₁ and T₂, both want to read/write the same item A.
     - Both use X-LOCK(A) because they intend to write
     - The lock Manager decides who can access `A` and when.
@@ -226,7 +233,9 @@ __Executeing with 2PL__
     - When done, T₂ also calls `UNLOCK(A)` → releases the lock.
 
 __Problem w/2PL: Cascanding Aborts__
+
 ![img](./img/Screenshot%202025-10-28%20121836.png)
+
 - One of the main weakness of baisc 2PL: Cascading Abort Problem
     - Example Shceudle timeline:
         1. T₁ starts, locks A and B (exclusive locks) → allowed under 2PL.
@@ -268,9 +277,11 @@ __Strong Strict 2PL (aka Rigorous 2PL)__
         - Only after commit (or abort) does the DBMS release all locks at once.
     - Allows only conflict-serializable schedules, but it is often stronger than needed for some apps
 
+
 __2PL Deadlocks__
 
 ![img](./img/Screenshot%202025-11-09%20105743.png)
+
 - Even thought 2PL guarantees conflict-serializability, it does not prevent deadlocks
 - Timeline:
     - Step 1: T1 starts
