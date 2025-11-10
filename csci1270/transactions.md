@@ -269,6 +269,7 @@ __Strong Strict 2PL (aka Rigorous 2PL)__
     - Allows only conflict-serializable schedules, but it is often stronger than needed for some apps
 
 __2PL Deadlocks__
+
 ![img](./img/Screenshot%202025-11-09%20105743.png)
 - Even thought 2PL guarantees conflict-serializability, it does not prevent deadlocks
 - Timeline:
