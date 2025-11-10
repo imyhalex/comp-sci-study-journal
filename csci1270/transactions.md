@@ -553,7 +553,7 @@ __Write-Ahead Log (WAL)__
     - Data file
     - Stable storage
     - Log Sequence Number (LSN)
-- Maintain a log file that contains the changes that txns make to databse
+- Maintain a log file that contains the changes that txns make to database
     - Log is separate from data files
     - Log will also be written to stable storage
     - Log contains enough information to perform the necessary undo and redo actions to restore the database
@@ -633,14 +633,19 @@ of the data pages? In other words — if the log contains
 every insert, update, and delete, why do we still need the
 data pages at all?
 
-Answer: The log is designed for recovery: append only, optimized for sequential writes. The data pages are deisigend for querying" 
+Answer: The log is designed for recovery: append only, optimized for sequential writes. The data pages are deisigend for querying: 
 random access, indexing and efficeint read.  It is possible for processing to just use the log. But the performance would be very 
-poor since he log would be horrible for quering
+poor since the log would be horrible for quering
 ```
 
 ### Actions after a failure to recover the database to a state that ensures atomicity, consistency, and durability. 
 
 __Checkpoints__
+- After a crash, the DBMS must replay the WAL to recover committed transactions and undo uncommitted ones.
+- A checkpoint is a snapshot in time: a moment where the database state on disk is consistent with the log.
+- Without Checkpoints:
+    - The WAL could be huge (possibly gigabytes long).
+    - The DBMS would have to replay it from the beginning, which is very slow.
 - The DBMS periodically takes a checkpoint where it flushes all buffers out to disk
     - This synchronizes the WAL and the data pages on disk
     - It also provides a hint on how far back it needs to replay the WAL after a crash
@@ -659,16 +664,16 @@ __Checkpoints: Frequency__
     - Makes recovery time much longer.
     - Tunable option that depends on application recovery time requirements. 
 
-__ARIES__
-- Algorithm for Recovery and Isolation Exploiting Semantics
+__ARIES(Algorithm for Recovery and Isolation Exploiting Semantics)__
+- ARIES is the standard crash recovery algorithm used by most modern DBMSs:
 - Main Idea
     - Write-Ahead Logging:
         - Any change is recorded in log on stable storage before the database change is written to disk
-        - Use STEAL+NO-FORCE buffer pool policies
+        - Use **STEAL+NO-FORCE** buffer pool policies
     - Repeat History Duration Redo:
         - On DBMS restrat, retrace actions and restore database to exact state before crash
     - Logging Changes During Undo:
-        - Record undo action to log to ensure action is not repeated in the event of repeated failures.
+        - Any Undo action is also logged: ensures recovery can resume correctly if a crash occurs during recovery itself..
 
 __Log Sequence Numbers (LSNs)__
 - Every log record includes a globally unique log sequence number (LSN)
@@ -677,44 +682,77 @@ __Log Sequence Numbers (LSNs)__
     - Various components in the system keep track of LSNs that pertain to them... 
 
 __Important LSN__
-- flushedLSN
-    - Location: disk
-    - Definition: Latest LSN in log on disk
-- pageLSN
-    - Location: each pagex
-    - Definition: Latest update to pagex
-- lastLSN
-    - Location: each Ti
-    - Definition: Latest record of txn Ti
-- MasterRecord
-    - Location: Disk
-    - Defition: LSN of latest checkpoint
-
-__Writing Log REcords__
-- All log records have an LSN.
-- Update the pageLSN every time a txn modifies a record in the page.
-- Update the flushedLSN in memory every time the DBMS writes out the WAL buffer to disk.
+- Each component in ARIES tracks an LSN(Log Sequence Number): a monotonically increasing ID that tells where in the log each change lives
+- `flushedLSN`
+    - Location: Disk (Log Manager)
+    - Definition: The last LSN that’s actually written to stable storage (persistent).
+- `pageLSN`
+    - Location: In each data page (on disk or buffer)
+    - Definition: The LSN of the most recent update applied to that page.
+- `lastLSN`
+    - Location: Per transaction (in memory)
+    - Definition: The LSN of the most recent log record written by that transaction.
+- `MasterRecord`
+    - Location: Disk (in WAL header)
+    - Defition: The LSN of the most recent checkpoint. Used as starting point for recovery.
+- __WAL Property:__ 
+    - Before the DBMS can write page x to disk, it must flush the log at least to the point where __pageLSNₓ ≤ flushedLSN__
+    - What the dule ensures:
+        - When the DBMS writes a dirty page (a modified buffer page) back to disk, it must first make sure that the log record describing that modification is already safe on disk
+        - So __pageLSNₓ ≤ flushedLSN__ means “The latest log entry that modified this page has been persisted to stable storage."
+        - So if the system crashes after the page is written but before the nex log flush, the DBMS still has enough log info to 
+            - Redo the change (if committed)
+            - Undo (if it wansn't)
+        - Fail to comply this will results in __WAL Property violation__
 
 __Transaction Commit__
-- When a txn commit, the DBMS write a COMMIT record to log and guarantees that all log records up to txn's COMMIT record are flushed to disk
+- When a transaction finishes successfully, ARIES ensures durability through the WAL commit protocol.
+- When a txn commit, the DBMS write a `COMMIT` record to log and guarantees that all log records up to txn's `COMMIT` record are flushed to disk
     - Log flush are sequential, synchronous write to disk
     - Many log records per log page
     - Ensure durability
-- When the commit succeeds, write a special TXN-END record to log.
+- When the commit succeeds, write a special `TXN-END` record to log.
     - Indicates that no new log record for a txn will appear in the log ever again
     - This does not need to be flushed immediatly 
     - Ensures final cleanup
 
 __Transaction Abort__
+- A transaction abort means stopping and undoing a transaction because it cannot finish successfully.
 - Aborting a txn is a special case of the undo opeartion applied to only one txn
+- Undo operations:
+    - The process of reverting the effects of a transaction that didn't sucessfully commit
 - For efficiecn (not required): we add another field to our log records:
-    - PrevLSN: The previous LSN for the txn
+    - `PrevLSN`: The previous LSN for the txn
     - This maintains a linked-list for each txn that makes it easy to walk through its record
 
 __Compensation Log Record (CLRs)__
-- A CLR describes the actions taken to undo the actions of a previous update record.
-- It has all the fields of an update log record plus the undoNext pointer (the next-to-be-undone LSN).
-- CLRs are added to log records but the DBMS does not wait for them to be flushed before notifying the application that the txn aborted.
+- Definition:
+    - A special log entry written by ARIES when it performs an Undo operation
+    - It records what undo action was performed:
+        - So, if the system crashes again while undoing, the recovery process knows where to resume without accidentally undoing something twice
+- CLR content, each includes:
+    - All normal log fields `(LSN, txnID, pageID, old/new values, etc.)`
+        | Field                   | Description                                                                |
+        | ----------------------- | -------------------------------------------------------------------------- |
+        | **LSN**                 | Unique identifier (like all log records)                                   |
+        | **TxnID**               | The transaction being undone                                               |
+        | **PageID**              | The page that was modified                                                 |
+        | **Before/After Values** | The “redo” info for the undo (so we can reapply the undo if needed)        |
+        | **undoNextLSN**         | 👈 Pointer to the *next* record that still needs to be undone for this txn |
+
+    - `undoNextLSN` -> the next record that still needs to be undone
+- __Why CLRs Exist__
+    - Without CLRs
+        - If a crash happens during undo, you might redo the same undo again after restart
+        - This could revert a value twice -> corrupt state
+    - With CLRs
+        - ARIES knows exactly how far undo has progressed and can resume safely for that point
+- What ARIES Does with CLRs:
+    - Write them as it perform undos
+    - Does not wait to flush them before acknowledging abort to the client (becuase rollback durability is not required by the user)
+    - But they will evetually be flushed -> be ensure crash-safe recovery if the system crashes mid-undo
+- Example:
+
 
 __Abort Algorithm__
 - First write an ABORT record to log for the txn.
@@ -723,11 +761,54 @@ __Abort Algorithm__
     - Restore old value.
 - Lastly, write a TXN-END record and release locks.
 - Notice: CLRs never need to be undone.
+- Detailed explaination
+    - When a single transaction aborts (before any crash), ARIES performs a __controlled undo__ using its own log records
+    - Steps
+        1. Write an `ABORT` record
+            - Marks the start of the rollback
+            - Ensures recovery knows the transactions is in the process of aborting if a crash occurs
+        2. Process log records in reverse (useing `prevLSN`)
+            - __Restore the old value__ to the page (undo the change)
+            - __Write a Compensation Log Record (CLR)__ to WAL, containing:
+                - What was undone
+                - `undoNexLSN`
 
 __ARIES: Recovery Phases__
 - Phase #1: Analysis
-    - Examine the WAL in forward direction starting at the latest checkpoint (MasterRecord) to identify the active txns at the time of the crash.
+    - Goal: Figure out what was going on at the time of the crash
+    - Starts at:
+        - `MasterRecord.LSN` -> point to the most recent checkpoint
+        - Scans: WAL forward to rebuild two in-memory table
+            - `Transaction Table`: Which transactions were active at crash
+            - `Dirty Page Table`: Which pages were dirty (modified but not yet written to disk)
+        - Result of Analysis:
+            - Set of transactions that were active but not commiteed (-> need Undo)
+            - Earliest LSN that must be redone (-> start of Redo phase)
+    - Examine the WAL in forward direction starting at the latest checkpoint (`MasterRecord`) to identify the active txns at the time of the crash.
 - Phase #2: Redo
-    - Repeat all actions starting from MasterRecord in the log (even txns that will abort)
+    - Repeat all actions starting from `MasterRecord` in the log (even txns that will abort)
+    - Goal: Repeat history: restore the database to exactly the start it was in at crash time
+    - Starts at:
+        - The smallest `LSN` in the `Dirty Page Table` (first dirty update not yet reflected on disk)
+    - Prodecure:
+        1. Scan WAL forward from that point
+        2. For each log record:
+            - Check if the change needs to be reapplied using
+                - Whether the affected pages is in the `Dirty Page Table`
+                - Whether `pageLSN < record.LSN`
+        3. If needed, redo the update on that page
+    - __Key point:__ 
+        - Even uncommitted transactions’ updates are redone
+        - Why: Because ARIES wants the DB to look exactly as it did at crash time, then the Undo phase will remove uncommitted work.
 - Phase #3: Undo
-    - Undo the actions of txn that did not commit before the crash
+    - Goal: Undo all actions from transactions that were not commited at crash time
+    - Starts with:
+        - The active transactions found in the Analysis phase
+        - Prodecure:
+            1. For each uncommitted transactions:
+                - Follows its log backward using `prevLSN`
+                - For each update record:
+                    - Undo the change
+                    - Write a _CLR_ to the log
+                    - Use `undoNextLSN` to continue if crash happens mid-undo
+            2. When done, Write a `TXN-END` for each
