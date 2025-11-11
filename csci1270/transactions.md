@@ -539,6 +539,7 @@ __NO-STEAL + FORCE__
 
 __SHADOW PAGING__
 - Key idea: Intead of modifying data in place, the DBMS makes a copy (shadow) of any page that is about to be changed
+- Implement Policy: __No-STEAL+FORCE__
 - The DBMS copies pages on write to crate two versions:
     - Primary Page: The currently committed, durable database (safe on disk)
     - Shadow Page: Copies of modified pages created by ongoing, uncommited transactions.
