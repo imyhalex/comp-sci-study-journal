@@ -422,10 +422,11 @@ __Lock Granilarities__
     - Fewer Locks, Larger Granularity vs. More Locks, Smaller Granularity.
     - Parallelism (Concurrency) — how many transactions can run at the same time
     - Locking Overhead — how much memory and CPU time it costs to track locks
-| Lock Granularity                       | Pros                                                    | Cons                                   |
-| -------------------------------------- | ------------------------------------------------------- | -------------------------------------- |
-| **Fine (small)** — e.g., row/attribute | High concurrency (many txns can work on different rows) | More locks to manage → higher overhead |
-| **Coarse (large)** — e.g., page/table  | Fewer locks to manage → lower overhead                  | Less concurrency (others are blocked)  |
+
+        | Lock Granularity                       | Pros                                                    | Cons                                   |
+        | -------------------------------------- | ------------------------------------------------------- | -------------------------------------- |
+        | **Fine (small)** — e.g., row/attribute | High concurrency (many txns can work on different rows) | More locks to manage → higher overhead |
+        | **Coarse (large)** — e.g., page/table  | Fewer locks to manage → lower overhead                  | Less concurrency (others are blocked)  |
 
 
 # Transaction III
