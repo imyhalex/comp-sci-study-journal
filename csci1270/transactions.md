@@ -826,3 +826,27 @@ __ARIES: Recovery Phases__
                     - Write a _CLR_ to the log
                     - Use `undoNextLSN` to continue if crash happens mid-undo
             2. When done, Write a `TXN-END` for each
+
+#### Questions:
+Q: The reason that ARIES links together the log records of the same transaction is to accelerate the redo phase of the recovery. (True/__False__)
+- ARIES links log records of the same transaction to speed up the `UNDO` phase, not the `REDO` phase
+- What "Linking Log Records" Means:
+    - Each log record in ARIES has a field:
+        - `PrevLSN -> points to the previous log record written by the same transaction`
+    - That means all log records of the same transaction form a linked list (in reverse chronological order).
+- When Is This Used:
+    - During UNDO phase
+        - ARIES needs to rool back all the uncommitted transactions
+        - Instead of scanning the entire log from end to start, it can jump directly from one record of a transaction to the previous one via `PrevLSN`
+        - This Makes the UNDO phase much faster
+            - Each transaction can be undone independently
+            - The system can use a priority queue for LSNs and directly follow PrevLSN links backward
+    - During REDO phase
+        - The redo phase replays all updates from the log (for committed and some uncommitted txns) in LSN order (chronological order).
+        - It doesn’t need per-transaction links: it just scans forward through the log.
+
+Q: The undo phase of ARIES recovery starts from the most recent checkpoint. (True/__False__)
+- The undo phase of ARIES recovery does not start from the most recent checkpoint.
+    - It starts after the redo phase has been completed.
+    - The redo phase brings the database to the most recent consistent state by redoing actions from the log, including those after the most recent checkpoint up to the crash.
+    - Once the redo phase is completed, the undo phase begins, rolling back all transactions that were active at the crash time and did not successfully commit.
