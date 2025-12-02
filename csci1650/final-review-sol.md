@@ -105,25 +105,39 @@ provide any additional benefit? (Justify your answer for full credit.)
         ```
 - Full ASLR: The binary is position-independent (see ‘Type’, ‘Entry point address’, or the ‘Addr’ field of every section – everything is relative to 0x0), so if ASLR is supported, the binary itself can be mapped to a random location.
 
-# Stack Drawing
+## Q5: Stack pivoting
+- Stack pivoting is a core technique in advanced ROP exploits
+- Moving the stack pointer (`esp`) away from the real stack to a fake stack that the attacker controls.
+- Because ROP requires a long chain of gadget addresses, but the real stack often:
+    - is too small,
+    - contains canaries,
+    - or isn’t fully under attacker control.
+- So instead of trying to build the ROP chain on the real stack, you do this:
+    - put the ROP chain somewhere else (heap, .bss, global buffer)
+    - then use a gadget to pivot (esp) to that location
+    - now ret will execute each gadget in your fake stack
 
-## Ret to Libc
-![img](./img/Screenshot%202025-12-01%20172416.png)
-![img](./img/Screenshot%202025-12-01%20172435.png)
-![img](./img/Screenshot%202025-12-01%20173205.png)
-```text
-Use the NOP sled technique:
-1. Move the shellcode right below the overwritten return address.
-2. Fill the beginning of the buf[] with NOP (0x90) instructions.
-3. Overwrite the return address with an address belonging to the
-“middle” of the NOP sled.
-```
-![img](./img/Screenshot%202025-12-01%20175247.png)
-
-## Advance Code Reuse (Ret2Libc Chaining)
-![img](./img/Screenshot%202025-12-01%20180115.png)
-![img](./img/Screenshot%202025-12-01%20180147.png)
-
-## ROP
-![img](./img/Screenshot%202025-12-01%20183237.png)
-![img](./img/Screenshot%202025-12-01%20183243.png)
+## Q6: Format String
+- What Is a Format String Vulnerability?
+    - A format string vulnerability happens when: User input becomes the format string, instead of a fixed string.
+- In C, functions like printf, fprintf, sprintf, etc. take a format string that tells them how to interpret arguments.
+    - Example: ```printf("Number: %d\n", x);``` -> Here "Number: %d\n" is the format string, and %d tells printf to expect an int.
+- A format string vulnerability happens when: User input becomes the format string, instead of a fixed string.
+    - If user_input = "Hello", it's fine.
+    - But if user_input = `"%x %x %x %x"`:
+    - printf will treat those as format directives
+    - and start reading values from the stack
+    - even though the program did not pass these arguments
+    - This leads to information disclosure.
+- Worst Case `%n` → memory write
+    - This is where format strings become exploitable.
+    - %n tells printf:
+        - Write the number of bytes printed so far into the memory address pointed to by the next argument.
+        - Example: `printf("AAAA%n", &x);` -> After printing 4 bytes, x becomes 4.
+        - If the attacker controls the format string: They can cause printf to read a “pointer” (really: raw stack data) and write to that location.
+        - This becomes powerful enough to:
+            - overwrite saved return addresses
+            - overwrite function pointers
+            - bypass stack canaries
+            - write to `.got.plt` entries (ret2plt attacks)
+            - escalate into ROP / arbitrary code execution

@@ -3,10 +3,14 @@
 __OLAP & Data Warehousing__
 - A data warehouse is a database designed to perform large scale analytics
     - __Online Analytical Processing (OLAP):__
-        - Involves processing large volumes of data to identify patterns and trends
+        - Focuses on processing large volumes of historical data to identify patterns, trends, and business insights
         - Also called __Business Intelligent (BI)__ or __Decision Support__
 - Typically involves read-only queries that touch a lot of data
     - Example: “find total sales of Toyota’s over the last two years for each state and city in the USA”
+- Workload charateristic:
+    - Mostly read-only queries
+    - Queries scan huge portions of data
+    - Example: “Find total Toyota sales in the last two years, grouped by state and city.”
 - Usually the result of Extract-Transform-Load (ETL) process
 
 __OLTP vs. OLAP__
@@ -55,6 +59,7 @@ __Bifurcated Environment__
 * Provide more specialized views for specific business units.
 
 __Schemas in Data Warehouse__
+- OLAP uses star or snowflake schemas
 - Star Schema
     - Central fact table (metircs like sales, revenue, click)
     - Surrounding denormalized dimension tables (customer, product, time, location).
@@ -108,7 +113,7 @@ __Star vs. Snowflake Schema__
 
 
 __Data Lakes__
-- Repository for storing large amount if stuctured, semi-structure, and unstructured data without having define a schema or ingest the data into proprietary internal formats
+- Repository for storing large amount of stuctured, semi-structure, and unstructured data without having define a schema or ingest the data into proprietary internal formats
 - Store raw, unprocessed data from many sources (CSV, logs, JSON, images, streams).
 - Schema-on-read: data structure is applied only when you query it.
 - Cheap, scalable storage (e.g., S3, GCS, HDFS).

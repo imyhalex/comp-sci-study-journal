@@ -236,9 +236,9 @@ __Vector Quantization__
     - For millions or billions of vectors → very high cost
 - Quantization reduces the memory needed by approximating the vector with a lower-precision or compressed representation.
 - Types:
-    - Scalar Quantization: Reduces the precision of each vector component
-    - Product Quantization: Divides vectors into sub-vectors and approximates them using codebooks
-    - Binary Quantization: Represents vectors using bit vectors
+    - __Scalar Quantization:__ Converts floating-point numbers to integers, leading to faster integer operations and smaller memory requirements.
+    - __Product Quantization:__ Divides a large vector into chunks, using a cluster centroid to represent the values in each chunk for compression.
+    - __Binary Quantization:__ Maps floating-point numbers to 0 or 1 bits.
 - Restate Tradeoff
     - Qunatized search -> fast but approximate
     - Full-percision search -> accurate but slow

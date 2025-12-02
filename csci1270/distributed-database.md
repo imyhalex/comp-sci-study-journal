@@ -68,12 +68,21 @@ __Horizontal Partitioning__
 * Causes expensive rebalancing and heavy data movement.
 
 **Consistent Hashing**
-* Places partitions (servers) on a **hash ring** from 0 to 1.
-* Each key is mapped to the *next* node clockwise on the ring.
-* Only keys falling between affected positions move when node joins/leaves.
-* Minimizes rebalancing → only a **small fraction** of data moves.
-* Used in DynamoDB, Cassandra, Riak, Memcached, etc.
-* Works regardless of number of objects or number of servers.
+* Consistent Hashing is designed to address the scalability limitations of naïve hashing.
+* __Hash Ring:__ It uses a logical hash ring, typically a rang of real numbers (0 to 1)
+* Both partitions (machines) and data items (tuples) are mapped to points on this ring
+* __Tuple placement__: A tuple is stored in the partition that is the next one in the clockwise direction from the tuple's hashed location on the ring
+* __Graceful Scaling:__ When a new server joins, the data movement is local, affecting only the data from the previous neighboring server that now falls within the new server's sub-ring. This avoids global rehasing
+    * Only a fraction of the data from the previous neighboring server needs to be moved to the new server
+* Load Balancing (virtual nodes): To ensure uniform distribution and prevent data skew due to clustering of hash points, virtual nodes are used
+    * Each physical node is represented by multiple virtual node (e.g. 10 points) on the ring, carving the ring into more granular, uniformly sized sub-division
+    * The number of virtual nodes can be adjusted based on the specific capabilities of the physical server
+* Falut Tolerance: Redundancy is achived by replicating a tuple not just in its primary partition but also in the next neighboring machines in the clockwise direction (e.g. Replication Factor of 3)
+    * Each tuple is NOT store on just one server (node)
+    * Instead, it is stored on multiple consecutive node on the hash ring
+    * For example, with a replication factor __R = 3__: Assume ring has Node A, B, C, D
+        * So if Node A dies, B still has the data; If B dies, C still has the data.
+    * __So the every server (node) on the hash ring, they not just store primary data, and also responsible for storing replication of that from previous server (clockwise concept)__
 
 **Consistent Hashing Question**
 * Claim: “When a new server joins, only a fraction of the data from the previous server moves.”
