@@ -98,8 +98,12 @@ __Distributed Architecture__
     - When a shard gets too big, the DBMS automatically splits the shard and rebalances
 
 __Sharding__
-- Mongos routes queries to only the shards that contain relevant data if the queries contain the shard key.
-- When a query doesn’t contain the shard key, the query is broadcast to all shards.
+- __Architecture:__ MongoDB typically uses a __Shard Nothing__ architecture. The cluster consist of
+    1. __Shard (mongod):__ Hold the partitioned data
+    2. __Routers (mongos):__ Centralized process that receives queries and routes them to the appropriate shards.
+    3. __Config Servers:__ Store the metadata about the cluster configuration and data distribution (replica set).
+- __Auto-Sharding:__ MongoDB manages shards automatically, including splitting shards and rebalancing data when a shard grows too big
+- __Query Routing:__ If a query contains the shard key, the router routes the query only to the shards containing relevant data. If the query does not contain the shard key, it must be __brodcast to all shards__.
 
 __Shard Key Selection__
 - Hash or Range-based; Can be Composite
@@ -107,10 +111,22 @@ __Shard Key Selection__
     - distributed documents and load evenly throughout the cluster, and 
     - facilitate common query patterns
 - Considerations
-    - Frequency with which shard key values occur
-    - Query load for each key
-    - Query patterns (range vs. point queries)
-    - Cardinality of the shard key
+    - __Frequency of Key Values__
+        - If some key values occur much frequently than others (e.g. highly productive authors or popular countries), it leads to data skew (hotspots) and load imbalance across shards
+        - Important for uniform data distribution
+    - __Cardinality__
+        - The number of distinct values of the shard key must be __high__. Low cardinality keys (like "month". cadinality=12) limit the maximum number of shards that can store data, potentially restricting scalability even if many machines are available
+        - Important for utilizeing a large cluster size
+    - __Query patterns__
+        - Selection depends on workload: __Hash-based sharding__ is good for point queries (exact lookups), while __Range-based sharding__ is better for temporal or range queries (e.g. records from last month)
+        - Important for query efficiency
+    - __Compound Keys__
+        - Using a combination of attributes as the sharding key (a compound key) can mitgate skew and low cardinality issue by increasing the number of distinct key values
+        - Strategy for addressing data skew
+- Replication: MongoDB uses __primary-secondary replication__ via __replica sets__ to ensure high availability and redundancy.
+    - All writes are directed to primary node, which records the operation in its log
+    - Secondary nodes replicate this log and apply the operations to their local datasets.
+    - If the primary fails, the secondaries elect a new primary.
 
 __Replication__
 - Write operations execute on the primary, which records the operations on its log. Secondaries replicate this log and apply the ooperations to their data set

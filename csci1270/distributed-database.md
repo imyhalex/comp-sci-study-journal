@@ -206,6 +206,7 @@ If coordinator fails during T:
   * It cannot decide commit/abort on its own.
   * **Must block and wait** for the coordinator to recover.
   * This is the classic **2PC blocking problem**.
+  * This case is describing: If coordinator died before sending commit/abort, participants with <ready T> get stuck → __blocking problem.__
 
 **2PC Question Answer**
 
